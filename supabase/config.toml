@@ -1,0 +1,4 @@
+project_id = "othbyqwtiidurkxxcaxg"
+
+[functions.ai-book-chat]
+verify_jwt = false
