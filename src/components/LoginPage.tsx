@@ -115,11 +115,8 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
           <div className="text-center mb-8">
             <div className="flex justify-center mb-6">
               <div className="relative">
-                <div className="w-20 h-20 rounded-2xl gradient-primary flex items-center justify-center shadow-lg animate-float">
-                  <Book className="w-10 h-10 text-white" />
-                </div>
-                <div className="absolute -top-2 -right-2 w-8 h-8 rounded-lg gradient-secondary flex items-center justify-center shadow-md">
-                  <Sparkles className="w-4 h-4 text-white" />
+                <div className="w-20 h-20 rounded-2xl gradient-primary flex items-center justify-center shadow-lg animate-float p-3">
+                  <img src="/favicon.ico" alt="BookVault" className="w-full h-full object-contain" />
                 </div>
               </div>
             </div>
