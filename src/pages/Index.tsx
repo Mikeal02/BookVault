@@ -336,8 +336,8 @@ const Index = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="absolute inset-0 gradient-mesh" />
         <div className="relative text-center">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl gradient-primary flex items-center justify-center animate-pulse-soft">
-            <Sparkles className="w-10 h-10 text-white" />
+          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl gradient-primary flex items-center justify-center animate-pulse-soft p-3">
+            <img src="/favicon.ico" alt="BookVault" className="w-full h-full object-contain" />
           </div>
           <p className="text-xl font-medium text-foreground">Loading BookVault...</p>
         </div>
@@ -359,8 +359,8 @@ const Index = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center space-x-4">
-            <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-lg animate-float">
-              <Sparkles className="w-7 h-7 text-white" />
+            <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-lg animate-float p-2">
+              <img src="/favicon.ico" alt="BookVault" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="text-4xl font-bold gradient-text-mixed">
