@@ -1,5 +1,6 @@
 
 import { Search, BookOpen, BarChart3, Sparkles, Home } from 'lucide-react';
+import { DatabaseSyncButton } from './DatabaseSyncButton';
 
 interface NavigationProps {
   currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations';
@@ -45,7 +46,8 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
   return (
     <div className="mb-8">
       <nav className="glass-card rounded-2xl p-2">
-        <div className="flex flex-wrap justify-center gap-2">
+        <div className="flex flex-wrap justify-center items-center gap-2">
+          <div className="flex flex-wrap justify-center gap-2 flex-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
@@ -84,6 +86,10 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
               </button>
             );
           })}
+          </div>
+          <div className="border-l border-border/50 pl-2 ml-2">
+            <DatabaseSyncButton />
+          </div>
         </div>
       </nav>
     </div>
