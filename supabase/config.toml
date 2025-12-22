@@ -2,3 +2,6 @@ project_id = "othbyqwtiidurkxxcaxg"
 
 [functions.ai-book-chat]
 verify_jwt = false
+
+[functions.sync-external-db]
+verify_jwt = false
