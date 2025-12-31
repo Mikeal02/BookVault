@@ -14,7 +14,41 @@ serve(async (req) => {
   }
 
   try {
-    const { direction, userId } = await req.json();
+    const { action, direction, userId } = await req.json();
+    
+    // Handle connection test
+    if (action === 'test') {
+      const externalDbUrl = Deno.env.get('EXTERNAL_DB_URL');
+      if (!externalDbUrl) {
+        return new Response(JSON.stringify({
+          connected: false,
+          error: 'EXTERNAL_DB_URL is not configured',
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      try {
+        const testDb = postgres(externalDbUrl, { ssl: 'require', connect_timeout: 10 });
+        await testDb`SELECT 1`;
+        await testDb.end();
+        
+        return new Response(JSON.stringify({
+          connected: true,
+          message: 'Connection successful',
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      } catch (testError) {
+        console.error('Connection test failed:', testError);
+        return new Response(JSON.stringify({
+          connected: false,
+          error: testError.message,
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
     
     if (!userId) {
       throw new Error('User ID is required');
