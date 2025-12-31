@@ -28,9 +28,9 @@ import {
 } from '@/components/ui/tooltip';
 
 interface SyncResult {
-  profiles: { exported: number; imported: number };
-  user_books: { exported: number; imported: number };
-  reading_sessions: { exported: number; imported: number };
+  profiles: { exported: number; imported: number; errors?: number };
+  user_books: { exported: number; imported: number; errors?: number };
+  reading_sessions: { exported: number; imported: number; errors?: number };
 }
 
 type SyncStatus = 'idle' | 'syncing' | 'success' | 'error' | 'testing';
@@ -130,10 +130,13 @@ export const DatabaseSyncButton = () => {
         const directionLabel = direction === 'both' ? 'Two-way sync' : direction === 'export' ? 'Export' : 'Import';
         const totalExported = results.profiles.exported + results.user_books.exported + results.reading_sessions.exported;
         const totalImported = results.profiles.imported + results.user_books.imported + results.reading_sessions.imported;
+        const totalErrors = (results.profiles.errors || 0) + (results.user_books.errors || 0) + (results.reading_sessions.errors || 0);
+        
+        const duration = data.duration_ms ? `(${(data.duration_ms / 1000).toFixed(1)}s)` : '';
         
         toast.success(
           <div className="space-y-1">
-            <p className="font-semibold">{directionLabel} completed!</p>
+            <p className="font-semibold">{directionLabel} completed! {duration}</p>
             {(direction === 'export' || direction === 'both') && totalExported > 0 && (
               <p className="text-sm opacity-90">
                 ↑ Exported: {results.user_books.exported} books, {results.reading_sessions.exported} sessions
@@ -146,6 +149,9 @@ export const DatabaseSyncButton = () => {
             )}
             {totalExported === 0 && totalImported === 0 && (
               <p className="text-sm opacity-90">Everything is already in sync</p>
+            )}
+            {totalErrors > 0 && (
+              <p className="text-sm text-amber-500">⚠ {totalErrors} items had errors</p>
             )}
           </div>
         );
