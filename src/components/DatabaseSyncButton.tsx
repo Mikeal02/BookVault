@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Database, ArrowUpDown, ArrowUp, ArrowDown, CheckCircle2, XCircle, Clock, Wifi } from 'lucide-react';
+import { RefreshCw, Database, ArrowUpDown, ArrowUp, ArrowDown, CheckCircle2, XCircle, Clock, Wifi, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAdminCheck } from '@/hooks/useAdminCheck';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,6 +39,7 @@ type SyncStatus = 'idle' | 'syncing' | 'success' | 'error' | 'testing';
 const LAST_SYNC_KEY = 'bookvault_last_sync';
 
 export const DatabaseSyncButton = () => {
+  const { isAdmin, isLoading: isAdminLoading } = useAdminCheck();
   const [status, setStatus] = useState<SyncStatus>('idle');
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [showImportConfirm, setShowImportConfirm] = useState(false);
@@ -159,7 +161,27 @@ export const DatabaseSyncButton = () => {
         // Reset success status after 3 seconds
         setTimeout(() => setStatus('idle'), 3000);
       } else {
-        throw new Error(data.error || 'Sync failed');
+        const errorMsg = data.error || 'Sync failed';
+        // Check for common URL format error
+        if (errorMsg.includes('Invalid database URL') || errorMsg.includes('postgresql://')) {
+          toast.error(
+            <div className="space-y-1">
+              <p className="font-semibold">Invalid Database URL</p>
+              <p className="text-sm opacity-90">
+                The EXTERNAL_DB_URL must be a valid PostgreSQL connection string.
+              </p>
+              <p className="text-xs opacity-75 font-mono">
+                Format: postgresql://user:pass@host:port/dbname
+              </p>
+            </div>
+          );
+        } else {
+          throw new Error(errorMsg);
+        }
+        setStatus('error');
+        setIsConnected(false);
+        setTimeout(() => setStatus('idle'), 5000);
+        return;
       }
     } catch (error) {
       console.error('Sync error:', error);
@@ -216,6 +238,15 @@ export const DatabaseSyncButton = () => {
     }
   };
 
+  // Don't render if not admin or still loading
+  if (isAdminLoading) {
+    return null;
+  }
+
+  if (!isAdmin) {
+    return null;
+  }
+
   return (
     <TooltipProvider>
       <>
@@ -234,11 +265,15 @@ export const DatabaseSyncButton = () => {
                 >
                   {getStatusIcon()}
                   <span className="hidden sm:inline">{getButtonText()}</span>
+                  <Shield className="h-3 w-3 text-amber-500" />
                 </Button>
               </DropdownMenuTrigger>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="flex flex-col gap-1">
-              <span className="font-medium">Database Sync</span>
+              <span className="font-medium flex items-center gap-1">
+                <Shield className="h-3 w-3 text-amber-500" />
+                Database Sync (Admin Only)
+              </span>
               {lastSync && (
                 <span className="text-xs opacity-75 flex items-center gap-1">
                   <Clock className="h-3 w-3" />
@@ -254,6 +289,10 @@ export const DatabaseSyncButton = () => {
             </TooltipContent>
           </Tooltip>
           <DropdownMenuContent align="end" className="w-56">
+            <div className="px-2 py-1.5 text-xs font-medium text-amber-600 flex items-center gap-1 border-b border-border mb-1">
+              <Shield className="h-3 w-3" />
+              Admin Feature
+            </div>
             <DropdownMenuItem onClick={() => handleSync('both')} className="gap-2 cursor-pointer">
               <ArrowUpDown className="h-4 w-4 text-primary" />
               <div className="flex flex-col">
