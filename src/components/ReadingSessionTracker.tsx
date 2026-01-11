@@ -1,8 +1,9 @@
 
 import { useState, useEffect } from 'react';
-import { Play, Pause, Square, Clock, BookOpen, Target } from 'lucide-react';
+import { Play, Pause, Square, Clock, BookOpen, Target, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Book } from '@/types/book';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ReadingSessionTrackerProps {
   book: Book;
@@ -72,11 +73,36 @@ export const ReadingSessionTracker = ({ book, onSessionComplete, onClose }: Read
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full shadow-2xl animate-scale-in">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Reading Session</h2>
+    <div 
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div 
+        className="bg-card rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="p-6 border-b border-border flex-shrink-0">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold text-foreground">Reading Session</h2>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-muted rounded-full transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
           <div className="flex items-center space-x-3">
             <img
               src={book.imageLinks?.thumbnail || '/placeholder.svg'}
@@ -84,89 +110,93 @@ export const ReadingSessionTracker = ({ book, onSessionComplete, onClose }: Read
               className="w-12 h-16 object-cover rounded shadow-md"
             />
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white line-clamp-1">{book.title}</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <h3 className="font-semibold text-foreground line-clamp-1">{book.title}</h3>
+              <p className="text-sm text-muted-foreground">
                 {book.authors?.join(', ') || 'Unknown Author'}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
-          {/* Timer Display */}
-          <div className="text-center">
-            <div className="text-6xl font-mono font-bold text-purple-600 dark:text-purple-400 mb-2">
-              {formatTime(time)}
+        {/* Scrollable Content */}
+        <ScrollArea className="flex-1 min-h-0">
+          <div className="p-6 space-y-6">
+            {/* Timer Display */}
+            <div className="text-center">
+              <div className="text-6xl font-mono font-bold text-primary mb-2">
+                {formatTime(time)}
+              </div>
+              <p className="text-muted-foreground">Reading Time</p>
             </div>
-            <p className="text-gray-600 dark:text-gray-400">Reading Time</p>
-          </div>
 
-          {/* Controls */}
-          <div className="flex justify-center space-x-4">
-            {!isActive ? (
-              <Button
-                onClick={startSession}
-                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
-                size="lg"
-              >
-                <Play className="w-5 h-5 mr-2" />
-                Start Reading
-              </Button>
-            ) : (
-              <Button
-                onClick={pauseSession}
-                className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600"
-                size="lg"
-              >
-                <Pause className="w-5 h-5 mr-2" />
-                Pause
-              </Button>
-            )}
-            
-            {time > 0 && (
-              <Button
-                onClick={endSession}
-                className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600"
-                size="lg"
-              >
-                <Square className="w-5 h-5 mr-2" />
-                End Session
-              </Button>
-            )}
-          </div>
+            {/* Controls */}
+            <div className="flex justify-center flex-wrap gap-3">
+              {!isActive ? (
+                <Button
+                  onClick={startSession}
+                  className="bg-success hover:bg-success/90 text-success-foreground"
+                  size="lg"
+                >
+                  <Play className="w-5 h-5 mr-2" />
+                  Start Reading
+                </Button>
+              ) : (
+                <Button
+                  onClick={pauseSession}
+                  className="bg-warning hover:bg-warning/90 text-warning-foreground"
+                  size="lg"
+                >
+                  <Pause className="w-5 h-5 mr-2" />
+                  Pause
+                </Button>
+              )}
+              
+              {time > 0 && (
+                <Button
+                  onClick={endSession}
+                  className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                  size="lg"
+                >
+                  <Square className="w-5 h-5 mr-2" />
+                  End Session
+                </Button>
+              )}
+            </div>
 
-          {/* Pages Read */}
-          <div className="space-y-2">
-            <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
-              <BookOpen className="w-4 h-4 mr-2" />
-              Pages Read
-            </label>
-            <input
-              type="number"
-              value={pagesRead}
-              onChange={(e) => setPagesRead(parseInt(e.target.value) || 0)}
-              className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              placeholder="How many pages did you read?"
-            />
-          </div>
+            {/* Pages Read */}
+            <div className="space-y-2">
+              <label className="flex items-center text-sm font-medium text-foreground">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Pages Read
+              </label>
+              <input
+                type="number"
+                value={pagesRead}
+                onChange={(e) => setPagesRead(parseInt(e.target.value) || 0)}
+                className="w-full px-4 py-3 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-foreground"
+                placeholder="How many pages did you read?"
+              />
+            </div>
 
-          {/* Session Notes */}
-          <div className="space-y-2">
-            <label className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
-              <Target className="w-4 h-4 mr-2" />
-              Session Notes (Optional)
-            </label>
-            <textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-              rows={3}
-              placeholder="Thoughts, insights, or memorable quotes from this session..."
-            />
+            {/* Session Notes */}
+            <div className="space-y-2">
+              <label className="flex items-center text-sm font-medium text-foreground">
+                <Target className="w-4 h-4 mr-2" />
+                Session Notes (Optional)
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                className="w-full px-4 py-3 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent resize-none text-foreground"
+                rows={3}
+                placeholder="Thoughts, insights, or memorable quotes from this session..."
+              />
+            </div>
           </div>
-        </div>
+        </ScrollArea>
 
-        <div className="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-3">
+        {/* Footer */}
+        <div className="p-6 border-t border-border flex justify-end space-x-3 flex-shrink-0">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>

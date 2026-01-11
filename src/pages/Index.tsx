@@ -11,11 +11,12 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { StatsDashboard } from '@/components/StatsDashboard';
 import { BookManagementModal } from '@/components/BookManagementModal';
 import { ReadingDashboard } from '@/components/ReadingDashboard';
+import { ProfileSection } from '@/components/ProfileSection';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
-import { LogOut, Sparkles } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -23,7 +24,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile'>('dashboard');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [managingBook, setManagingBook] = useState<Book | null>(null);
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
@@ -430,6 +431,15 @@ const Index = () => {
             <StatsDashboard 
               books={bookshelf} 
               currentUser={currentUser}
+            />
+          )}
+
+          {currentView === 'profile' && (
+            <ProfileSection
+              books={bookshelf}
+              currentUser={currentUser}
+              userEmail={user?.email}
+              userId={user?.id}
             />
           )}
         </div>

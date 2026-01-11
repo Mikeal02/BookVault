@@ -1,10 +1,10 @@
 
-import { Search, BookOpen, BarChart3, Sparkles, Home } from 'lucide-react';
+import { Search, BookOpen, BarChart3, Sparkles, Home, User } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 
 interface NavigationProps {
-  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations';
-  onViewChange: (view: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations') => void;
+  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile';
+  onViewChange: (view: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile') => void;
   bookshelfCount: number;
 }
 
@@ -40,6 +40,12 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
       label: 'Analytics',
       icon: BarChart3,
       description: 'Reading insights'
+    },
+    {
+      id: 'profile' as const,
+      label: 'Profile',
+      icon: User,
+      description: 'Your profile'
     }
   ];
 
