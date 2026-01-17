@@ -12,6 +12,10 @@ import { StatsDashboard } from '@/components/StatsDashboard';
 import { BookManagementModal } from '@/components/BookManagementModal';
 import { ReadingDashboard } from '@/components/ReadingDashboard';
 import { ProfileSection } from '@/components/ProfileSection';
+import { QuoteCollection } from '@/components/QuoteCollection';
+import { ReadingMoodJournal } from '@/components/ReadingMoodJournal';
+import { TBRRandomizer } from '@/components/TBRRandomizer';
+import { ReadingAtmosphere } from '@/components/ReadingAtmosphere';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -24,7 +28,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'randomizer' | 'atmosphere'>('dashboard');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [managingBook, setManagingBook] = useState<Book | null>(null);
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
@@ -441,6 +445,22 @@ const Index = () => {
               userEmail={user?.email}
               userId={user?.id}
             />
+          )}
+
+          {currentView === 'quotes' && (
+            <QuoteCollection books={bookshelf} />
+          )}
+
+          {currentView === 'mood' && (
+            <ReadingMoodJournal books={bookshelf} />
+          )}
+
+          {currentView === 'randomizer' && (
+            <TBRRandomizer books={bookshelf} onBookSelect={handleBookSelect} />
+          )}
+
+          {currentView === 'atmosphere' && (
+            <ReadingAtmosphere books={bookshelf} />
           )}
         </div>
 
