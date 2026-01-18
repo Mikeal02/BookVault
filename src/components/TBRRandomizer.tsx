@@ -19,34 +19,68 @@ export const TBRRandomizer = ({ books, onBookSelect }: TBRRandomizerProps) => {
   
   const tbrBooks = books.filter(b => b.readingStatus === 'not-read');
   
+  // Track previously selected books to avoid repetition
+  const [previousSelections, setPreviousSelections] = useState<Set<string>>(new Set());
+  
   const spinWheel = () => {
     if (tbrBooks.length === 0 || isSpinning) return;
     
     setIsSpinning(true);
     setSelectedBook(null);
     
+    // Get available books (excluding recently selected ones)
+    let availableBooks = tbrBooks.filter(book => !previousSelections.has(book.id));
+    
+    // If all books have been selected, reset the exclusion list
+    if (availableBooks.length === 0) {
+      availableBooks = tbrBooks;
+      setPreviousSelections(new Set());
+    }
+    
+    // Use crypto for better randomness
+    const getSecureRandom = () => {
+      const array = new Uint32Array(1);
+      crypto.getRandomValues(array);
+      return array[0] / (0xffffffff + 1);
+    };
+    
+    // Shuffle the available books using Fisher-Yates algorithm
+    const shuffledBooks = [...availableBooks];
+    for (let i = shuffledBooks.length - 1; i > 0; i--) {
+      const j = Math.floor(getSecureRandom() * (i + 1));
+      [shuffledBooks[i], shuffledBooks[j]] = [shuffledBooks[j], shuffledBooks[i]];
+    }
+    
+    // Pick the first book from shuffled array (truly random)
+    const finalBook = shuffledBooks[0];
+    
     // Rapid cycling animation
     let currentIndex = 0;
-    const totalCycles = 20 + Math.floor(Math.random() * 10);
+    const totalCycles = 20 + Math.floor(getSecureRandom() * 10);
     let cycleCount = 0;
+    let intervalTime = 80;
     
-    const interval = setInterval(() => {
+    const runCycle = () => {
       currentIndex = (currentIndex + 1) % tbrBooks.length;
       setSelectedBook(tbrBooks[currentIndex]);
       cycleCount++;
       
       if (cycleCount >= totalCycles) {
-        clearInterval(interval);
-        
         // Final selection with delay for drama
         setTimeout(() => {
-          const finalBook = tbrBooks[Math.floor(Math.random() * tbrBooks.length)];
           setSelectedBook(finalBook);
           setSpinHistory(prev => [finalBook, ...prev.slice(0, 4)]);
+          setPreviousSelections(prev => new Set([...prev, finalBook.id]));
           setIsSpinning(false);
         }, 300);
+      } else {
+        // Gradually slow down the animation
+        intervalTime = Math.min(intervalTime + 5, 200);
+        setTimeout(runCycle, intervalTime);
       }
-    }, 100 - (cycleCount * 2)); // Gradually slow down
+    };
+    
+    runCycle();
   };
 
   const getRandomColor = (index: number) => {

@@ -75,11 +75,11 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
   ];
 
   return (
-    <div className="mb-6 sm:mb-8">
-      <nav className="glass-card rounded-2xl p-1.5 sm:p-2">
-        <div className="flex items-center gap-2">
-          <ScrollArea className="flex-1">
-            <div className="flex gap-1 sm:gap-2 pb-1">
+    <div className="mb-6 sm:mb-8 w-full overflow-hidden">
+      <nav className="glass-card rounded-2xl p-1.5 sm:p-2 w-full">
+        <div className="flex items-center gap-1 sm:gap-2 w-full">
+          <ScrollArea className="flex-1 w-full">
+            <div className="flex gap-1 sm:gap-2 pb-2 w-max min-w-full">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = currentView === item.id;
@@ -88,20 +88,20 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
                   <button
                     key={item.id}
                     onClick={() => onViewChange(item.id)}
-                    className={`relative flex items-center px-2.5 sm:px-4 py-2 sm:py-3 rounded-xl font-medium transition-all duration-300 group whitespace-nowrap flex-shrink-0 ${
+                    className={`relative flex items-center px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 rounded-xl font-medium transition-all duration-300 group whitespace-nowrap flex-shrink-0 ${
                       isActive
                         ? 'gradient-primary text-white shadow-lg'
                         : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2 transition-transform duration-200 ${
+                    <Icon className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 ${
                       isActive ? 'scale-110' : 'group-hover:scale-105'
                     }`} />
                     
-                    <span className="font-semibold text-xs sm:text-sm">{item.label}</span>
+                    <span className="hidden xs:inline font-semibold text-xs sm:text-sm ml-1 sm:ml-1.5 md:ml-2">{item.label}</span>
                     
                     {item.badge !== undefined && item.badge > 0 && (
-                      <span className={`ml-1.5 sm:ml-2 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded-full transition-colors ${
+                      <span className={`ml-1 sm:ml-1.5 md:ml-2 px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-bold rounded-full transition-colors ${
                         isActive
                           ? 'bg-white/20 text-white'
                           : 'bg-primary/10 text-primary'
@@ -111,7 +111,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
                     )}
 
                     {/* Tooltip - hidden on mobile */}
-                    <div className="hidden md:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+                    <div className="hidden lg:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-lg">
                       {item.description}
                       <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-foreground"></div>
                     </div>
@@ -119,9 +119,9 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
                 );
               })}
             </div>
-            <ScrollBar orientation="horizontal" className="h-1.5" />
+            <ScrollBar orientation="horizontal" className="h-1.5 mt-1" />
           </ScrollArea>
-          <div className="border-l border-border/50 pl-1.5 sm:pl-2 ml-1 sm:ml-2 flex-shrink-0">
+          <div className="border-l border-border/50 pl-1 sm:pl-2 ml-0.5 sm:ml-2 flex-shrink-0">
             <DatabaseSyncButton />
           </div>
         </div>
