@@ -18,7 +18,8 @@ import {
   Moon,
   Sun,
   Waves,
-  TreePine,
+  Tractor,
+  Snowflake,
   Sparkles,
   BookOpen
 } from 'lucide-react';
@@ -58,13 +59,13 @@ const soundscapes: SoundOption[] = [
     audioUrl: 'https://www.soundjay.com/nature/sounds/campfire-1.mp3'
   },
   { 
-    id: 'forest', 
-    name: 'Forest Ambience', 
-    icon: TreePine, 
+    id: 'IceCrack', 
+    name: 'Ice Ambience', 
+    icon: Snowflake, 
     color: 'from-green-500 to-emerald-500',
     genres: ['adventure', 'fantasy', 'nature', 'outdoors'],
-    description: 'Birds and rustling leaves',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/forest-birds-ambience-02.mp3'
+    description: 'Ice Breaking and Cracking',
+    audioUrl: 'http://soundjay.com/nature/sounds/ice-cracking-01.mp3'
   },
   { 
     id: 'ocean', 
@@ -76,13 +77,13 @@ const soundscapes: SoundOption[] = [
     audioUrl: 'https://www.soundjay.com/nature/sounds/ocean-wave-2.mp3'
   },
   { 
-    id: 'cafe', 
-    name: 'Coffee Shop', 
-    icon: Coffee, 
+    id: 'Farm', 
+    name: 'Farm Ambience', 
+    icon: Tractor, 
     color: 'from-amber-500 to-orange-500',
     genres: ['contemporary', 'urban', 'slice of life', 'literary'],
-    description: 'Quiet cafe murmurs',
-    audioUrl: 'https://www.soundjay.com/human/sounds/crowd-talking-1.mp3'
+    description: 'Daytime Farm Ambience',
+    audioUrl: '/mp3_files/Farm.mp3'
   },
   { 
     id: 'night', 
@@ -91,7 +92,7 @@ const soundscapes: SoundOption[] = [
     color: 'from-indigo-500 to-purple-500',
     genres: ['horror', 'mystery', 'thriller', 'supernatural'],
     description: 'Crickets and night sounds',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/cricket-1.mp3'
+    audioUrl: '/mp3_files/night.mp3'
   },
   { 
     id: 'wind', 
@@ -109,7 +110,7 @@ const soundscapes: SoundOption[] = [
     color: 'from-yellow-400 to-orange-400',
     genres: ['romance', 'feel good', 'comedy', 'light'],
     description: 'Cheerful birdsong',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/birds-singing-1.mp3'
+    audioUrl: '/mp3_files/bird.mp3'
   },
 ];
 
