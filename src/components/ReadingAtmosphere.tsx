@@ -37,7 +37,7 @@ interface ReadingAtmosphereProps {
   books: Book[];
 }
 
-// Free ambient sound URLs from freesound.org (CC0 licensed)
+// Free ambient sound URLs from reliable sources
 const soundscapes: SoundOption[] = [
   { 
     id: 'rain', 
@@ -46,7 +46,7 @@ const soundscapes: SoundOption[] = [
     color: 'from-blue-500 to-cyan-500',
     genres: ['mystery', 'thriller', 'noir', 'drama'],
     description: 'Soft rainfall on a window',
-    audioUrl: 'https://cdn.freesound.org/previews/531/531947_5765682-lq.mp3'
+    audioUrl: 'https://www.soundjay.com/nature/sounds/rain-01.mp3'
   },
   { 
     id: 'fireplace', 
@@ -55,7 +55,7 @@ const soundscapes: SoundOption[] = [
     color: 'from-orange-500 to-red-500',
     genres: ['romance', 'historical', 'fantasy', 'fiction'],
     description: 'Crackling fire warmth',
-    audioUrl: 'https://cdn.freesound.org/previews/499/499032_4249947-lq.mp3'
+    audioUrl: 'https://www.soundjay.com/nature/sounds/campfire-1.mp3'
   },
   { 
     id: 'forest', 
@@ -64,7 +64,7 @@ const soundscapes: SoundOption[] = [
     color: 'from-green-500 to-emerald-500',
     genres: ['adventure', 'fantasy', 'nature', 'outdoors'],
     description: 'Birds and rustling leaves',
-    audioUrl: 'https://cdn.freesound.org/previews/509/509433_4397472-lq.mp3'
+    audioUrl: 'https://www.soundjay.com/nature/sounds/forest-birds-ambience-02.mp3'
   },
   { 
     id: 'ocean', 
@@ -73,7 +73,7 @@ const soundscapes: SoundOption[] = [
     color: 'from-teal-500 to-blue-500',
     genres: ['romance', 'adventure', 'travel', 'beach'],
     description: 'Gentle waves on shore',
-    audioUrl: 'https://cdn.freesound.org/previews/527/527603_4397472-lq.mp3'
+    audioUrl: 'https://www.soundjay.com/nature/sounds/ocean-wave-2.mp3'
   },
   { 
     id: 'cafe', 
@@ -82,7 +82,7 @@ const soundscapes: SoundOption[] = [
     color: 'from-amber-500 to-orange-500',
     genres: ['contemporary', 'urban', 'slice of life', 'literary'],
     description: 'Quiet cafe murmurs',
-    audioUrl: 'https://cdn.freesound.org/previews/472/472538_6142149-lq.mp3'
+    audioUrl: 'https://www.soundjay.com/human/sounds/crowd-talking-1.mp3'
   },
   { 
     id: 'night', 
@@ -91,7 +91,7 @@ const soundscapes: SoundOption[] = [
     color: 'from-indigo-500 to-purple-500',
     genres: ['horror', 'mystery', 'thriller', 'supernatural'],
     description: 'Crickets and night sounds',
-    audioUrl: 'https://cdn.freesound.org/previews/518/518300_8043370-lq.mp3'
+    audioUrl: 'https://www.soundjay.com/nature/sounds/cricket-1.mp3'
   },
   { 
     id: 'wind', 
@@ -100,7 +100,7 @@ const soundscapes: SoundOption[] = [
     color: 'from-slate-400 to-gray-500',
     genres: ['drama', 'contemporary', 'literary', 'philosophical'],
     description: 'Soft breeze through trees',
-    audioUrl: 'https://cdn.freesound.org/previews/244/244944_4486188-lq.mp3'
+    audioUrl: 'https://www.soundjay.com/nature/sounds/wind-howl-01.mp3'
   },
   { 
     id: 'birds', 
@@ -109,7 +109,7 @@ const soundscapes: SoundOption[] = [
     color: 'from-yellow-400 to-orange-400',
     genres: ['romance', 'feel good', 'comedy', 'light'],
     description: 'Cheerful birdsong',
-    audioUrl: 'https://cdn.freesound.org/previews/531/531953_5765682-lq.mp3'
+    audioUrl: 'https://www.soundjay.com/nature/sounds/birds-singing-1.mp3'
   },
 ];
 
