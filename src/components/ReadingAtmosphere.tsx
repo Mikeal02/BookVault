@@ -38,7 +38,7 @@ interface ReadingAtmosphereProps {
   books: Book[];
 }
 
-// Free ambient sound URLs from reliable sources
+// Free ambient sound URLs - using reliable sources
 const soundscapes: SoundOption[] = [
   { 
     id: 'rain', 
@@ -57,15 +57,6 @@ const soundscapes: SoundOption[] = [
     genres: ['romance', 'historical', 'fantasy', 'fiction'],
     description: 'Crackling fire warmth',
     audioUrl: 'https://www.soundjay.com/nature/sounds/campfire-1.mp3'
-  },
-  { 
-    id: 'IceCrack', 
-    name: 'Ice Ambience', 
-    icon: Snowflake, 
-    color: 'from-green-500 to-emerald-500',
-    genres: ['adventure', 'fantasy', 'nature', 'outdoors'],
-    description: 'Ice Breaking and Cracking',
-    audioUrl: 'http://soundjay.com/nature/sounds/ice-cracking-01.mp3'
   },
   { 
     id: 'ocean', 
@@ -111,6 +102,15 @@ const soundscapes: SoundOption[] = [
     genres: ['romance', 'feel good', 'comedy', 'light'],
     description: 'Cheerful birdsong',
     audioUrl: '/mp3_files/bird.mp3'
+  },
+  { 
+    id: 'ice', 
+    name: 'Ice Ambience', 
+    icon: Snowflake, 
+    color: 'from-cyan-400 to-blue-400',
+    genres: ['adventure', 'fantasy', 'nature', 'outdoors'],
+    description: 'Ice cracking and winter sounds',
+    audioUrl: 'https://www.soundjay.com/nature/sounds/ice-cracking-01.mp3'
   },
 ];
 

@@ -100,11 +100,12 @@ serve(async (req) => {
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
-      } catch (testError) {
-        console.error('Connection test failed:', testError.message);
+      } catch (testError: unknown) {
+        const errorMessage = testError instanceof Error ? testError.message : 'Unknown error';
+        console.error('Connection test failed:', errorMessage);
         return new Response(JSON.stringify({
           connected: false,
-          error: `Connection failed: ${testError.message}`,
+          error: `Connection failed: ${errorMessage}`,
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -180,8 +181,9 @@ serve(async (req) => {
                 updated_at = EXCLUDED.updated_at
             `;
             syncResults.profiles.exported++;
-          } catch (e) {
-            console.error('Error exporting profile:', e.message);
+          } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+            console.error('Error exporting profile:', errorMessage);
             syncResults.profiles.errors++;
           }
         }
@@ -233,8 +235,9 @@ serve(async (req) => {
                 updated_at = EXCLUDED.updated_at
             `;
             syncResults.user_books.exported++;
-          } catch (e) {
-            console.error('Error exporting book:', e.message);
+          } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+            console.error('Error exporting book:', errorMessage);
             syncResults.user_books.errors++;
           }
         }
@@ -261,8 +264,9 @@ serve(async (req) => {
                 notes = EXCLUDED.notes
             `;
             syncResults.reading_sessions.exported++;
-          } catch (e) {
-            console.error('Error exporting session:', e.message);
+          } catch (e: unknown) {
+            const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+            console.error('Error exporting session:', errorMessage);
             syncResults.reading_sessions.errors++;
           }
         }
@@ -303,8 +307,9 @@ serve(async (req) => {
             syncResults.profiles.imported++;
           }
         }
-      } catch (e) {
-        console.error('Error querying external profiles:', e.message);
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+        console.error('Error querying external profiles:', errorMessage);
       }
 
       // Import user_books
@@ -356,8 +361,9 @@ serve(async (req) => {
             syncResults.user_books.imported++;
           }
         }
-      } catch (e) {
-        console.error('Error querying external books:', e.message);
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+        console.error('Error querying external books:', errorMessage);
       }
 
       // Import reading_sessions
@@ -388,8 +394,9 @@ serve(async (req) => {
             syncResults.reading_sessions.imported++;
           }
         }
-      } catch (e) {
-        console.error('Error querying external sessions:', e.message);
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+        console.error('Error querying external sessions:', errorMessage);
       }
       
       console.log('Import completed');
@@ -413,22 +420,25 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error) {
-    console.error('Sync error:', error.message);
-    console.error('Error stack:', error.stack);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error('Sync error:', errorMessage);
+    if (errorStack) console.error('Error stack:', errorStack);
     
     // Clean up connection on error
     if (externalDb) {
       try {
         await externalDb.end();
-      } catch (e) {
-        console.error('Error closing connection:', e.message);
+      } catch (e: unknown) {
+        const closeErrorMessage = e instanceof Error ? e.message : 'Unknown error';
+        console.error('Error closing connection:', closeErrorMessage);
       }
     }
     
     return new Response(JSON.stringify({
       success: false,
-      error: error.message,
+      error: errorMessage,
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
