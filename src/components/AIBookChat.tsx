@@ -311,29 +311,29 @@ Format your responses using markdown:
   ];
 
   return (
-    <div className="fixed inset-0 bg-foreground/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-card rounded-2xl max-w-2xl w-full h-[80vh] flex flex-col shadow-2xl animate-scale-in overflow-hidden border border-border">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 z-50 animate-fade-in">
+      <div className="bg-background rounded-xl sm:rounded-2xl max-w-2xl w-full h-[90vh] sm:h-[85vh] flex flex-col shadow-2xl animate-scale-in overflow-hidden border border-border">
         {/* Header */}
-        <div className="p-4 border-b border-border flex justify-between items-center bg-primary">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary-foreground/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <Bot className="w-5 h-5 text-primary-foreground" />
+        <div className="p-3 sm:p-4 border-b border-border flex justify-between items-center bg-gradient-to-r from-primary/10 to-secondary/10">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-primary to-secondary rounded-lg sm:rounded-xl flex items-center justify-center shadow-md">
+              <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-display font-bold text-primary-foreground">AI Book Assistant</h2>
-              <p className="text-xs text-primary-foreground/80 font-sans">Powered by Gemini</p>
+              <h2 className="text-base sm:text-lg font-bold text-foreground">AI Book Assistant</h2>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Powered by Gemini</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-primary-foreground/20 rounded-full transition-colors"
+            className="p-1.5 sm:p-2 hover:bg-muted rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-primary-foreground" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
           </button>
         </div>
 
         {/* Mode Selector */}
-        <div className="p-3 border-b border-border flex gap-2 overflow-x-auto bg-secondary/50">
+        <div className="p-2 sm:p-3 border-b border-border flex gap-1.5 sm:gap-2 overflow-x-auto bg-muted/30">
           {[
             { value: 'chat', label: 'Chat', icon: MessageSquare },
             { value: 'summary', label: 'Summaries', icon: BookOpen },
@@ -343,32 +343,32 @@ Format your responses using markdown:
             <button
               key={m.value}
               onClick={() => setMode(m.value as ChatMode)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-sans font-medium transition-all whitespace-nowrap ${
+              className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${
                 mode === m.value
-                  ? 'bg-primary/10 text-primary border border-primary/30'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               }`}
             >
-              <m.icon className="w-4 h-4" />
-              {m.label}
+              <m.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <span className="hidden xs:inline">{m.label}</span>
             </button>
           ))}
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-muted/10">
           {messages.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-6">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mb-4 shadow-lg">
-                <Bot className="w-8 h-8 text-primary-foreground" />
+            <div className="h-full flex flex-col items-center justify-center text-center p-4 sm:p-6">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-primary to-secondary rounded-xl sm:rounded-2xl flex items-center justify-center mb-3 sm:mb-4 shadow-lg">
+                <Bot className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
               </div>
-              <h3 className="text-lg font-display font-semibold text-foreground mb-2">
+              <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1.5 sm:mb-2">
                 How can I help you today?
               </h3>
-              <p className="text-sm text-muted-foreground mb-6 max-w-md font-sans">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6 max-w-md">
                 I can summarize books, give recommendations, analyze your reading patterns, or just chat about literature.
               </p>
-              <div className="grid grid-cols-2 gap-3 w-full max-w-md">
+              <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full max-w-md">
                 {quickActions.map(action => (
                   <button
                     key={action.label}
@@ -376,10 +376,10 @@ Format your responses using markdown:
                       setMode(action.mode);
                       sendMessage(action.prompt);
                     }}
-                    className="flex items-center gap-2 p-3 bg-secondary rounded-xl text-left hover:bg-secondary/80 transition-colors border border-border hover:border-primary/30"
+                    className="flex items-center gap-1.5 sm:gap-2 p-2.5 sm:p-3 bg-card rounded-lg sm:rounded-xl text-left hover:bg-muted transition-colors border border-border hover:border-primary/30 hover:shadow-sm"
                   >
-                    <action.icon className="w-5 h-5 text-primary" />
-                    <span className="text-sm font-sans font-medium text-foreground">{action.label}</span>
+                    <action.icon className="w-4 h-4 sm:w-5 sm:h-5 text-primary flex-shrink-0" />
+                    <span className="text-xs sm:text-sm font-medium text-foreground truncate">{action.label}</span>
                   </button>
                 ))}
               </div>
@@ -388,45 +388,45 @@ Format your responses using markdown:
             messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                className={`flex gap-2 sm:gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {msg.role === 'assistant' && (
-                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-                    <Bot className="w-4 h-4 text-primary-foreground" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
                   </div>
                 )}
                 <div
-                  className={`max-w-[80%] p-4 rounded-2xl ${
+                  className={`max-w-[85%] sm:max-w-[80%] p-3 sm:p-4 rounded-xl sm:rounded-2xl ${
                     msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground rounded-br-md'
-                      : 'bg-secondary text-foreground rounded-bl-md border border-border'
+                      ? 'bg-primary text-primary-foreground rounded-br-sm sm:rounded-br-md'
+                      : 'bg-card text-foreground rounded-bl-sm sm:rounded-bl-md border border-border shadow-sm'
                   }`}
                 >
                   {msg.role === 'assistant' ? (
-                    <div className="ai-response font-sans">
+                    <div className="ai-response text-xs sm:text-sm">
                       {formatAIResponse(msg.content)}
                     </div>
                   ) : (
-                    <p className="text-sm whitespace-pre-wrap font-sans">{msg.content}</p>
+                    <p className="text-xs sm:text-sm whitespace-pre-wrap">{msg.content}</p>
                   )}
                 </div>
                 {msg.role === 'user' && (
-                  <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0">
-                    <User className="w-4 h-4 text-muted-foreground" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                    <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground" />
                   </div>
                 )}
               </div>
             ))
           )}
           {isLoading && (
-            <div className="flex gap-3 justify-start">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-md">
-                <Bot className="w-4 h-4 text-primary-foreground" />
+            <div className="flex gap-2 sm:gap-3 justify-start">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center shadow-sm">
+                <Bot className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
               </div>
-              <div className="bg-secondary p-4 rounded-2xl rounded-bl-md border border-border">
+              <div className="bg-card p-3 sm:p-4 rounded-xl sm:rounded-2xl rounded-bl-sm sm:rounded-bl-md border border-border shadow-sm">
                 <div className="flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                  <span className="text-sm text-muted-foreground font-sans">Thinking...</span>
+                  <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin text-primary" />
+                  <span className="text-xs sm:text-sm text-muted-foreground">Thinking...</span>
                 </div>
               </div>
             </div>
@@ -435,7 +435,7 @@ Format your responses using markdown:
         </div>
 
         {/* Input */}
-        <div className="p-4 border-t border-border bg-card">
+        <div className="p-3 sm:p-4 border-t border-border bg-card">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -448,15 +448,16 @@ Format your responses using markdown:
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about your books..."
-              className="flex-1 px-4 py-3 bg-secondary border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all font-sans text-foreground placeholder:text-muted-foreground"
+              className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 bg-muted border border-border rounded-lg sm:rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-foreground placeholder:text-muted-foreground text-xs sm:text-sm"
               disabled={isLoading}
             />
             <Button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              size="icon"
+              className="h-10 w-10 sm:h-12 sm:w-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg sm:rounded-xl"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </form>
         </div>
