@@ -75,21 +75,33 @@ export const ReadingSessionTracker = ({ book, onSessionComplete, onClose }: Read
 
   // Prevent body scroll when modal is open
   useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
     document.body.style.overflow = 'hidden';
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = originalStyle;
     };
   }, []);
 
+  // Handle escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
+
   return (
     <div 
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in"
+      className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 animate-fade-in overflow-hidden"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
+      onWheel={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
     >
       <div 
-        className="bg-card rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl animate-scale-in"
+        className="bg-card rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl animate-scale-in border border-border overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
