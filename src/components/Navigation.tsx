@@ -7,8 +7,8 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 
 interface NavigationProps {
-  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'randomizer' | 'atmosphere';
-  onViewChange: (view: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'randomizer' | 'atmosphere') => void;
+  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'randomizer' | 'atmosphere' | 'challenges' | 'comparison';
+  onViewChange: (view: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'randomizer' | 'atmosphere' | 'challenges' | 'comparison') => void;
   bookshelfCount: number;
 }
 
