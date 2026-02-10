@@ -130,7 +130,7 @@ export const ReadingSessionTracker = ({ book, onSessionComplete, onClose }: Read
         </div>
 
         {/* Scrollable Content */}
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="p-6 space-y-6">
             {/* Timer Display */}
             <div className="text-center">
