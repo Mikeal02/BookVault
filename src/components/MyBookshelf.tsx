@@ -21,6 +21,7 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
   const [filterStatus, setFilterStatus] = useState<'all' | 'not-read' | 'reading' | 'finished'>('all');
   const [showExport, setShowExport] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'compact'>('grid');
 
   const filteredBooks = books
     .filter(book => {
