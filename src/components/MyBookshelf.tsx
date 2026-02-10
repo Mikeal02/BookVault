@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Search, BookOpen, Filter, Settings, FileText, Bot } from 'lucide-react';
+import { Search, BookOpen, Filter, Settings, FileText, Bot, LayoutGrid, List, LayoutList } from 'lucide-react';
 import { Book } from '@/types/book';
 import { BookCard } from './BookCard';
 import { BookManagementModal } from './BookManagementModal';
