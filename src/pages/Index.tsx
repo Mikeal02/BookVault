@@ -464,6 +464,14 @@ const Index = () => {
           {currentView === 'atmosphere' && (
             <ReadingAtmosphere books={bookshelf} />
           )}
+
+          {currentView === 'challenges' && (
+            <ReadingChallenges books={bookshelf} />
+          )}
+
+          {currentView === 'comparison' && (
+            <BookComparison books={bookshelf} onBookSelect={handleBookSelect} />
+          )}
         </div>
 
         {/* Modals */}
