@@ -25,6 +25,8 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
     { id: 'mood' as const, label: 'Mood', icon: Heart, description: 'Reading mood journal' },
     { id: 'randomizer' as const, label: 'TBR Spin', icon: Shuffle, description: 'Pick your next read' },
     { id: 'atmosphere' as const, label: 'Ambience', icon: Music, description: 'Reading soundscapes' },
+    { id: 'challenges' as const, label: 'Challenges', icon: Trophy, description: 'Earn XP & badges' },
+    { id: 'comparison' as const, label: 'Compare', icon: GitCompareArrows, description: 'Compare books' },
     { id: 'profile' as const, label: 'Profile', icon: User, description: 'Your profile' }
   ];
 
