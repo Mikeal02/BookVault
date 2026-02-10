@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { ReadingHeatmap } from './ReadingHeatmap';
 import { Book } from '@/types/book';
 import { 
   BookOpen, Target, Clock, TrendingUp, Award, Calendar, 
