@@ -331,8 +331,47 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
                 </div>
               </div>
             ))}
-          </div>
         </div>
+      </div>
+
+      {/* Reading Heatmap */}
+      <ReadingHeatmap books={books} />
+
+      {/* Quick Actions */}
+      <div className="grid sm:grid-cols-3 gap-4">
+        <button
+          onClick={() => onViewChange('challenges')}
+          className="glass-card rounded-2xl p-5 text-left hover-lift transition-all group"
+        >
+          <div className="w-10 h-10 rounded-xl gradient-secondary flex items-center justify-center mb-3 shadow-lg">
+            <Trophy className="w-5 h-5 text-white" />
+          </div>
+          <h4 className="font-semibold text-sm">Challenges</h4>
+          <p className="text-xs text-muted-foreground mt-1">Earn XP & badges</p>
+          <ChevronRight className="w-4 h-4 text-muted-foreground mt-2 group-hover:translate-x-1 transition-transform" />
+        </button>
+        <button
+          onClick={() => onViewChange('stats')}
+          className="glass-card rounded-2xl p-5 text-left hover-lift transition-all group"
+        >
+          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center mb-3 shadow-lg">
+            <TrendingUp className="w-5 h-5 text-white" />
+          </div>
+          <h4 className="font-semibold text-sm">Analytics</h4>
+          <p className="text-xs text-muted-foreground mt-1">Deep reading insights</p>
+          <ChevronRight className="w-4 h-4 text-muted-foreground mt-2 group-hover:translate-x-1 transition-transform" />
+        </button>
+        <button
+          onClick={() => onViewChange('recommendations')}
+          className="glass-card rounded-2xl p-5 text-left hover-lift transition-all group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-warning to-warning/70 flex items-center justify-center mb-3 shadow-lg">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <h4 className="font-semibold text-sm">For You</h4>
+          <p className="text-xs text-muted-foreground mt-1">Personalized picks</p>
+          <ChevronRight className="w-4 h-4 text-muted-foreground mt-2 group-hover:translate-x-1 transition-transform" />
+        </button>
       </div>
 
       {/* Recently Added Books */}
