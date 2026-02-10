@@ -98,8 +98,7 @@ export const BookManagementModal = ({ book, onClose, onSave }: BookManagementMod
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-h-0 overflow-hidden">
-          <ScrollArea className="h-full">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
               {/* Book Info */}
               <div className="flex items-start space-x-3 sm:space-x-4">
