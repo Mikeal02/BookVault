@@ -186,9 +186,8 @@ export const BookDetailsModal = ({
           </div>
         </div>
 
-        {/* Content - Fixed scroll container */}
-        <div className="flex-1 min-h-0 overflow-hidden">
-          <ScrollArea className="h-full">
+        {/* Content - Scrollable */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="flex flex-col lg:flex-row">
               {/* Book Cover */}
               <div className="lg:w-1/3 p-4 sm:p-6 flex justify-center lg:justify-start bg-gradient-to-b from-muted/30 to-transparent flex-shrink-0">
