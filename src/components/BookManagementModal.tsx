@@ -232,7 +232,6 @@ export const BookManagementModal = ({ book, onClose, onSave }: BookManagementMod
                 />
               </div>
             </div>
-          </ScrollArea>
         </div>
 
         {/* Footer */}

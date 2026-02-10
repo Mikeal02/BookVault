@@ -422,7 +422,6 @@ export const BookDetailsModal = ({
                 )}
               </div>
             </div>
-          </ScrollArea>
         </div>
 
         {/* Footer Actions */}

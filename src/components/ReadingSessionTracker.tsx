@@ -204,7 +204,7 @@ export const ReadingSessionTracker = ({ book, onSessionComplete, onClose }: Read
               />
             </div>
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Footer */}
         <div className="p-6 border-t border-border flex justify-end space-x-3 flex-shrink-0">
