@@ -331,6 +331,7 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
                 </div>
               </div>
             ))}
+          </div>
         </div>
       </div>
 
