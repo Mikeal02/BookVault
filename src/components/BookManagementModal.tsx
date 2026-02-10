@@ -4,7 +4,7 @@ import { X, Star, Save, Tag, BookOpen, Calendar, MessageSquare } from 'lucide-re
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 
 interface BookManagementModalProps {
   book: Book;
@@ -75,16 +75,15 @@ export const BookManagementModal = ({ book, onClose, onSave }: BookManagementMod
 
   return (
     <div 
-      className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 animate-fade-in overflow-hidden"
+      className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      onWheel={(e) => e.stopPropagation()}
-      onTouchMove={(e) => e.stopPropagation()}
     >
       <div 
-        className="bg-card rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl animate-scale-in border border-border overflow-hidden"
+        className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl h-[92vh] sm:h-auto sm:max-h-[90vh] flex flex-col shadow-2xl animate-scale-in border border-border"
         onClick={(e) => e.stopPropagation()}
+        style={{ overscrollBehavior: 'contain' }}
       >
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-border flex justify-between items-center bg-gradient-to-r from-primary/5 to-secondary/5 flex-shrink-0">
@@ -99,8 +98,7 @@ export const BookManagementModal = ({ book, onClose, onSave }: BookManagementMod
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-h-0 overflow-hidden">
-          <ScrollArea className="h-full">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
               {/* Book Info */}
               <div className="flex items-start space-x-3 sm:space-x-4">
@@ -234,7 +232,6 @@ export const BookManagementModal = ({ book, onClose, onSave }: BookManagementMod
                 />
               </div>
             </div>
-          </ScrollArea>
         </div>
 
         {/* Footer */}

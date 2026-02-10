@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Play, Pause, Square, Clock, BookOpen, Target, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Book } from '@/types/book';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 
 interface ReadingSessionTrackerProps {
   book: Book;
@@ -93,16 +93,15 @@ export const ReadingSessionTracker = ({ book, onSessionComplete, onClose }: Read
 
   return (
     <div 
-      className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 animate-fade-in overflow-hidden"
+      className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      onWheel={(e) => e.stopPropagation()}
-      onTouchMove={(e) => e.stopPropagation()}
     >
       <div 
-        className="bg-card rounded-2xl max-w-md w-full max-h-[90vh] flex flex-col shadow-2xl animate-scale-in border border-border overflow-hidden"
+        className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md h-[92vh] sm:h-auto sm:max-h-[90vh] flex flex-col shadow-2xl animate-scale-in border border-border"
         onClick={(e) => e.stopPropagation()}
+        style={{ overscrollBehavior: 'contain' }}
       >
         {/* Header */}
         <div className="p-6 border-b border-border flex-shrink-0">
@@ -131,7 +130,7 @@ export const ReadingSessionTracker = ({ book, onSessionComplete, onClose }: Read
         </div>
 
         {/* Scrollable Content */}
-        <ScrollArea className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
           <div className="p-6 space-y-6">
             {/* Timer Display */}
             <div className="text-center">
@@ -205,7 +204,7 @@ export const ReadingSessionTracker = ({ book, onSessionComplete, onClose }: Read
               />
             </div>
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Footer */}
         <div className="p-6 border-t border-border flex justify-end space-x-3 flex-shrink-0">

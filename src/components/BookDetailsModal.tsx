@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { X, Star, Plus, Trash2, ExternalLink, ShoppingCart, Clock, Play, Settings } from 'lucide-react';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 
 interface BookDetailsModalProps {
   book: Book;
@@ -93,16 +93,15 @@ export const BookDetailsModal = ({
 
   return (
     <div 
-      className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 animate-fade-in overflow-hidden"
+      className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      onWheel={(e) => e.stopPropagation()}
-      onTouchMove={(e) => e.stopPropagation()}
     >
       <div 
-        className="bg-card rounded-2xl max-w-5xl w-full max-h-[95vh] flex flex-col shadow-2xl animate-scale-in border border-border overflow-hidden"
+        className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-5xl h-[92vh] sm:h-auto sm:max-h-[90vh] flex flex-col shadow-2xl animate-scale-in border border-border"
         onClick={(e) => e.stopPropagation()}
+        style={{ overscrollBehavior: 'contain' }}
       >
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-border bg-gradient-to-r from-primary/5 to-secondary/5 flex-shrink-0">
@@ -187,9 +186,8 @@ export const BookDetailsModal = ({
           </div>
         </div>
 
-        {/* Content - Fixed scroll container */}
-        <div className="flex-1 min-h-0 overflow-hidden">
-          <ScrollArea className="h-full">
+        {/* Content - Scrollable */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="flex flex-col lg:flex-row">
               {/* Book Cover */}
               <div className="lg:w-1/3 p-4 sm:p-6 flex justify-center lg:justify-start bg-gradient-to-b from-muted/30 to-transparent flex-shrink-0">
@@ -424,7 +422,6 @@ export const BookDetailsModal = ({
                 )}
               </div>
             </div>
-          </ScrollArea>
         </div>
 
         {/* Footer Actions */}

@@ -16,6 +16,8 @@ import { QuoteCollection } from '@/components/QuoteCollection';
 import { ReadingMoodJournal } from '@/components/ReadingMoodJournal';
 import { TBRRandomizer } from '@/components/TBRRandomizer';
 import { ReadingAtmosphere } from '@/components/ReadingAtmosphere';
+import { ReadingChallenges } from '@/components/ReadingChallenges';
+import { BookComparison } from '@/components/BookComparison';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -28,7 +30,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'randomizer' | 'atmosphere'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'randomizer' | 'atmosphere' | 'challenges' | 'comparison'>('dashboard');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [managingBook, setManagingBook] = useState<Book | null>(null);
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
@@ -461,6 +463,14 @@ const Index = () => {
 
           {currentView === 'atmosphere' && (
             <ReadingAtmosphere books={bookshelf} />
+          )}
+
+          {currentView === 'challenges' && (
+            <ReadingChallenges books={bookshelf} />
+          )}
+
+          {currentView === 'comparison' && (
+            <BookComparison books={bookshelf} onBookSelect={handleBookSelect} />
           )}
         </div>
 

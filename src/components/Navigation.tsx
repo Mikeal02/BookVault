@@ -1,14 +1,14 @@
 
 import { useState } from 'react';
-import { Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart, Shuffle, Music, Menu, X } from 'lucide-react';
+import { Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart, Shuffle, Music, Menu, X, Trophy, GitCompareArrows } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 
 interface NavigationProps {
-  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'randomizer' | 'atmosphere';
-  onViewChange: (view: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'randomizer' | 'atmosphere') => void;
+  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'randomizer' | 'atmosphere' | 'challenges' | 'comparison';
+  onViewChange: (view: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'randomizer' | 'atmosphere' | 'challenges' | 'comparison') => void;
   bookshelfCount: number;
 }
 
@@ -25,6 +25,8 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
     { id: 'mood' as const, label: 'Mood', icon: Heart, description: 'Reading mood journal' },
     { id: 'randomizer' as const, label: 'TBR Spin', icon: Shuffle, description: 'Pick your next read' },
     { id: 'atmosphere' as const, label: 'Ambience', icon: Music, description: 'Reading soundscapes' },
+    { id: 'challenges' as const, label: 'Challenges', icon: Trophy, description: 'Earn XP & badges' },
+    { id: 'comparison' as const, label: 'Compare', icon: GitCompareArrows, description: 'Compare books' },
     { id: 'profile' as const, label: 'Profile', icon: User, description: 'Your profile' }
   ];
 
