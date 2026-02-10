@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Play, Pause, Square, Clock, BookOpen, Target, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Book } from '@/types/book';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 
 interface ReadingSessionTrackerProps {
   book: Book;

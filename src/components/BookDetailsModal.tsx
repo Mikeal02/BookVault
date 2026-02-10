@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { X, Star, Plus, Trash2, ExternalLink, ShoppingCart, Clock, Play, Settings } from 'lucide-react';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 
 interface BookDetailsModalProps {
   book: Book;
