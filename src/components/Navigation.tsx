@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart, Shuffle, Music, Menu, X } from 'lucide-react';
+import { Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart, Shuffle, Music, Menu, X, Trophy, GitCompareArrows } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
