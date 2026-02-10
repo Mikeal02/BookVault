@@ -16,6 +16,8 @@ import { QuoteCollection } from '@/components/QuoteCollection';
 import { ReadingMoodJournal } from '@/components/ReadingMoodJournal';
 import { TBRRandomizer } from '@/components/TBRRandomizer';
 import { ReadingAtmosphere } from '@/components/ReadingAtmosphere';
+import { ReadingChallenges } from '@/components/ReadingChallenges';
+import { BookComparison } from '@/components/BookComparison';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
