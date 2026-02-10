@@ -10,7 +10,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, 
 interface ReadingDashboardProps {
   books: Book[];
   currentUser: string;
-  onViewChange: (view: 'search' | 'shelf' | 'stats' | 'recommendations') => void;
+  onViewChange: (view: 'search' | 'shelf' | 'stats' | 'recommendations' | 'challenges') => void;
 }
 
 export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDashboardProps) => {
