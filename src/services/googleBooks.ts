@@ -1,85 +1,53 @@
 
-import { Book, GoogleBookResponse, GoogleBookItem } from '@/types/book';
+import { Book } from '@/types/book';
 
+// Open Library API - completely free, no API key needed, no rate limits
+const OPEN_LIBRARY_SEARCH_URL = 'https://openlibrary.org/search.json';
+const OPEN_LIBRARY_COVERS_URL = 'https://covers.openlibrary.org/b/olid';
+
+// Also use Google Books as fallback when Open Library lacks data
 const GOOGLE_BOOKS_API_URL = 'https://www.googleapis.com/books/v1/volumes';
 
-export const searchBooks = async (query: string, maxResults: number = 40): Promise<Book[]> => {
-  try {
-    // Enhanced search with better parameters for finding popular books
-    const searchQuery = query.trim();
-    
-    // Try multiple search strategies for better results
-    const searchStrategies = [
-      `intitle:${searchQuery}`, // Exact title match
-      searchQuery, // General search
-      `${searchQuery} bestseller`, // Include bestseller keyword
-    ];
-    
-    let allResults: Book[] = [];
-    
-    for (const strategy of searchStrategies) {
-      try {
-        const response = await fetch(
-          `${GOOGLE_BOOKS_API_URL}?q=${encodeURIComponent(strategy)}&maxResults=${maxResults}&orderBy=relevance&printType=books&langRestrict=en`
-        );
+const transformOpenLibraryBook = (item: any): Book => {
+  const coverId = item.cover_i;
+  const olid = item.edition_key?.[0]; // e.g. OL1234M
+  
+  const thumbnail = coverId 
+    ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`
+    : olid
+    ? `${OPEN_LIBRARY_COVERS_URL}/${olid}-M.jpg`
+    : undefined;
 
-        if (response.ok) {
-          const data: GoogleBookResponse = await response.json();
-          if (data.items) {
-            const books = data.items.map(transformGoogleBookToBook);
-            allResults.push(...books);
-          }
-        }
-      } catch (error) {
-        console.error(`Search strategy ${strategy} failed:`, error);
-      }
-      
-      // If we have enough results, stop searching
-      if (allResults.length >= maxResults) break;
-    }
+  const authors = item.author_name || [];
+  const title = item.title || 'Unknown Title';
+  const buyLinks = generatePurchaseLinks(title, authors[0]);
+  
+  // Create a stable unique ID from Open Library key
+  const id = item.key?.replace('/works/', 'ol_') || `ol_${Math.random().toString(36).slice(2)}`;
 
-    // Remove duplicates by book ID
-    const uniqueBooks = allResults.filter((book, index, self) => 
-      index === self.findIndex(b => b.id === book.id)
-    );
-
-    // Sort by rating and ratings count for better results
-    const sortedBooks = uniqueBooks.sort((a, b) => {
-      const scoreA = (a.averageRating || 0) * Math.log10((a.ratingsCount || 1) + 1);
-      const scoreB = (b.averageRating || 0) * Math.log10((b.ratingsCount || 1) + 1);
-      return scoreB - scoreA;
-    });
-
-    return sortedBooks.slice(0, maxResults);
-  } catch (error) {
-    console.error('Error searching books:', error);
-    throw error;
-  }
+  return {
+    id,
+    title,
+    authors,
+    description: item.first_sentence?.value || item.description || undefined,
+    publishedDate: item.first_publish_year?.toString(),
+    publisher: item.publisher?.[0],
+    pageCount: item.number_of_pages_median || undefined,
+    categories: item.subject?.slice(0, 5) || [],
+    imageLinks: thumbnail ? { thumbnail, smallThumbnail: thumbnail.replace('-M.jpg', '-S.jpg') } : undefined,
+    averageRating: undefined, // Open Library doesn't have ratings
+    ratingsCount: item.ratings_count || undefined,
+    language: item.language?.[0] === 'eng' ? 'en' : item.language?.[0],
+    previewLink: item.key ? `https://openlibrary.org${item.key}` : undefined,
+    infoLink: item.key ? `https://openlibrary.org${item.key}` : undefined,
+    buyLinks,
+  };
 };
 
-// Search for popular/trending books
-export const searchPopularBooks = async (category?: string, maxResults: number = 20): Promise<Book[]> => {
-  const popularQueries = [
-    'bestseller 2024',
-    'new york times bestseller',
-    'most popular books',
-    'award winning fiction',
-    'book club favorites',
-  ];
-  
-  const query = category 
-    ? `${category} bestseller` 
-    : popularQueries[Math.floor(Math.random() * popularQueries.length)];
-    
-  return searchBooks(query, maxResults);
-};
-
-const transformGoogleBookToBook = (item: GoogleBookItem): Book => {
-  const { volumeInfo, saleInfo } = item;
-  
-  // Generate purchase links
+const transformGoogleBookToBook = (item: any): Book => {
+  const { volumeInfo } = item;
   const buyLinks = generatePurchaseLinks(volumeInfo.title, volumeInfo.authors?.[0]);
-  
+
   return {
     id: item.id,
     title: volumeInfo.title || 'Unknown Title',
@@ -99,9 +67,81 @@ const transformGoogleBookToBook = (item: GoogleBookItem): Book => {
   };
 };
 
+export const searchBooks = async (query: string, maxResults: number = 40): Promise<Book[]> => {
+  try {
+    const searchQuery = query.trim();
+    
+    // PRIMARY: Use Open Library - unlimited, no API key, massive catalog
+    const openLibResults = await searchOpenLibrary(searchQuery, maxResults);
+    
+    if (openLibResults.length >= 5) {
+      return openLibResults;
+    }
+    
+    // FALLBACK: Try Google Books if Open Library returns too few results
+    const googleResults = await searchGoogleBooks(searchQuery, maxResults - openLibResults.length);
+    
+    // Merge and deduplicate by title+author
+    const all = [...openLibResults, ...googleResults];
+    const seen = new Set<string>();
+    return all.filter(book => {
+      const key = `${book.title.toLowerCase()}-${book.authors[0]?.toLowerCase() || ''}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, maxResults);
+    
+  } catch (error) {
+    console.error('Error searching books:', error);
+    throw error;
+  }
+};
+
+const searchOpenLibrary = async (query: string, limit: number = 40): Promise<Book[]> => {
+  try {
+    const params = new URLSearchParams({
+      q: query,
+      limit: Math.min(limit, 100).toString(),
+      fields: 'key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count',
+    });
+    
+    const response = await fetch(`${OPEN_LIBRARY_SEARCH_URL}?${params}`);
+    if (!response.ok) throw new Error('Open Library request failed');
+    
+    const data = await response.json();
+    if (!data.docs || !Array.isArray(data.docs)) return [];
+    
+    return data.docs
+      .filter((item: any) => item.title && item.author_name?.length)
+      .map(transformOpenLibraryBook);
+      
+  } catch (error) {
+    console.error('Open Library search failed:', error);
+    return [];
+  }
+};
+
+const searchGoogleBooks = async (query: string, limit: number = 20): Promise<Book[]> => {
+  try {
+    const response = await fetch(
+      `${GOOGLE_BOOKS_API_URL}?q=${encodeURIComponent(query)}&maxResults=${Math.min(limit, 40)}&orderBy=relevance&printType=books`
+    );
+    if (!response.ok) return [];
+    const data = await response.json();
+    if (!data.items) return [];
+    return data.items.map(transformGoogleBookToBook);
+  } catch {
+    return [];
+  }
+};
+
+export const searchPopularBooks = async (category?: string, maxResults: number = 20): Promise<Book[]> => {
+  const query = category ? `subject:${category}` : 'fiction bestseller popular';
+  return searchBooks(query, maxResults);
+};
+
 const generatePurchaseLinks = (title: string, author?: string) => {
   const searchQuery = encodeURIComponent(`${title} ${author || ''}`.trim());
-  
   return {
     googlePlay: `https://play.google.com/store/search?q=${searchQuery}&c=books`,
     amazon: `https://www.amazon.com/s?k=${searchQuery}&i=digital-text`,

@@ -60,22 +60,17 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
     saveRecentSearch(searchQuery.trim());
 
     try {
-      let results = await searchBooks(searchQuery, 30);
-      
-      if (filterBy !== 'all') {
-        results = results.filter(book => {
-          const categories = book.categories?.join(' ').toLowerCase() || '';
-          const description = book.description?.toLowerCase() || '';
-          return filterBy === 'fiction' 
-            ? categories.includes('fiction') || categories.includes('novel') || description.includes('fiction')
-            : !categories.includes('fiction') && !categories.includes('novel') && !description.includes('fiction');
-        });
-      }
+      // Build subject-qualified query for better filtering
+      let queryStr = searchQuery;
+      if (filterBy === 'fiction') queryStr = `${searchQuery} subject:fiction`;
+      if (filterBy === 'non-fiction') queryStr = `${searchQuery} subject:nonfiction`;
+
+      let results = await searchBooks(queryStr, 40);
 
       results = results.sort((a, b) => {
         switch (sortBy) {
           case 'newest':
-            return new Date(b.publishedDate || 0).getTime() - new Date(a.publishedDate || 0).getTime();
+            return (parseInt(b.publishedDate || '0') || 0) - (parseInt(a.publishedDate || '0') || 0);
           case 'rating':
             return (b.averageRating || 0) - (a.averageRating || 0);
           default:
@@ -86,7 +81,7 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
       setBooks(results);
       setCurrentPage(1);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'Failed to search books. Please try again.');
       setBooks([]);
     } finally {
       setLoading(false);
@@ -109,10 +104,12 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
   };
 
   const filteredBooks = useMemo(() => {
+    if (!query.trim()) return books;
+    const q = query.toLowerCase();
     return books.filter(book => {
       const title = book.title.toLowerCase();
       const author = book.authors?.join(' ').toLowerCase() || '';
-      return title.includes(query.toLowerCase()) || author.includes(query.toLowerCase());
+      return title.includes(q) || author.includes(q);
     });
   }, [books, query]);
 

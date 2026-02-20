@@ -93,15 +93,19 @@ export const BookDetailsModal = ({
 
   return (
     <div 
-      className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 animate-fade-in"
+      className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 animate-fade-in p-0 sm:p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div 
-        className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-5xl h-[92vh] sm:h-auto sm:max-h-[90vh] flex flex-col shadow-2xl animate-scale-in border border-border"
+        className="bg-card rounded-t-3xl sm:rounded-2xl w-full sm:max-w-5xl flex flex-col shadow-2xl animate-scale-in border border-border"
         onClick={(e) => e.stopPropagation()}
-        style={{ overscrollBehavior: 'contain' }}
+        style={{ 
+          overscrollBehavior: 'contain',
+          maxHeight: '92dvh',
+          height: 'auto',
+        }}
       >
         {/* Header */}
         <div className="p-4 sm:p-6 border-b border-border bg-gradient-to-r from-primary/5 to-secondary/5 flex-shrink-0">
@@ -187,7 +191,7 @@ export const BookDetailsModal = ({
         </div>
 
         {/* Content - Scrollable */}
-        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain" style={{ WebkitOverflowScrolling: 'touch', overflowY: 'scroll' }}>
             <div className="flex flex-col lg:flex-row">
               {/* Book Cover */}
               <div className="lg:w-1/3 p-4 sm:p-6 flex justify-center lg:justify-start bg-gradient-to-b from-muted/30 to-transparent flex-shrink-0">
