@@ -103,15 +103,8 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const filteredBooks = useMemo(() => {
-    if (!query.trim()) return books;
-    const q = query.toLowerCase();
-    return books.filter(book => {
-      const title = book.title.toLowerCase();
-      const author = book.authors?.join(' ').toLowerCase() || '';
-      return title.includes(q) || author.includes(q);
-    });
-  }, [books, query]);
+  // Don't double-filter: books are already fetched by query from the API
+  const filteredBooks = books;
 
   const paginatedBooks = useMemo(() => {
     return filteredBooks.slice((currentPage - 1) * booksPerPage, currentPage * booksPerPage);
@@ -142,7 +135,8 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onFocus={() => setShowSuggestions(true)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Search by title, author, ISBN..."
                 className="w-full pl-12 pr-4 py-4 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 shadow-sm text-lg text-foreground placeholder-muted-foreground"
               />
@@ -394,13 +388,6 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
         </div>
       ) : null}
 
-      {/* Click outside to close suggestions */}
-      {showSuggestions && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setShowSuggestions(false)}
-        />
-      )}
     </div>
   );
 };

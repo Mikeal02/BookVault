@@ -13,9 +13,9 @@ const transformOpenLibraryBook = (item: any): Book => {
   const olid = item.edition_key?.[0]; // e.g. OL1234M
   
   const thumbnail = coverId 
-    ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`
+    ? `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`
     : olid
-    ? `${OPEN_LIBRARY_COVERS_URL}/${olid}-M.jpg`
+    ? `${OPEN_LIBRARY_COVERS_URL}/${olid}-L.jpg`
     : undefined;
 
   const authors = item.author_name || [];
@@ -34,7 +34,7 @@ const transformOpenLibraryBook = (item: any): Book => {
     publisher: item.publisher?.[0],
     pageCount: item.number_of_pages_median || undefined,
     categories: item.subject?.slice(0, 5) || [],
-    imageLinks: thumbnail ? { thumbnail, smallThumbnail: thumbnail.replace('-M.jpg', '-S.jpg') } : undefined,
+    imageLinks: thumbnail ? { thumbnail, smallThumbnail: thumbnail.replace('-L.jpg', '-M.jpg') } : undefined,
     averageRating: undefined, // Open Library doesn't have ratings
     ratingsCount: item.ratings_count || undefined,
     language: item.language?.[0] === 'eng' ? 'en' : item.language?.[0],
@@ -57,7 +57,10 @@ const transformGoogleBookToBook = (item: any): Book => {
     publisher: volumeInfo.publisher,
     pageCount: volumeInfo.pageCount,
     categories: volumeInfo.categories,
-    imageLinks: volumeInfo.imageLinks,
+    imageLinks: volumeInfo.imageLinks ? {
+      thumbnail: volumeInfo.imageLinks.thumbnail?.replace('http://', 'https://'),
+      smallThumbnail: volumeInfo.imageLinks.smallThumbnail?.replace('http://', 'https://'),
+    } : undefined,
     averageRating: volumeInfo.averageRating,
     ratingsCount: volumeInfo.ratingsCount,
     language: volumeInfo.language,
