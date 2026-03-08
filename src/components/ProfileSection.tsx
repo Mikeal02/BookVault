@@ -142,14 +142,14 @@ export const ProfileSection = ({ books, currentUser, userEmail, userId }: Profil
   }, [books, profile.reading_goal]);
 
   const achievements = useMemo(() => [
-    { id: 1, name: 'First Steps', description: 'Add your first book', icon: BookOpen, unlocked: books.length >= 1, color: '#14b8a6' },
-    { id: 2, name: 'Bookworm', description: 'Finish 5 books', icon: Trophy, unlocked: stats.finishedBooks >= 5, color: '#f97316' },
-    { id: 3, name: 'Library Builder', description: 'Have 20+ books', icon: Library, unlocked: books.length >= 20, color: '#8b5cf6' },
-    { id: 4, name: 'Speed Reader', description: 'Read for 10+ hours', icon: Zap, unlocked: stats.totalReadingTime >= 600, color: '#eab308' },
-    { id: 5, name: 'Dedicated', description: '7-day reading streak', icon: Flame, unlocked: stats.streak >= 7, color: '#ef4444' },
-    { id: 6, name: 'Critic', description: 'Rate 10+ books', icon: Star, unlocked: books.filter(b => b.personalRating && b.personalRating > 0).length >= 10, color: '#f59e0b' },
-    { id: 7, name: 'Goal Crusher', description: 'Complete yearly goal', icon: Target, unlocked: stats.goalProgress >= 100, color: '#22c55e' },
-    { id: 8, name: 'Avid Reader', description: 'Finish 25 books', icon: Award, unlocked: stats.finishedBooks >= 25, color: '#6366f1' },
+    { id: 1, name: 'First Steps', description: 'Add your first book', icon: BookOpen, unlocked: books.length >= 1, color: 'hsl(var(--success))' },
+    { id: 2, name: 'Bookworm', description: 'Finish 5 books', icon: Trophy, unlocked: stats.finishedBooks >= 5, color: 'hsl(var(--warning))' },
+    { id: 3, name: 'Library Builder', description: 'Have 20+ books', icon: Library, unlocked: books.length >= 20, color: 'hsl(var(--primary))' },
+    { id: 4, name: 'Speed Reader', description: 'Read for 10+ hours', icon: Zap, unlocked: stats.totalReadingTime >= 600, color: 'hsl(var(--highlight))' },
+    { id: 5, name: 'Dedicated', description: '7-day reading streak', icon: Flame, unlocked: stats.streak >= 7, color: 'hsl(var(--secondary))' },
+    { id: 6, name: 'Critic', description: 'Rate 10+ books', icon: Star, unlocked: books.filter(b => b.personalRating && b.personalRating > 0).length >= 10, color: 'hsl(var(--warning))' },
+    { id: 7, name: 'Goal Crusher', description: 'Complete yearly goal', icon: Target, unlocked: stats.goalProgress >= 100, color: 'hsl(var(--success))' },
+    { id: 8, name: 'Avid Reader', description: 'Finish 25 books', icon: Award, unlocked: stats.finishedBooks >= 25, color: 'hsl(var(--accent))' },
   ], [books, stats]);
 
   const unlockedCount = achievements.filter(a => a.unlocked).length;

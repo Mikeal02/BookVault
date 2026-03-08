@@ -309,8 +309,8 @@ export const StatsDashboard = ({ books, currentUser }: StatsDashboardProps) => {
                 />
                 <defs>
                   <linearGradient id="colorGenre" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="5%" stopColor="#4c6ef5" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#e04882" stopOpacity={0.8}/>
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0.8}/>
                   </linearGradient>
                 </defs>
               </BarChart>
