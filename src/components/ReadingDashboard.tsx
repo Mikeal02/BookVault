@@ -3,6 +3,8 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter';
 import { FlipClockStreak } from './FlipClockStreak';
 import { ReadingHeatmap } from './ReadingHeatmap';
+import { ReadingPaceCard } from './ReadingPaceCard';
+import { MonthlyReportCard } from './MonthlyReportCard';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -411,6 +413,12 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
             <p className="text-center text-muted-foreground py-8">No books yet</p>
           )}
         </motion.div>
+      </div>
+
+      {/* Reading Pace & Monthly Report */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <ReadingPaceCard books={books} readingGoal={userGoal} />
+        <MonthlyReportCard books={books} />
       </div>
 
       {/* Bottom Section */}

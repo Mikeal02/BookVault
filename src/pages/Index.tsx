@@ -1,36 +1,46 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LoginPage } from '@/components/LoginPage';
-import { EnhancedBookSearch } from '@/components/EnhancedBookSearch';
-import { BookRecommendations } from '@/components/BookRecommendations';
-import { MyBookshelf } from '@/components/MyBookshelf';
 import { Navigation } from '@/components/Navigation';
 import { BookDetailsModal } from '@/components/BookDetailsModal';
 import { ReadingSessionTracker } from '@/components/ReadingSessionTracker';
 import { OnboardingModal } from '@/components/OnboardingModal';
-import { StatsDashboard } from '@/components/StatsDashboard';
 import { BookManagementModal } from '@/components/BookManagementModal';
 import { ReadingDashboard } from '@/components/ReadingDashboard';
-import { ProfileSection } from '@/components/ProfileSection';
-import { QuoteCollection } from '@/components/QuoteCollection';
-import { ReadingMoodJournal } from '@/components/ReadingMoodJournal';
-import { ReadingAtmosphere } from '@/components/ReadingAtmosphere';
-import { ReadingChallenges } from '@/components/ReadingChallenges';
-import { BookComparison } from '@/components/BookComparison';
-import { ReadingLists } from '@/components/ReadingLists';
-import { BookAnnotations } from '@/components/BookAnnotations';
-import { SocialSharing } from '@/components/SocialSharing';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
-import { AIBookInsights } from '@/components/AIBookInsights';
-import { ISBNScanner } from '@/components/ISBNScanner';
-import { ReadingWrapped } from '@/components/ReadingWrapped';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useBookshelf } from '@/hooks/useBookshelf';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Loader2 } from 'lucide-react';
+
+// Lazy load heavy components for better initial load
+const EnhancedBookSearch = lazy(() => import('@/components/EnhancedBookSearch').then(m => ({ default: m.EnhancedBookSearch })));
+const BookRecommendations = lazy(() => import('@/components/BookRecommendations').then(m => ({ default: m.BookRecommendations })));
+const MyBookshelf = lazy(() => import('@/components/MyBookshelf').then(m => ({ default: m.MyBookshelf })));
+const StatsDashboard = lazy(() => import('@/components/StatsDashboard').then(m => ({ default: m.StatsDashboard })));
+const ProfileSection = lazy(() => import('@/components/ProfileSection').then(m => ({ default: m.ProfileSection })));
+const QuoteCollection = lazy(() => import('@/components/QuoteCollection').then(m => ({ default: m.QuoteCollection })));
+const ReadingMoodJournal = lazy(() => import('@/components/ReadingMoodJournal').then(m => ({ default: m.ReadingMoodJournal })));
+const ReadingAtmosphere = lazy(() => import('@/components/ReadingAtmosphere').then(m => ({ default: m.ReadingAtmosphere })));
+const ReadingChallenges = lazy(() => import('@/components/ReadingChallenges').then(m => ({ default: m.ReadingChallenges })));
+const BookComparison = lazy(() => import('@/components/BookComparison').then(m => ({ default: m.BookComparison })));
+const ReadingLists = lazy(() => import('@/components/ReadingLists').then(m => ({ default: m.ReadingLists })));
+const BookAnnotations = lazy(() => import('@/components/BookAnnotations').then(m => ({ default: m.BookAnnotations })));
+const SocialSharing = lazy(() => import('@/components/SocialSharing').then(m => ({ default: m.SocialSharing })));
+const AIBookInsights = lazy(() => import('@/components/AIBookInsights').then(m => ({ default: m.AIBookInsights })));
+const ISBNScanner = lazy(() => import('@/components/ISBNScanner').then(m => ({ default: m.ISBNScanner })));
+const ReadingWrapped = lazy(() => import('@/components/ReadingWrapped').then(m => ({ default: m.ReadingWrapped })));
+
+const LazyFallback = () => (
+  <div className="flex items-center justify-center py-24">
+    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+  </div>
+);
 
 const SIDEBAR_COLLAPSED_KEY = 'bookvault_sidebar_collapsed';
 
@@ -45,7 +55,7 @@ const Index = () => {
   const [managingBook, setManagingBook] = useState<Book | null>(null);
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
   const [insightsBook, setInsightsBook] = useState<Book | null>(null);
-  const [bookshelf, setBookshelf] = useState<Book[]>([]);
+  const { bookshelf, setBookshelf, loadBooks, addBook: addToBookshelf, updateBook: updateBookInShelf, removeBook: removeFromBookshelf, isInBookshelf } = useBookshelf(user?.id);
   const [readingGoal, setReadingGoal] = useState<number>(12);
   const isMobile = useIsMobile();
 
@@ -126,43 +136,7 @@ const Index = () => {
         setShowOnboarding(true);
       }
 
-      const { data: userBooks, error } = await supabase
-        .from('user_books')
-        .select('*')
-        .eq('user_id', authUser.id);
-
-      if (error) {
-        console.error('Error loading books:', error);
-      } else if (userBooks) {
-        const books: Book[] = userBooks.map(ub => ({
-          id: ub.book_id,
-          title: ub.title,
-          authors: ub.authors || [],
-          description: ub.description || undefined,
-          publishedDate: ub.published_date || undefined,
-          publisher: ub.publisher || undefined,
-          pageCount: ub.page_count || undefined,
-          categories: ub.categories || undefined,
-          imageLinks: ub.thumbnail_url ? { thumbnail: ub.thumbnail_url } : undefined,
-          averageRating: ub.average_rating ? Number(ub.average_rating) : undefined,
-          ratingsCount: ub.ratings_count || undefined,
-          language: ub.language || undefined,
-          previewLink: ub.preview_link || undefined,
-          infoLink: ub.info_link || undefined,
-          readingStatus: (ub.reading_status as 'not-read' | 'reading' | 'finished') || 'not-read',
-          personalRating: ub.personal_rating || undefined,
-          readingProgress: ub.reading_progress || 0,
-          currentPage: ub.current_page || 0,
-          timeSpentReading: ub.time_spent_reading || 0,
-          notes: ub.notes || undefined,
-          myThoughts: ub.my_thoughts || undefined,
-          tags: ub.tags || [],
-          dateAdded: ub.date_added || undefined,
-          dateStarted: ub.date_started || undefined,
-          dateFinished: ub.date_finished || undefined,
-        }));
-        setBookshelf(books);
-      }
+      await loadBooks(authUser.id);
     } catch (error) {
       console.error('Error loading user data:', error);
     } finally {
@@ -215,121 +189,6 @@ const Index = () => {
     setBookshelf([]);
     setShowOnboarding(false);
     toast.success('Logged out successfully');
-  };
-
-  const addToBookshelf = async (book: Book) => {
-    if (!user) return;
-
-    const bookData = {
-      user_id: user.id,
-      book_id: book.id,
-      title: book.title,
-      authors: book.authors,
-      description: book.description,
-      published_date: book.publishedDate,
-      publisher: book.publisher,
-      page_count: book.pageCount,
-      categories: book.categories,
-      thumbnail_url: book.imageLinks?.thumbnail,
-      average_rating: book.averageRating,
-      ratings_count: book.ratingsCount,
-      language: book.language,
-      preview_link: book.previewLink,
-      info_link: book.infoLink,
-      reading_status: 'not-read',
-      personal_rating: 0,
-      reading_progress: 0,
-      current_page: 0,
-      time_spent_reading: 0,
-      notes: '',
-      my_thoughts: '',
-      tags: [],
-      date_added: new Date().toISOString()
-    };
-
-    const { error } = await supabase.from('user_books').insert(bookData);
-
-    if (error) {
-      if (error.code === '23505') {
-        toast.error('This book is already in your library');
-      } else {
-        console.error('Error adding book:', error);
-        toast.error('Failed to add book');
-      }
-      return;
-    }
-
-    const bookWithDefaults: Book = {
-      ...book,
-      dateAdded: new Date().toISOString(),
-      readingStatus: 'not-read',
-      tags: [],
-      notes: '',
-      myThoughts: '',
-      personalRating: 0,
-      readingProgress: 0,
-      timeSpentReading: 0,
-      currentPage: 0
-    };
-    
-    setBookshelf(prev => [...prev, bookWithDefaults]);
-    toast.success('Book added to your library!');
-  };
-
-  const updateBookInShelf = async (updatedBook: Book) => {
-    if (!user) return;
-
-    const { error } = await supabase
-      .from('user_books')
-      .update({
-        reading_status: updatedBook.readingStatus,
-        personal_rating: updatedBook.personalRating,
-        reading_progress: updatedBook.readingProgress,
-        current_page: updatedBook.currentPage,
-        time_spent_reading: updatedBook.timeSpentReading,
-        notes: updatedBook.notes,
-        my_thoughts: updatedBook.myThoughts,
-        tags: updatedBook.tags,
-        date_started: updatedBook.dateStarted,
-        date_finished: updatedBook.dateFinished,
-        updated_at: new Date().toISOString()
-      })
-      .eq('user_id', user.id)
-      .eq('book_id', updatedBook.id);
-
-    if (error) {
-      console.error('Error updating book:', error);
-      toast.error('Failed to update book');
-      return;
-    }
-
-    setBookshelf(prev => prev.map(book => 
-      book.id === updatedBook.id ? updatedBook : book
-    ));
-    toast.success('Book updated!');
-  };
-
-  const removeFromBookshelf = async (bookId: string) => {
-    if (!user) return;
-
-    const { error } = await supabase
-      .from('user_books')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('book_id', bookId);
-
-    if (error) {
-      console.error('Error removing book:', error);
-      toast.error('Failed to remove book');
-      return;
-    }
-
-    setBookshelf(prev => prev.filter(book => book.id !== bookId));
-    toast.success('Book removed from library');
-  };
-
-  const isInBookshelf = (bookId: string) => {
-    return bookshelf.some(book => book.id === bookId);
   };
 
   const handleReadingSessionComplete = async (sessionData: any) => {
@@ -426,6 +285,7 @@ const Index = () => {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
+              <Suspense fallback={<LazyFallback />}>
               {currentView === 'dashboard' && (
                 <ReadingDashboard
                   books={bookshelf}
@@ -521,6 +381,7 @@ const Index = () => {
               {currentView === 'wrapped' && (
                 <ReadingWrapped books={bookshelf} currentUser={currentUser} />
               )}
+              </Suspense>
             </motion.div>
           </AnimatePresence>
           </ErrorBoundary>
