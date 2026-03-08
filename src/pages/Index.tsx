@@ -563,6 +563,15 @@ const Index = () => {
           }}
           onLogMood={() => setCurrentView('mood')}
         />
+
+        {/* AI Book Insights Modal */}
+        {insightsBook && (
+          <AIBookInsights
+            book={insightsBook}
+            userBooks={bookshelf}
+            onClose={() => setInsightsBook(null)}
+          />
+        )}
       </div>
     </div>
   );
