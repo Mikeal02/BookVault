@@ -17,50 +17,53 @@ interface NavigationProps {
   bookshelfCount: number;
 }
 
-const navGroups = [
+type ViewId = NavigationProps['currentView'];
+type NavItem = { id: ViewId; label: string; icon: any; description: string };
+type NavGroup = { label: string; items: NavItem[] };
+
+const navGroups: NavGroup[] = [
   {
     label: 'Home',
     items: [
-      { id: 'dashboard' as const, label: 'Dashboard', icon: Home, description: 'Your reading overview' },
+      { id: 'dashboard', label: 'Dashboard', icon: Home, description: 'Your reading overview' },
     ],
   },
   {
     label: 'Discover',
     items: [
-      { id: 'search' as const, label: 'Search', icon: Search, description: 'Find new books' },
-      { id: 'recommendations' as const, label: 'For You', icon: Sparkles, description: 'Personalized picks' },
-      { id: 'comparison' as const, label: 'Compare', icon: GitCompareArrows, description: 'Compare books' },
+      { id: 'search', label: 'Search', icon: Search, description: 'Find new books' },
+      { id: 'recommendations', label: 'For You', icon: Sparkles, description: 'Personalized picks' },
+      { id: 'comparison', label: 'Compare', icon: GitCompareArrows, description: 'Compare books' },
     ],
   },
   {
     label: 'Library',
     items: [
-      { id: 'shelf' as const, label: 'Bookshelf', icon: BookOpen, description: 'Your collection' },
-      { id: 'lists' as const, label: 'Lists', icon: FolderOpen, description: 'Reading collections' },
-      { id: 'annotations' as const, label: 'Notes', icon: FileText, description: 'Book annotations' },
-      { id: 'quotes' as const, label: 'Quotes', icon: Quote, description: 'Quote collection' },
+      { id: 'shelf', label: 'Bookshelf', icon: BookOpen, description: 'Your collection' },
+      { id: 'lists', label: 'Lists', icon: FolderOpen, description: 'Reading collections' },
+      { id: 'annotations', label: 'Notes', icon: FileText, description: 'Book annotations' },
+      { id: 'quotes', label: 'Quotes', icon: Quote, description: 'Quote collection' },
     ],
   },
   {
     label: 'Activity',
     items: [
-      { id: 'stats' as const, label: 'Analytics', icon: BarChart3, description: 'Reading insights' },
-      { id: 'challenges' as const, label: 'Challenges', icon: Trophy, description: 'Earn XP & badges' },
-      { id: 'mood' as const, label: 'Mood', icon: Heart, description: 'Mood journal' },
+      { id: 'stats', label: 'Analytics', icon: BarChart3, description: 'Reading insights' },
+      { id: 'challenges', label: 'Challenges', icon: Trophy, description: 'Earn XP & badges' },
+      { id: 'mood', label: 'Mood', icon: Heart, description: 'Mood journal' },
     ],
   },
   {
     label: 'More',
     items: [
-      { id: 'atmosphere' as const, label: 'Ambience', icon: Music, description: 'Reading soundscapes' },
-      { id: 'sharing' as const, label: 'Share', icon: Share2, description: 'Share your reading' },
-      { id: 'profile' as const, label: 'Profile', icon: User, description: 'Your profile' },
+      { id: 'atmosphere', label: 'Ambience', icon: Music, description: 'Reading soundscapes' },
+      { id: 'sharing', label: 'Share', icon: Share2, description: 'Share your reading' },
+      { id: 'profile', label: 'Profile', icon: User, description: 'Your profile' },
     ],
   },
 ];
 
-type NavItem = { id: NavigationProps['currentView']; label: string; icon: any; description: string };
-const allItems: NavItem[] = navGroups.flatMap(g => g.items) as NavItem[];
+const allItems = navGroups.flatMap(g => g.items);
 
 export const Navigation = ({ currentView, onViewChange, bookshelfCount }: NavigationProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
