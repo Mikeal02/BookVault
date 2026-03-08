@@ -68,12 +68,59 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
 };
 
 export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDashboardProps) => {
+  const [realStreak, setRealStreak] = useState<number | null>(null);
+
+  // Calculate real streak from reading_sessions
+  useEffect(() => {
+    const calcStreak = async () => {
+      const { data: sessions } = await supabase
+        .from('reading_sessions')
+        .select('session_date')
+        .order('session_date', { ascending: false })
+        .limit(90);
+
+      if (!sessions || sessions.length === 0) {
+        setRealStreak(0);
+        return;
+      }
+
+      // Count consecutive days with sessions
+      let streak = 0;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const sessionDates = new Set(
+        sessions.map(s => {
+          const d = new Date(s.session_date!);
+          d.setHours(0, 0, 0, 0);
+          return d.getTime();
+        })
+      );
+
+      for (let i = 0; i < 90; i++) {
+        const checkDate = new Date(today);
+        checkDate.setDate(checkDate.getDate() - i);
+        if (sessionDates.has(checkDate.getTime())) {
+          streak++;
+        } else if (i === 0) {
+          // Today might not have a session yet, check yesterday
+          continue;
+        } else {
+          break;
+        }
+      }
+      setRealStreak(streak);
+    };
+    calcStreak();
+  }, []);
+
   const stats = useMemo(() => {
     const finishedBooks = books.filter(book => book.readingStatus === 'finished');
     const readingBooks = books.filter(book => book.readingStatus === 'reading');
     const totalReadingTime = books.reduce((sum, book) => sum + (book.timeSpentReading || 0), 0);
     const currentYear = new Date().getFullYear();
-    const streak = readingBooks.length > 0 ? Math.max(readingBooks.length * 5, 7) : 0;
+    // Use real streak from DB, fallback to estimate
+    const streak = realStreak !== null ? realStreak : (readingBooks.length > 0 ? Math.max(readingBooks.length * 5, 7) : 0);
     
     const genreCount: Record<string, number> = {};
     books.forEach(book => {
