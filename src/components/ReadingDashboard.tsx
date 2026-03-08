@@ -215,9 +215,10 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
       achievements,
       booksThisYear,
       recentBooks,
-      goalProgress: Math.min((booksThisYear / 24) * 100, 100)
+      goalProgress: Math.min((booksThisYear / userGoal) * 100, 100),
+      readingGoal: userGoal,
     };
-  }, [books, realStreak, weeklySessionData]);
+  }, [books, realStreak, weeklySessionData, userGoal]);
 
   if (books.length === 0) {
     return (
