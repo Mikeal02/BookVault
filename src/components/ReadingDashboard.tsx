@@ -59,9 +59,7 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
           <div className={`w-12 h-12 rounded-xl ${stat.bgClass} flex items-center justify-center mb-4`}>
             <stat.icon className={`w-6 h-6 ${stat.iconClass}`} />
           </div>
-          <p className="text-3xl font-black mb-1 tracking-tight">
-            {stat.value}{stat.suffix}
-          </p>
+          <AnimatedStatValue value={stat.value} suffix={stat.suffix} />
           <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
         </motion.div>
       ))}
