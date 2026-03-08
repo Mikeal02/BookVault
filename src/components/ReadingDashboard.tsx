@@ -1,5 +1,6 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import { useAnimatedCounter } from '@/hooks/useAnimatedCounter';
 import { ReadingHeatmap } from './ReadingHeatmap';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,6 +26,15 @@ const cardVariants = {
 };
 
 const parallaxOffsets = [0, -8, -16, -8]; // staggered depths
+
+const AnimatedStatValue = ({ value, suffix }: { value: number; suffix: string }) => {
+  const animated = useAnimatedCounter(value, 1200);
+  return (
+    <p className="text-3xl font-black mb-1 tracking-tight tabular-nums">
+      {animated}{suffix}
+    </p>
+  );
+};
 
 const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -58,9 +68,7 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
           <div className={`w-12 h-12 rounded-xl ${stat.bgClass} flex items-center justify-center mb-4`}>
             <stat.icon className={`w-6 h-6 ${stat.iconClass}`} />
           </div>
-          <p className="text-3xl font-black mb-1 tracking-tight">
-            {stat.value}{stat.suffix}
-          </p>
+          <AnimatedStatValue value={stat.value} suffix={stat.suffix} />
           <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
         </motion.div>
       ))}

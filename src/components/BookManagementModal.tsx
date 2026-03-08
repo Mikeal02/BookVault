@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Star, Save, Tag, BookOpen, Calendar, MessageSquare } from 'lucide-react';
+import { useConfetti } from '@/hooks/useConfetti';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,7 +41,10 @@ export const BookManagementModal = ({ book, onClose, onSave }: BookManagementMod
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
 
+  const { fire: fireConfetti } = useConfetti();
+
   const handleSave = () => {
+    const isNewlyFinished = readingStatus === 'finished' && book.readingStatus !== 'finished';
     const updatedBook: Book = {
       ...book,
       readingStatus,
@@ -53,6 +57,12 @@ export const BookManagementModal = ({ book, onClose, onSave }: BookManagementMod
         : book.dateFinished
     };
     onSave(updatedBook);
+    
+    // Fire confetti if book was just marked as finished!
+    if (isNewlyFinished) {
+      setTimeout(() => fireConfetti(), 100);
+    }
+    
     onClose();
   };
 

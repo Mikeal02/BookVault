@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LoginPage } from '@/components/LoginPage';
 import { EnhancedBookSearch } from '@/components/EnhancedBookSearch';
@@ -22,6 +22,8 @@ import { BookAnnotations } from '@/components/BookAnnotations';
 import { SocialSharing } from '@/components/SocialSharing';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { AIBookInsights } from '@/components/AIBookInsights';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -44,6 +46,19 @@ const Index = () => {
   const [bookshelf, setBookshelf] = useState<Book[]>([]);
   const [readingGoal, setReadingGoal] = useState<number>(12);
   const isMobile = useIsMobile();
+
+  // Keyboard shortcuts
+  const navViews = ['dashboard', 'search', 'shelf', 'stats', 'recommendations', 'quotes', 'mood', 'atmosphere', 'challenges'] as const;
+  useKeyboardShortcuts(
+    navViews.map((view, i) => ({
+      key: String(i + 1),
+      handler: () => setCurrentView(view),
+      description: `Navigate to ${view}`,
+    })).concat([
+      { key: '/', handler: () => setCurrentView('search'), description: 'Focus search' },
+      { key: 'Escape', handler: () => { setSelectedBook(null); setManagingBook(null); setReadingSessionBook(null); setInsightsBook(null); }, description: 'Close modals' },
+    ])
+  );
 
   // Read sidebar collapsed state for layout offset
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -400,6 +415,7 @@ const Index = () => {
           {/* Page header is handled by each section component */}
 
           {/* Main Content with page transitions */}
+          <ErrorBoundary>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentView}
@@ -493,6 +509,7 @@ const Index = () => {
               )}
             </motion.div>
           </AnimatePresence>
+          </ErrorBoundary>
         </div>
       </div>
 
