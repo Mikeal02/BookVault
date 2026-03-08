@@ -59,12 +59,13 @@ const navGroups = [
   },
 ];
 
-const allItems = navGroups.flatMap(g => g.items);
+type NavItem = { id: NavigationProps['currentView']; label: string; icon: any; description: string };
+const allItems: NavItem[] = navGroups.flatMap(g => g.items) as NavItem[];
 
 export const Navigation = ({ currentView, onViewChange, bookshelfCount }: NavigationProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleNavClick = (id: typeof allItems[number]['id']) => {
+  const handleNavClick = (id: NavigationProps['currentView']) => {
     onViewChange(id);
     setMobileMenuOpen(false);
   };
