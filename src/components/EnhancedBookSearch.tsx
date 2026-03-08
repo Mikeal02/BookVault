@@ -353,6 +353,13 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
         </div>
       )}
 
+      {/* Loading Skeletons */}
+      {loading && books.length === 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <BookCardSkeleton count={10} />
+        </div>
+      )}
+
       {/* Results */}
       {books.length > 0 && (
         <div className="space-y-6">
