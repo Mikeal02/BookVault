@@ -142,14 +142,14 @@ export const ProfileSection = ({ books, currentUser, userEmail, userId }: Profil
   }, [books, profile.reading_goal]);
 
   const achievements = useMemo(() => [
-    { id: 1, name: 'First Steps', description: 'Add your first book', icon: BookOpen, unlocked: books.length >= 1, color: '#14b8a6' },
-    { id: 2, name: 'Bookworm', description: 'Finish 5 books', icon: Trophy, unlocked: stats.finishedBooks >= 5, color: '#f97316' },
-    { id: 3, name: 'Library Builder', description: 'Have 20+ books', icon: Library, unlocked: books.length >= 20, color: '#8b5cf6' },
-    { id: 4, name: 'Speed Reader', description: 'Read for 10+ hours', icon: Zap, unlocked: stats.totalReadingTime >= 600, color: '#eab308' },
-    { id: 5, name: 'Dedicated', description: '7-day reading streak', icon: Flame, unlocked: stats.streak >= 7, color: '#ef4444' },
-    { id: 6, name: 'Critic', description: 'Rate 10+ books', icon: Star, unlocked: books.filter(b => b.personalRating && b.personalRating > 0).length >= 10, color: '#f59e0b' },
-    { id: 7, name: 'Goal Crusher', description: 'Complete yearly goal', icon: Target, unlocked: stats.goalProgress >= 100, color: '#22c55e' },
-    { id: 8, name: 'Avid Reader', description: 'Finish 25 books', icon: Award, unlocked: stats.finishedBooks >= 25, color: '#6366f1' },
+    { id: 1, name: 'First Steps', description: 'Add your first book', icon: BookOpen, unlocked: books.length >= 1, color: 'hsl(var(--success))' },
+    { id: 2, name: 'Bookworm', description: 'Finish 5 books', icon: Trophy, unlocked: stats.finishedBooks >= 5, color: 'hsl(var(--warning))' },
+    { id: 3, name: 'Library Builder', description: 'Have 20+ books', icon: Library, unlocked: books.length >= 20, color: 'hsl(var(--primary))' },
+    { id: 4, name: 'Speed Reader', description: 'Read for 10+ hours', icon: Zap, unlocked: stats.totalReadingTime >= 600, color: 'hsl(var(--highlight))' },
+    { id: 5, name: 'Dedicated', description: '7-day reading streak', icon: Flame, unlocked: stats.streak >= 7, color: 'hsl(var(--secondary))' },
+    { id: 6, name: 'Critic', description: 'Rate 10+ books', icon: Star, unlocked: books.filter(b => b.personalRating && b.personalRating > 0).length >= 10, color: 'hsl(var(--warning))' },
+    { id: 7, name: 'Goal Crusher', description: 'Complete yearly goal', icon: Target, unlocked: stats.goalProgress >= 100, color: 'hsl(var(--success))' },
+    { id: 8, name: 'Avid Reader', description: 'Finish 25 books', icon: Award, unlocked: stats.finishedBooks >= 25, color: 'hsl(var(--accent))' },
   ], [books, stats]);
 
   const unlockedCount = achievements.filter(a => a.unlocked).length;
@@ -157,7 +157,7 @@ export const ProfileSection = ({ books, currentUser, userEmail, userId }: Profil
   const genreChartData = stats.topGenres.map(([name, value], index) => ({
     name: name.length > 12 ? name.substring(0, 12) + '...' : name,
     value,
-    fill: ['#14b8a6', '#f97316', '#8b5cf6', '#eab308', '#ef4444'][index]
+    fill: ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--warning))', 'hsl(var(--success))'][index]
   }));
 
   const readingTimeLabel = useMemo(() => {
@@ -196,13 +196,13 @@ export const ProfileSection = ({ books, currentUser, userEmail, userId }: Profil
           <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
             {/* Avatar Section */}
             <div className="relative group">
-              <div className="w-32 h-32 rounded-full gradient-primary flex items-center justify-center shadow-2xl ring-4 ring-white dark:ring-gray-800">
-                <span className="text-5xl font-bold text-white">
+              <div className="w-32 h-32 rounded-full gradient-primary flex items-center justify-center shadow-2xl ring-4 ring-card">
+                <span className="text-5xl font-bold text-primary-foreground">
                   {profile.username?.charAt(0).toUpperCase() || 'U'}
                 </span>
               </div>
               <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-secondary flex items-center justify-center shadow-lg">
-                <Sparkles className="w-5 h-5 text-white" />
+                <Sparkles className="w-5 h-5 text-secondary-foreground" />
               </div>
             </div>
 
@@ -305,17 +305,17 @@ export const ProfileSection = ({ books, currentUser, userEmail, userId }: Profil
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: BookOpen, label: 'Total Pages', value: stats.totalPages.toLocaleString(), color: 'primary' },
-          { icon: Clock, label: 'Reading Time', value: `${Math.floor(stats.totalReadingTime / 60)}h`, color: 'secondary' },
-          { icon: Star, label: 'Avg Rating', value: stats.avgRating.toFixed(1), color: 'warning' },
-          { icon: Trophy, label: 'Achievements', value: `${unlockedCount}/${achievements.length}`, color: 'success' },
+          { icon: BookOpen, label: 'Total Pages', value: stats.totalPages.toLocaleString(), bgClass: 'bg-primary/10', iconClass: 'text-primary' },
+          { icon: Clock, label: 'Reading Time', value: `${Math.floor(stats.totalReadingTime / 60)}h`, bgClass: 'bg-secondary/10', iconClass: 'text-secondary' },
+          { icon: Star, label: 'Avg Rating', value: stats.avgRating.toFixed(1), bgClass: 'bg-warning/10', iconClass: 'text-warning' },
+          { icon: Trophy, label: 'Achievements', value: `${unlockedCount}/${achievements.length}`, bgClass: 'bg-success/10', iconClass: 'text-success' },
         ].map((stat, index) => (
           <div
             key={stat.label}
             className={`glass-card p-6 rounded-2xl hover-lift stagger-${index + 1}`}
           >
-            <div className={`w-12 h-12 rounded-xl bg-${stat.color}/10 flex items-center justify-center mb-4`}>
-              <stat.icon className={`w-6 h-6 text-${stat.color}`} />
+            <div className={`w-12 h-12 rounded-xl ${stat.bgClass} flex items-center justify-center mb-4`}>
+              <stat.icon className={`w-6 h-6 ${stat.iconClass}`} />
             </div>
             <p className="text-2xl font-bold">{stat.value}</p>
             <p className="text-sm text-muted-foreground">{stat.label}</p>

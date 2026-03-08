@@ -30,34 +30,34 @@ interface QuoteCollectionProps {
 
 const quoteThemes = {
   classic: {
-    bg: 'bg-gradient-to-br from-amber-50 to-orange-100 dark:from-amber-900/30 dark:to-orange-900/30',
-    text: 'text-amber-900 dark:text-amber-100',
-    accent: 'border-amber-300 dark:border-amber-700',
+    bg: 'bg-gradient-to-br from-primary/5 to-primary/10',
+    text: 'text-foreground',
+    accent: 'border-primary/20',
   },
   modern: {
-    bg: 'bg-gradient-to-br from-slate-100 to-gray-200 dark:from-slate-800 dark:to-gray-900',
-    text: 'text-slate-800 dark:text-slate-100',
-    accent: 'border-slate-300 dark:border-slate-600',
+    bg: 'bg-gradient-to-br from-muted to-muted/80',
+    text: 'text-foreground',
+    accent: 'border-border',
   },
   warm: {
-    bg: 'bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30',
-    text: 'text-rose-900 dark:text-rose-100',
-    accent: 'border-rose-300 dark:border-rose-700',
+    bg: 'bg-gradient-to-br from-secondary/5 to-secondary/10',
+    text: 'text-foreground',
+    accent: 'border-secondary/20',
   },
   ocean: {
-    bg: 'bg-gradient-to-br from-cyan-50 to-teal-100 dark:from-cyan-900/30 dark:to-teal-900/30',
-    text: 'text-teal-900 dark:text-teal-100',
-    accent: 'border-teal-300 dark:border-teal-700',
+    bg: 'bg-gradient-to-br from-accent/5 to-accent/10',
+    text: 'text-foreground',
+    accent: 'border-accent/20',
   },
   sunset: {
-    bg: 'bg-gradient-to-br from-orange-50 to-red-100 dark:from-orange-900/30 dark:to-red-900/30',
-    text: 'text-red-900 dark:text-red-100',
-    accent: 'border-red-300 dark:border-red-700',
+    bg: 'bg-gradient-to-br from-warning/5 to-warning/10',
+    text: 'text-foreground',
+    accent: 'border-warning/20',
   },
   forest: {
-    bg: 'bg-gradient-to-br from-emerald-50 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30',
-    text: 'text-emerald-900 dark:text-emerald-100',
-    accent: 'border-emerald-300 dark:border-emerald-700',
+    bg: 'bg-gradient-to-br from-success/5 to-success/10',
+    text: 'text-foreground',
+    accent: 'border-success/20',
   },
 };
 

@@ -43,16 +43,16 @@ interface ReadingMoodJournalProps {
 }
 
 const moodOptions = [
-  { value: 'excited', label: 'Excited', emoji: '🤩', icon: Zap, color: 'bg-yellow-500' },
-  { value: 'happy', label: 'Happy', emoji: '😊', icon: Smile, color: 'bg-green-500' },
-  { value: 'peaceful', label: 'Peaceful', emoji: '😌', icon: Sun, color: 'bg-blue-400' },
-  { value: 'romantic', label: 'Romantic', emoji: '🥰', icon: Heart, color: 'bg-pink-500' },
-  { value: 'inspired', label: 'Inspired', emoji: '✨', icon: Flame, color: 'bg-orange-500' },
-  { value: 'thoughtful', label: 'Thoughtful', emoji: '🤔', icon: Moon, color: 'bg-indigo-500' },
-  { value: 'melancholy', label: 'Melancholy', emoji: '😢', icon: CloudRain, color: 'bg-slate-500' },
-  { value: 'tense', label: 'Tense', emoji: '😰', icon: Snowflake, color: 'bg-cyan-500' },
-  { value: 'sad', label: 'Sad', emoji: '😔', icon: Frown, color: 'bg-gray-500' },
-  { value: 'neutral', label: 'Neutral', emoji: '😐', icon: Meh, color: 'bg-gray-400' },
+  { value: 'excited', label: 'Excited', emoji: '🤩', icon: Zap, color: 'bg-warning' },
+  { value: 'happy', label: 'Happy', emoji: '😊', icon: Smile, color: 'bg-success' },
+  { value: 'peaceful', label: 'Peaceful', emoji: '😌', icon: Sun, color: 'bg-primary' },
+  { value: 'romantic', label: 'Romantic', emoji: '🥰', icon: Heart, color: 'bg-secondary' },
+  { value: 'inspired', label: 'Inspired', emoji: '✨', icon: Flame, color: 'bg-accent' },
+  { value: 'thoughtful', label: 'Thoughtful', emoji: '🤔', icon: Moon, color: 'bg-primary' },
+  { value: 'melancholy', label: 'Melancholy', emoji: '😢', icon: CloudRain, color: 'bg-muted-foreground' },
+  { value: 'tense', label: 'Tense', emoji: '😰', icon: Snowflake, color: 'bg-accent' },
+  { value: 'sad', label: 'Sad', emoji: '😔', icon: Frown, color: 'bg-muted-foreground' },
+  { value: 'neutral', label: 'Neutral', emoji: '😐', icon: Meh, color: 'bg-muted-foreground' },
 ];
 
 export const ReadingMoodJournal = ({ books }: ReadingMoodJournalProps) => {

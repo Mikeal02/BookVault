@@ -339,10 +339,10 @@ export const ReadingChallenges = ({ books }: ReadingChallengesProps) => {
             {/* Stats Overview */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { label: 'Challenges Done', value: challenges.filter(c => c.unlocked).length, total: challenges.length, icon: Target, color: 'primary' },
-                { label: 'Badges Earned', value: badges.filter(b => b.earned).length, total: badges.length, icon: Award, color: 'secondary' },
-                { label: 'Total XP', value: totalXP, total: null, icon: Zap, color: 'warning' },
-                { label: 'Current Level', value: level, total: null, icon: Crown, color: 'success' },
+                { label: 'Challenges Done', value: challenges.filter(c => c.unlocked).length, total: challenges.length, icon: Target, bgClass: 'bg-primary/10', iconClass: 'text-primary' },
+                { label: 'Badges Earned', value: badges.filter(b => b.earned).length, total: badges.length, icon: Award, bgClass: 'bg-secondary/10', iconClass: 'text-secondary' },
+                { label: 'Total XP', value: totalXP, total: null, icon: Zap, bgClass: 'bg-warning/10', iconClass: 'text-warning' },
+                { label: 'Current Level', value: level, total: null, icon: Crown, bgClass: 'bg-success/10', iconClass: 'text-success' },
               ].map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -351,8 +351,8 @@ export const ReadingChallenges = ({ books }: ReadingChallengesProps) => {
                   transition={{ delay: i * 0.1 }}
                   className="glass-card rounded-2xl p-5"
                 >
-                  <div className={`w-10 h-10 rounded-xl bg-${stat.color}/10 flex items-center justify-center mb-3`}>
-                    <stat.icon className={`w-5 h-5 text-${stat.color}`} />
+                  <div className={`w-10 h-10 rounded-xl ${stat.bgClass} flex items-center justify-center mb-3`}>
+                    <stat.icon className={`w-5 h-5 ${stat.iconClass}`} />
                   </div>
                   <p className="text-2xl font-bold">
                     {stat.value}{stat.total !== null ? `/${stat.total}` : ''}

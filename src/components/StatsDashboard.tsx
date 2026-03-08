@@ -46,9 +46,9 @@ export const StatsDashboard = ({ books, currentUser }: StatsDashboardProps) => {
     });
 
     const statusData = [
-      { name: 'Finished', value: finishedBooks.length, color: '#22b07a' },
-      { name: 'Reading', value: readingBooks.length, color: '#4c6ef5' },
-      { name: 'To Read', value: books.filter(book => book.readingStatus === 'not-read').length, color: '#e04882' }
+      { name: 'Finished', value: finishedBooks.length, color: 'hsl(var(--success))' },
+      { name: 'Reading', value: readingBooks.length, color: 'hsl(var(--primary))' },
+      { name: 'To Read', value: books.filter(book => book.readingStatus === 'not-read').length, color: 'hsl(var(--secondary))' }
     ];
 
     const genreData = Object.entries(genreCount)
@@ -207,14 +207,14 @@ export const StatsDashboard = ({ books, currentUser }: StatsDashboardProps) => {
                 <Area
                   type="monotone"
                   dataKey="books"
-                  stroke="#4c6ef5"
+                  stroke="hsl(var(--primary))"
                   fill="url(#colorBooks)"
                   strokeWidth={3}
                 />
                 <defs>
                   <linearGradient id="colorBooks" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4c6ef5" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#4c6ef5" stopOpacity={0.05}/>
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.05}/>
                   </linearGradient>
                 </defs>
               </AreaChart>
@@ -309,8 +309,8 @@ export const StatsDashboard = ({ books, currentUser }: StatsDashboardProps) => {
                 />
                 <defs>
                   <linearGradient id="colorGenre" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="5%" stopColor="#4c6ef5" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#e04882" stopOpacity={0.8}/>
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0.8}/>
                   </linearGradient>
                 </defs>
               </BarChart>
