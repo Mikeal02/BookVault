@@ -295,7 +295,7 @@
   height: 120%;
   top: -30%;
   left: -10%;
-  background: radial-gradient(ellipse at center, hsl(var(--primary) / 0.35) 0%, hsl(var(--primary) / 0.1) 40%, transparent 70%);
+  background: radial-gradient(ellipse at center, hsl(var(--primary) / 0.30) 0%, hsl(var(--primary) / 0.08) 40%, transparent 70%);
   animation: aurora 8s ease-in-out infinite;
 }
 
