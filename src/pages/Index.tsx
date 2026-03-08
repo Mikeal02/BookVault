@@ -21,6 +21,7 @@ import { BookComparison } from '@/components/BookComparison';
 import { ReadingLists } from '@/components/ReadingLists';
 import { BookAnnotations } from '@/components/BookAnnotations';
 import { SocialSharing } from '@/components/SocialSharing';
+import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
