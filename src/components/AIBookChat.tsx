@@ -267,6 +267,7 @@ const formatAIResponse = (content: string) => {
 
   flushList();
   flushBlockquote();
+  flushTable();
 
   return elements;
 };
