@@ -128,9 +128,12 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
   return (
     <div className="space-y-6">
       {/* Search Header */}
-      <div className="glass-card rounded-xl p-6 sm:p-8">
-        <div className="text-center mb-6">
-          <h2 className="text-3xl sm:text-4xl font-display font-semibold text-foreground mb-2">
+      <div className="glass-card rounded-2xl p-6 sm:p-8 relative overflow-hidden">
+        {/* Decorative background glow */}
+        <div className="absolute -top-20 -right-20 w-60 h-60 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative z-10 text-center mb-6">
+          <h2 className="text-3xl sm:text-4xl font-display font-semibold gradient-text-mixed mb-2">
             Discover Your Next Read
           </h2>
           <p className="text-muted-foreground text-sm">
