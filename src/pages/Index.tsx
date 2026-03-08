@@ -345,10 +345,13 @@ const Index = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="absolute inset-0 gradient-mesh" />
         <div className="relative text-center">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl gradient-primary flex items-center justify-center animate-pulse-soft p-3">
+          <div className="w-16 h-16 mx-auto mb-5 rounded-xl gradient-primary flex items-center justify-center animate-pulse-soft p-3">
             <img src="/favicon.ico" alt="BookVault" className="w-full h-full object-contain" />
           </div>
-          <p className="text-xl font-medium text-foreground">Loading BookVault...</p>
+          <p className="text-lg font-display font-medium text-foreground">Loading BookVault...</p>
+          <div className="mt-3 w-24 h-0.5 mx-auto rounded-full overflow-hidden bg-muted">
+            <div className="h-full bg-primary animate-shimmer w-1/2" />
+          </div>
         </div>
       </div>
     );
