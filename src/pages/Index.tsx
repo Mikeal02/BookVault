@@ -508,6 +508,14 @@ const Index = () => {
               {currentView === 'sharing' && (
                 <SocialSharing books={bookshelf} />
               )}
+
+              {currentView === 'scanner' && (
+                <ISBNScanner
+                  onBookFound={handleBookSelect}
+                  onAddToBookshelf={addToBookshelf}
+                  isInBookshelf={isInBookshelf}
+                />
+              )}
             </motion.div>
           </AnimatePresence>
           </ErrorBoundary>
