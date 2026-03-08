@@ -545,6 +545,20 @@ const Index = () => {
             onSkip={handleOnboardingSkip}
           />
         )}
+
+        {/* Floating Action Button */}
+        <FloatingActionButton
+          onAddBook={() => setCurrentView('search')}
+          onStartSession={() => {
+            const readingBook = bookshelf.find(b => b.readingStatus === 'reading');
+            if (readingBook) {
+              setReadingSessionBook(readingBook);
+            } else {
+              toast.info('Start reading a book first to begin a session');
+            }
+          }}
+          onLogMood={() => setCurrentView('mood')}
+        />
       </div>
     </div>
   );
