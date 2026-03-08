@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { X, Star, Plus, Trash2, ExternalLink, ShoppingCart, Clock, Play, Settings, Layers, Tablet, BookMarked, Globe, Users, MapPin, Brain } from 'lucide-react';
+import { X, Star, Plus, Trash2, ExternalLink, ShoppingCart, Clock, Play, Settings, Layers, Tablet, BookMarked, Globe, Users, MapPin, Brain, Sparkles } from 'lucide-react';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
 import { BookCoverPlaceholder } from './BookCoverPlaceholder';
