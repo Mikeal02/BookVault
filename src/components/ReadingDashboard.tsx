@@ -93,7 +93,11 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="absolute inset-0 gradient-mesh opacity-50" />
+        <div className="aurora-container">
+          <div className="aurora-blob-1" />
+          <div className="aurora-blob-2" />
+          <div className="aurora-blob-3" />
+        </div>
         <div className="relative z-10">
           <motion.div
             className="w-24 h-24 mx-auto mb-6 rounded-full gradient-primary flex items-center justify-center"
