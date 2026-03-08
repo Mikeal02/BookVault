@@ -479,7 +479,7 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
               {Math.round(stats.goalProgress)}% complete
             </span>
             <span className="text-muted-foreground">
-              {24 - stats.booksThisYear} books to go
+              {Math.max(0, stats.readingGoal - stats.booksThisYear)} books to go
             </span>
           </div>
         </motion.div>
