@@ -40,6 +40,7 @@ const Index = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [managingBook, setManagingBook] = useState<Book | null>(null);
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
+  const [insightsBook, setInsightsBook] = useState<Book | null>(null);
   const [bookshelf, setBookshelf] = useState<Book[]>([]);
 
   useEffect(() => {
