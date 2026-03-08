@@ -51,7 +51,7 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
   if (books.length === 0) {
     return (
       <div className="text-center py-16">
-        <div className="w-32 h-32 mx-auto mb-6 rounded-full gradient-primary/20 flex items-center justify-center">
+      <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-primary/10 flex items-center justify-center">
           <BookOpen className="w-16 h-16 text-primary" />
         </div>
         <h2 className="text-2xl font-bold text-muted-foreground mb-2">

@@ -153,9 +153,9 @@ const Index = () => {
     try {
       await supabase.from('profiles').upsert({
         user_id: user.id,
-        favorite_genres: preferences.genres || [],
+        favorite_genres: preferences.favoriteGenres || [],
         reading_goal: preferences.readingGoal || 12,
-        preferred_reading_time: preferences.preferredTime || 'evening',
+        preferred_reading_time: preferences.preferredReadingTime || 'evening',
         updated_at: new Date().toISOString()
       });
       
