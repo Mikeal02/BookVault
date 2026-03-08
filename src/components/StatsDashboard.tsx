@@ -46,9 +46,9 @@ export const StatsDashboard = ({ books, currentUser }: StatsDashboardProps) => {
     });
 
     const statusData = [
-      { name: 'Finished', value: finishedBooks.length, color: '#22b07a' },
-      { name: 'Reading', value: readingBooks.length, color: '#4c6ef5' },
-      { name: 'To Read', value: books.filter(book => book.readingStatus === 'not-read').length, color: '#e04882' }
+      { name: 'Finished', value: finishedBooks.length, color: 'hsl(var(--success))' },
+      { name: 'Reading', value: readingBooks.length, color: 'hsl(var(--primary))' },
+      { name: 'To Read', value: books.filter(book => book.readingStatus === 'not-read').length, color: 'hsl(var(--secondary))' }
     ];
 
     const genreData = Object.entries(genreCount)
