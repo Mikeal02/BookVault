@@ -150,6 +150,26 @@ const formatAIResponse = (content: string) => {
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
 
+    // Handle markdown tables
+    if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
+      flushList();
+      flushBlockquote();
+      const cells = trimmedLine.slice(1, -1).split('|').map(c => c.trim());
+      // Check if this is a separator row (| :--- | :--- |)
+      if (cells.every(c => /^:?-+:?$/.test(c))) {
+        // This is the separator — previous row was the header
+        return;
+      }
+      if (tableHeaders.length === 0 && tableRows.length === 0) {
+        tableHeaders = cells;
+      } else {
+        tableRows.push(cells);
+      }
+      return;
+    } else {
+      flushTable();
+    }
+
     // Handle blockquotes
     if (trimmedLine.startsWith('>')) {
       flushList();
