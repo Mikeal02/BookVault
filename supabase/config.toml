@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.sync-external-db]
 verify_jwt = false
+
+[functions.ai-book-insights]
+verify_jwt = false

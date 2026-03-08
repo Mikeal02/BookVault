@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { X, Star, Plus, Trash2, ExternalLink, ShoppingCart, Clock, Play, Settings, Layers, Tablet, BookMarked, Globe, Users, MapPin, Brain } from 'lucide-react';
+import { X, Star, Plus, Trash2, ExternalLink, ShoppingCart, Clock, Play, Settings, Layers, Tablet, BookMarked, Globe, Users, MapPin, Brain, Sparkles } from 'lucide-react';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
 import { BookCoverPlaceholder } from './BookCoverPlaceholder';
@@ -14,6 +14,7 @@ interface BookDetailsModalProps {
   onUpdateBook: (book: Book) => void;
   onStartReadingSession?: () => void;
   onManageBook?: () => void;
+  onAIInsights?: () => void;
   isInBookshelf: boolean;
 }
 
@@ -42,6 +43,7 @@ export const BookDetailsModal = ({
   onUpdateBook,
   onStartReadingSession,
   onManageBook,
+  onAIInsights,
   isInBookshelf
 }: BookDetailsModalProps) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'purchase'>('overview');
@@ -608,6 +610,17 @@ export const BookDetailsModal = ({
             </div>
 
             <div className="flex items-center flex-wrap justify-center gap-2 sm:gap-3">
+              {onAIInsights && (
+                <Button
+                  onClick={onAIInsights}
+                  size="sm"
+                  variant="outline"
+                  className="border-accent/30 text-accent hover:bg-accent/10 shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 text-xs sm:text-sm"
+                >
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                  AI Insights
+                </Button>
+              )}
               {isInBookshelf && onStartReadingSession && (
                 <Button
                   onClick={onStartReadingSession}

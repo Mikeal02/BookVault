@@ -4,6 +4,7 @@ import { Search, Clock, TrendingUp, X, Filter, SortAsc, Sparkles, BookOpen, Star
 import { searchBooks, SearchFilters } from '@/services/googleBooks';
 import { Book } from '@/types/book';
 import { BookCard } from './BookCard';
+import { BookCardSkeleton } from './BookCardSkeleton';
 import { Button } from '@/components/ui/button';
 
 interface EnhancedBookSearchProps {
@@ -349,6 +350,13 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
           <Button onClick={() => handleSearch()} variant="outline" size="sm" className="border-destructive/20 text-destructive">
             Try Again
           </Button>
+        </div>
+      )}
+
+      {/* Loading Skeletons */}
+      {loading && books.length === 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          <BookCardSkeleton count={10} />
         </div>
       )}
 

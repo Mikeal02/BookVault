@@ -22,6 +22,8 @@ import { ReadingLists } from '@/components/ReadingLists';
 import { BookAnnotations } from '@/components/BookAnnotations';
 import { SocialSharing } from '@/components/SocialSharing';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
+import { AIBookInsights } from '@/components/AIBookInsights';
+import { ThemePalettePicker } from '@/components/ThemePalettePicker';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -38,6 +40,7 @@ const Index = () => {
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [managingBook, setManagingBook] = useState<Book | null>(null);
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
+  const [insightsBook, setInsightsBook] = useState<Book | null>(null);
   const [bookshelf, setBookshelf] = useState<Book[]>([]);
 
   useEffect(() => {
@@ -392,6 +395,7 @@ const Index = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <ThemePalettePicker />
             <ThemeToggle />
             <button
               onClick={handleLogout}
@@ -520,6 +524,10 @@ const Index = () => {
               setSelectedBook(null);
             }}
             isInBookshelf={isInBookshelf(selectedBook.id)}
+            onAIInsights={() => {
+              setInsightsBook(selectedBook);
+              setSelectedBook(null);
+            }}
           />
         )}
 
@@ -559,6 +567,15 @@ const Index = () => {
           }}
           onLogMood={() => setCurrentView('mood')}
         />
+
+        {/* AI Book Insights Modal */}
+        {insightsBook && (
+          <AIBookInsights
+            book={insightsBook}
+            userBooks={bookshelf}
+            onClose={() => setInsightsBook(null)}
+          />
+        )}
       </div>
     </div>
   );
