@@ -13,6 +13,7 @@ interface ReadingDashboardProps {
   books: Book[];
   currentUser: string;
   onViewChange: (view: 'search' | 'shelf' | 'stats' | 'recommendations' | 'challenges' | 'lists' | 'annotations') => void;
+  readingGoal?: number;
 }
 
 const cardVariants = {
@@ -30,10 +31,10 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
 
   const statItems = [
-    { icon: BookOpen, label: 'Total Books', value: stats.totalBooks, color: 'primary', suffix: '' },
-    { icon: Target, label: 'Completed', value: stats.finishedBooks, color: 'success', suffix: '' },
-    { icon: Clock, label: 'Reading Time', value: Math.floor(stats.totalReadingTime / 60), color: 'secondary', suffix: 'h' },
-    { icon: Zap, label: 'Currently Reading', value: stats.readingBooks, color: 'warning', suffix: '' },
+    { icon: BookOpen, label: 'Total Books', value: stats.totalBooks, bgClass: 'bg-primary/10', iconClass: 'text-primary', suffix: '' },
+    { icon: Target, label: 'Completed', value: stats.finishedBooks, bgClass: 'bg-success/10', iconClass: 'text-success', suffix: '' },
+    { icon: Clock, label: 'Reading Time', value: Math.floor(stats.totalReadingTime / 60), bgClass: 'bg-secondary/10', iconClass: 'text-secondary', suffix: 'h' },
+    { icon: Zap, label: 'Currently Reading', value: stats.readingBooks, bgClass: 'bg-warning/10', iconClass: 'text-warning', suffix: '' },
   ];
 
   const y0 = useTransform(scrollYProgress, [0, 1], [20, -20]);
@@ -54,8 +55,8 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
           style={{ y: yValues[index] }}
           className="stat-card glass-card hover-lift rounded-2xl"
         >
-          <div className={`w-12 h-12 rounded-xl bg-${stat.color}/10 flex items-center justify-center mb-4`}>
-            <stat.icon className={`w-6 h-6 text-${stat.color}`} />
+          <div className={`w-12 h-12 rounded-xl ${stat.bgClass} flex items-center justify-center mb-4`}>
+            <stat.icon className={`w-6 h-6 ${stat.iconClass}`} />
           </div>
           <p className="text-3xl font-black mb-1 tracking-tight">
             {stat.value}{stat.suffix}
@@ -67,7 +68,7 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
   );
 };
 
-export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDashboardProps) => {
+export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal: userGoal = 12 }: ReadingDashboardProps) => {
   const [realStreak, setRealStreak] = useState<number | null>(null);
   const [weeklySessionData, setWeeklySessionData] = useState<{ day: string; minutes: number; pages: number }[]>([]);
 
@@ -214,9 +215,10 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
       achievements,
       booksThisYear,
       recentBooks,
-      goalProgress: Math.min((booksThisYear / 24) * 100, 100)
+      goalProgress: Math.min((booksThisYear / userGoal) * 100, 100),
+      readingGoal: userGoal,
     };
-  }, [books, realStreak, weeklySessionData]);
+  }, [books, realStreak, weeklySessionData, userGoal]);
 
   if (books.length === 0) {
     return (
@@ -459,7 +461,7 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
               {new Date().getFullYear()} Reading Goal
             </h3>
             <span className="text-sm font-bold px-3 py-1.5 rounded-full bg-primary/10 text-primary">
-              {stats.booksThisYear}/24 books
+              {stats.booksThisYear}/{stats.readingGoal} books
             </span>
           </div>
           
@@ -477,7 +479,7 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
               {Math.round(stats.goalProgress)}% complete
             </span>
             <span className="text-muted-foreground">
-              {24 - stats.booksThisYear} books to go
+              {Math.max(0, stats.readingGoal - stats.booksThisYear)} books to go
             </span>
           </div>
         </motion.div>

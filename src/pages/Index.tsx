@@ -42,6 +42,7 @@ const Index = () => {
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
   const [insightsBook, setInsightsBook] = useState<Book | null>(null);
   const [bookshelf, setBookshelf] = useState<Book[]>([]);
+  const [readingGoal, setReadingGoal] = useState<number>(12);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -86,6 +87,7 @@ const Index = () => {
 
       if (profile) {
         setCurrentUser(profile.username || profile.email || 'Reader');
+        setReadingGoal(profile.reading_goal || 12);
         
         // Only show onboarding if profile exists but has no genres AND no reading goal set (meaning never completed or skipped)
         // Once user skips, we set reading_goal to 12 as default, so this won't trigger again
@@ -153,9 +155,9 @@ const Index = () => {
     try {
       await supabase.from('profiles').upsert({
         user_id: user.id,
-        favorite_genres: preferences.genres || [],
+        favorite_genres: preferences.favoriteGenres || [],
         reading_goal: preferences.readingGoal || 12,
-        preferred_reading_time: preferences.preferredTime || 'evening',
+        preferred_reading_time: preferences.preferredReadingTime || 'evening',
         updated_at: new Date().toISOString()
       });
       
@@ -427,6 +429,7 @@ const Index = () => {
                 books={bookshelf}
                 currentUser={currentUser}
                 onViewChange={setCurrentView}
+                readingGoal={readingGoal}
               />
             )}
             
