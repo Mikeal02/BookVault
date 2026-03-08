@@ -27,6 +27,15 @@ const cardVariants = {
 
 const parallaxOffsets = [0, -8, -16, -8]; // staggered depths
 
+const AnimatedStatValue = ({ value, suffix }: { value: number; suffix: string }) => {
+  const animated = useAnimatedCounter(value, 1200);
+  return (
+    <p className="text-3xl font-black mb-1 tracking-tight tabular-nums">
+      {animated}{suffix}
+    </p>
+  );
+};
+
 const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
