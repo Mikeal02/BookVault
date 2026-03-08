@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { useMemo, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { ReadingHeatmap } from './ReadingHeatmap';
 import { Book } from '@/types/book';
 import { 
