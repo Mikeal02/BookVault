@@ -23,6 +23,7 @@ import { SocialSharing } from '@/components/SocialSharing';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { AIBookInsights } from '@/components/AIBookInsights';
 import { ISBNScanner } from '@/components/ISBNScanner';
+import { ReadingWrapped } from '@/components/ReadingWrapped';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { Book } from '@/types/book';
@@ -39,7 +40,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped'>('dashboard');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [managingBook, setManagingBook] = useState<Book | null>(null);
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
@@ -515,6 +516,10 @@ const Index = () => {
                   onAddToBookshelf={addToBookshelf}
                   isInBookshelf={isInBookshelf}
                 />
+              )}
+
+              {currentView === 'wrapped' && (
+                <ReadingWrapped books={bookshelf} currentUser={currentUser} />
               )}
             </motion.div>
           </AnimatePresence>

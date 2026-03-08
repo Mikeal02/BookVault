@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart,
   Music, Menu, Trophy, GitCompareArrows, FolderOpen, FileText, Share2,
-  ChevronRight, X, PanelLeftClose, PanelLeft, LogOut, ScanBarcode
+  ChevronRight, X, PanelLeftClose, PanelLeft, LogOut, ScanBarcode, Gift
 } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { ThemePalettePicker } from './ThemePalettePicker';
@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface NavigationProps {
-  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner';
+  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped';
   onViewChange: (view: NavigationProps['currentView']) => void;
   bookshelfCount: number;
   onLogout?: () => void;
@@ -55,6 +55,7 @@ const navGroups: NavGroup[] = [
     label: 'Activity',
     items: [
       { id: 'stats', label: 'Analytics', icon: BarChart3, description: 'Reading insights' },
+      { id: 'wrapped', label: 'Wrapped', icon: Gift, description: 'Year in review' },
       { id: 'challenges', label: 'Challenges', icon: Trophy, description: 'Earn XP & badges' },
       { id: 'mood', label: 'Mood', icon: Heart, description: 'Mood journal' },
     ],
