@@ -22,6 +22,7 @@ export const FloatingActionButton = ({ onAddBook, onStartSession, onLogMood, onS
   const handleAction = (id: string) => {
     setIsOpen(false);
     if (id === 'add') onAddBook();
+    else if (id === 'scan') onScanISBN();
     else if (id === 'session') onStartSession();
     else if (id === 'mood') onLogMood();
   };

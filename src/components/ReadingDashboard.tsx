@@ -300,49 +300,7 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="relative">
-                {/* Outer glow ring */}
-                <motion.div
-                  className="absolute inset-0 rounded-full bg-secondary/20"
-                  animate={{ scale: [1, 1.3, 1], opacity: [0.4, 0, 0.4] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                />
-                {/* Flame circle */}
-                <motion.div
-                  className="w-16 h-16 rounded-full gradient-secondary flex items-center justify-center relative"
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                >
-                  {/* Animated flame layers */}
-                  <motion.div
-                    className="absolute inset-0 rounded-full"
-                    style={{ background: 'radial-gradient(circle at 50% 70%, hsl(var(--secondary) / 0.6) 0%, transparent 70%)' }}
-                    animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
-                  />
-                  <Flame className="w-8 h-8 text-secondary-foreground relative z-10 streak-flame" />
-                </motion.div>
-                {/* Badge count */}
-                <motion.div
-                  className="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-card border-2 border-secondary flex items-center justify-center shadow-lg"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.6, type: "spring", stiffness: 400, damping: 15 }}
-                >
-                  <span className="text-xs font-black text-secondary">{stats.streak}</span>
-                </motion.div>
-              </div>
-              <div>
-                <motion.p
-                  className="font-bold text-2xl gradient-text-coral"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                >
-                  {stats.streak} Days
-                </motion.p>
-                <p className="text-sm text-muted-foreground font-medium">Reading streak 🔥</p>
-              </div>
+              <FlipClockStreak value={stats.streak} />
             </motion.div>
           )}
         </div>
