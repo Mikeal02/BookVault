@@ -43,7 +43,7 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
   const yValues = [y0, y1, y2, y3];
 
   return (
-    <div ref={ref} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div ref={ref} className="relative grid grid-cols-2 lg:grid-cols-4 gap-4">
       {statItems.map((stat, index) => (
         <motion.div
           key={stat.label}
