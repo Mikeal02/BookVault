@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, Search, Heart, Timer } from 'lucide-react';
+import { Plus, X, Search, Heart, Timer, ScanBarcode } from 'lucide-react';
 
 interface FloatingActionButtonProps {
   onAddBook: () => void;
