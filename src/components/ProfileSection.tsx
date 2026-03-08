@@ -305,17 +305,17 @@ export const ProfileSection = ({ books, currentUser, userEmail, userId }: Profil
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: BookOpen, label: 'Total Pages', value: stats.totalPages.toLocaleString(), color: 'primary' },
-          { icon: Clock, label: 'Reading Time', value: `${Math.floor(stats.totalReadingTime / 60)}h`, color: 'secondary' },
-          { icon: Star, label: 'Avg Rating', value: stats.avgRating.toFixed(1), color: 'warning' },
-          { icon: Trophy, label: 'Achievements', value: `${unlockedCount}/${achievements.length}`, color: 'success' },
+          { icon: BookOpen, label: 'Total Pages', value: stats.totalPages.toLocaleString(), bgClass: 'bg-primary/10', iconClass: 'text-primary' },
+          { icon: Clock, label: 'Reading Time', value: `${Math.floor(stats.totalReadingTime / 60)}h`, bgClass: 'bg-secondary/10', iconClass: 'text-secondary' },
+          { icon: Star, label: 'Avg Rating', value: stats.avgRating.toFixed(1), bgClass: 'bg-warning/10', iconClass: 'text-warning' },
+          { icon: Trophy, label: 'Achievements', value: `${unlockedCount}/${achievements.length}`, bgClass: 'bg-success/10', iconClass: 'text-success' },
         ].map((stat, index) => (
           <div
             key={stat.label}
             className={`glass-card p-6 rounded-2xl hover-lift stagger-${index + 1}`}
           >
-            <div className={`w-12 h-12 rounded-xl bg-${stat.color}/10 flex items-center justify-center mb-4`}>
-              <stat.icon className={`w-6 h-6 text-${stat.color}`} />
+            <div className={`w-12 h-12 rounded-xl ${stat.bgClass} flex items-center justify-center mb-4`}>
+              <stat.icon className={`w-6 h-6 ${stat.iconClass}`} />
             </div>
             <p className="text-2xl font-bold">{stat.value}</p>
             <p className="text-sm text-muted-foreground">{stat.label}</p>
