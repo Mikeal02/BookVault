@@ -38,79 +38,237 @@ interface ReadingAtmosphereProps {
   books: Book[];
 }
 
-// Free ambient sound URLs - using reliable sources
+// Ambient sound generator using Web Audio API for reliable playback
+class AmbientSoundGenerator {
+  private audioContext: AudioContext | null = null;
+  private nodes: AudioNode[] = [];
+  private gainNode: GainNode | null = null;
+  
+  private getCtx() {
+    if (!this.audioContext) this.audioContext = new AudioContext();
+    return this.audioContext;
+  }
+
+  createRain(): { gain: GainNode; stop: () => void } {
+    const ctx = this.getCtx();
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(ctx.destination);
+    
+    // Brown noise for rain
+    const bufferSize = 2 * ctx.sampleRate;
+    const buffer = ctx.createBuffer(2, bufferSize, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buffer.getChannelData(ch);
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (last + (0.02 * white)) / 1.02;
+        last = data[i];
+        data[i] *= 3.5;
+      }
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    
+    // High-pass filter for rain character
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 800;
+    source.connect(filter);
+    filter.connect(gain);
+    source.start();
+    
+    return { gain, stop: () => { source.stop(); } };
+  }
+
+  createFireplace(): { gain: GainNode; stop: () => void } {
+    const ctx = this.getCtx();
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(ctx.destination);
+    
+    // Crackle noise
+    const bufferSize = 2 * ctx.sampleRate;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() > 0.97 ? (Math.random() * 2 - 1) * 0.5 : (Math.random() * 2 - 1) * 0.01;
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 2000;
+    source.connect(filter);
+    filter.connect(gain);
+    source.start();
+    
+    return { gain, stop: () => { source.stop(); } };
+  }
+
+  createOcean(): { gain: GainNode; stop: () => void } {
+    const ctx = this.getCtx();
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(ctx.destination);
+    
+    // Pink noise for ocean
+    const bufferSize = 4 * ctx.sampleRate;
+    const buffer = ctx.createBuffer(2, bufferSize, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buffer.getChannelData(ch);
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.0750759;
+        b2 = 0.96900 * b2 + white * 0.1538520;
+        b3 = 0.86650 * b3 + white * 0.3104856;
+        b4 = 0.55000 * b4 + white * 0.5329522;
+        b5 = -0.7616 * b5 - white * 0.0168980;
+        data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+        // Add wave modulation
+        data[i] *= 0.5 + 0.5 * Math.sin(i / (ctx.sampleRate * 4));
+        b6 = white * 0.115926;
+      }
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1500;
+    source.connect(filter);
+    filter.connect(gain);
+    source.start();
+    
+    return { gain, stop: () => { source.stop(); } };
+  }
+
+  createWind(): { gain: GainNode; stop: () => void } {
+    const ctx = this.getCtx();
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(ctx.destination);
+    
+    // Filtered white noise for wind
+    const bufferSize = 4 * ctx.sampleRate;
+    const buffer = ctx.createBuffer(2, bufferSize, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buffer.getChannelData(ch);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * (0.3 + 0.7 * Math.sin(i / (ctx.sampleRate * 6)));
+      }
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    
+    const bpFilter = ctx.createBiquadFilter();
+    bpFilter.type = 'bandpass';
+    bpFilter.frequency.value = 400;
+    bpFilter.Q.value = 0.5;
+    source.connect(bpFilter);
+    bpFilter.connect(gain);
+    source.start();
+    
+    return { gain, stop: () => { source.stop(); } };
+  }
+
+  createIce(): { gain: GainNode; stop: () => void } {
+    const ctx = this.getCtx();
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(ctx.destination);
+    
+    // Sparse crackle + wind undertone
+    const bufferSize = 3 * ctx.sampleRate;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      const base = (Math.random() * 2 - 1) * 0.02;
+      const crackle = Math.random() > 0.995 ? (Math.random() * 2 - 1) * 0.8 : 0;
+      data[i] = base + crackle;
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 2000;
+    source.connect(filter);
+    filter.connect(gain);
+    source.start();
+    
+    return { gain, stop: () => { source.stop(); } };
+  }
+}
+
+const soundGen = new AmbientSoundGenerator();
+
+// Sound configuration
 const soundscapes: SoundOption[] = [
   { 
-    id: 'rain', 
-    name: 'Gentle Rain', 
-    icon: CloudRain, 
+    id: 'rain', name: 'Gentle Rain', icon: CloudRain, 
     color: 'from-blue-500 to-cyan-500',
     genres: ['mystery', 'thriller', 'noir', 'drama'],
     description: 'Soft rainfall on a window',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/rain-01.mp3'
+    audioUrl: '__synth__'
   },
   { 
-    id: 'fireplace', 
-    name: 'Cozy Fireplace', 
-    icon: Flame, 
+    id: 'fireplace', name: 'Cozy Fireplace', icon: Flame, 
     color: 'from-orange-500 to-red-500',
     genres: ['romance', 'historical', 'fantasy', 'fiction'],
     description: 'Crackling fire warmth',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/campfire-1.mp3'
+    audioUrl: '__synth__'
   },
   { 
-    id: 'ocean', 
-    name: 'Ocean Waves', 
-    icon: Waves, 
+    id: 'ocean', name: 'Ocean Waves', icon: Waves, 
     color: 'from-teal-500 to-blue-500',
     genres: ['romance', 'adventure', 'travel', 'beach'],
     description: 'Gentle waves on shore',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/ocean-wave-2.mp3'
+    audioUrl: '__synth__'
   },
   { 
-    id: 'Farm', 
-    name: 'Farm Ambience', 
-    icon: Tractor, 
+    id: 'Farm', name: 'Farm Ambience', icon: Tractor, 
     color: 'from-amber-500 to-orange-500',
     genres: ['contemporary', 'urban', 'slice of life', 'literary'],
     description: 'Daytime Farm Ambience',
     audioUrl: '/mp3_files/Farm.mp3'
   },
   { 
-    id: 'night', 
-    name: 'Night Ambience', 
-    icon: Moon, 
+    id: 'night', name: 'Night Ambience', icon: Moon, 
     color: 'from-indigo-500 to-purple-500',
     genres: ['horror', 'mystery', 'thriller', 'supernatural'],
     description: 'Crickets and night sounds',
     audioUrl: '/mp3_files/night.mp3'
   },
   { 
-    id: 'wind', 
-    name: 'Gentle Wind', 
-    icon: Wind, 
+    id: 'wind', name: 'Gentle Wind', icon: Wind, 
     color: 'from-slate-400 to-gray-500',
     genres: ['drama', 'contemporary', 'literary', 'philosophical'],
     description: 'Soft breeze through trees',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/wind-howl-01.mp3'
+    audioUrl: '__synth__'
   },
   { 
-    id: 'birds', 
-    name: 'Morning Birds', 
-    icon: Bird, 
+    id: 'birds', name: 'Morning Birds', icon: Bird, 
     color: 'from-yellow-400 to-orange-400',
     genres: ['romance', 'feel good', 'comedy', 'light'],
     description: 'Cheerful birdsong',
     audioUrl: '/mp3_files/bird.mp3'
   },
   { 
-    id: 'ice', 
-    name: 'Ice Ambience', 
-    icon: Snowflake, 
+    id: 'ice', name: 'Ice Ambience', icon: Snowflake, 
     color: 'from-cyan-400 to-blue-400',
     genres: ['adventure', 'fantasy', 'nature', 'outdoors'],
     description: 'Ice cracking and winter sounds',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/ice-cracking-01.mp3'
+    audioUrl: '__synth__'
   },
 ];
 
