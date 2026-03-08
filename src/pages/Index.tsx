@@ -470,6 +470,14 @@ const Index = () => {
           {currentView === 'comparison' && (
             <BookComparison books={bookshelf} onBookSelect={handleBookSelect} />
           )}
+
+          {currentView === 'lists' && (
+            <ReadingLists books={bookshelf} onBookSelect={handleBookSelect} />
+          )}
+
+          {currentView === 'annotations' && (
+            <BookAnnotations books={bookshelf} onBookSelect={handleBookSelect} />
+          )}
         </div>
 
         {/* Modals */}
