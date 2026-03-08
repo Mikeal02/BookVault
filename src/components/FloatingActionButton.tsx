@@ -16,7 +16,7 @@ const actions = [
   { id: 'mood', label: 'Log Mood', icon: Heart, color: 'bg-secondary text-secondary-foreground shadow-secondary/25' },
 ] as const;
 
-export const FloatingActionButton = ({ onAddBook, onStartSession, onLogMood }: FloatingActionButtonProps) => {
+export const FloatingActionButton = ({ onAddBook, onStartSession, onLogMood, onScanISBN }: FloatingActionButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleAction = (id: string) => {
