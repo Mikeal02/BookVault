@@ -42,6 +42,7 @@ const Index = () => {
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
   const [insightsBook, setInsightsBook] = useState<Book | null>(null);
   const [bookshelf, setBookshelf] = useState<Book[]>([]);
+  const [readingGoal, setReadingGoal] = useState<number>(12);
 
   useEffect(() => {
     // Set up auth state listener FIRST
