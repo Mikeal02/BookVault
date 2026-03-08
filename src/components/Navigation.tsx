@@ -1,14 +1,14 @@
 
 import { useState } from 'react';
-import { Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart, Music, Menu, X, Trophy, GitCompareArrows } from 'lucide-react';
+import { Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart, Music, Menu, Trophy, GitCompareArrows, FolderOpen, FileText } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 
 interface NavigationProps {
-  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison';
-  onViewChange: (view: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison') => void;
+  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations';
+  onViewChange: (view: NavigationProps['currentView']) => void;
   bookshelfCount: number;
 }
 
@@ -20,6 +20,8 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
     { id: 'search' as const, label: 'Discover', icon: Search, description: 'Find new books' },
     { id: 'recommendations' as const, label: 'For You', icon: Sparkles, description: 'Personalized picks' },
     { id: 'shelf' as const, label: 'Library', icon: BookOpen, badge: bookshelfCount, description: `${bookshelfCount} books` },
+    { id: 'lists' as const, label: 'Lists', icon: FolderOpen, description: 'Reading collections' },
+    { id: 'annotations' as const, label: 'Notes', icon: FileText, description: 'Book annotations' },
     { id: 'stats' as const, label: 'Analytics', icon: BarChart3, description: 'Reading insights' },
     { id: 'quotes' as const, label: 'Quotes', icon: Quote, description: 'Your quote collection' },
     { id: 'mood' as const, label: 'Mood', icon: Heart, description: 'Reading mood journal' },
