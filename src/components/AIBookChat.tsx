@@ -54,6 +54,41 @@ const formatAIResponse = (content: string) => {
     }
   };
 
+  const flushTable = () => {
+    if (tableHeaders.length > 0 || tableRows.length > 0) {
+      elements.push(
+        <div key={elements.length} className="overflow-x-auto my-3 rounded-lg border border-border">
+          <table className="w-full text-sm">
+            {tableHeaders.length > 0 && (
+              <thead>
+                <tr className="bg-primary/10">
+                  {tableHeaders.map((h, i) => (
+                    <th key={i} className="px-3 py-2 text-left font-semibold text-foreground border-b border-border">
+                      {formatInlineText(h)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+            )}
+            <tbody>
+              {tableRows.map((row, i) => (
+                <tr key={i} className={i % 2 === 0 ? 'bg-muted/20' : 'bg-muted/40'}>
+                  {row.map((cell, j) => (
+                    <td key={j} className="px-3 py-2 border-b border-border/50">
+                      {formatInlineText(cell)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+      tableHeaders = [];
+      tableRows = [];
+    }
+  };
+
   const formatInlineText = (text: string): JSX.Element => {
     // Handle **bold**, *italic*, `code`, and ==highlight==
     const parts: (string | JSX.Element)[] = [];
