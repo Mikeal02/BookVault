@@ -6,6 +6,7 @@ interface FloatingActionButtonProps {
   onAddBook: () => void;
   onStartSession: () => void;
   onLogMood: () => void;
+  onScanISBN: () => void;
 }
 
 const actions = [
