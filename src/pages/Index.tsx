@@ -21,6 +21,7 @@ import { BookComparison } from '@/components/BookComparison';
 import { ReadingLists } from '@/components/ReadingLists';
 import { BookAnnotations } from '@/components/BookAnnotations';
 import { SocialSharing } from '@/components/SocialSharing';
+import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -544,6 +545,20 @@ const Index = () => {
             onSkip={handleOnboardingSkip}
           />
         )}
+
+        {/* Floating Action Button */}
+        <FloatingActionButton
+          onAddBook={() => setCurrentView('search')}
+          onStartSession={() => {
+            const readingBook = bookshelf.find(b => b.readingStatus === 'reading');
+            if (readingBook) {
+              setReadingSessionBook(readingBook);
+            } else {
+              toast.info('Start reading a book first to begin a session');
+            }
+          }}
+          onLogMood={() => setCurrentView('mood')}
+        />
       </div>
     </div>
   );
