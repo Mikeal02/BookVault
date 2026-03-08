@@ -572,6 +572,7 @@ const Index = () => {
       {/* Floating Action Button */}
       <FloatingActionButton
         onAddBook={() => setCurrentView('search')}
+        onScanISBN={() => setCurrentView('scanner')}
         onStartSession={() => {
           const readingBook = bookshelf.find(b => b.readingStatus === 'reading');
           if (readingBook) {
