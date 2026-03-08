@@ -43,6 +43,7 @@ export const BookDetailsModal = ({
   onUpdateBook,
   onStartReadingSession,
   onManageBook,
+  onAIInsights,
   isInBookshelf
 }: BookDetailsModalProps) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'purchase'>('overview');
