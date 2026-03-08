@@ -524,6 +524,10 @@ const Index = () => {
               setSelectedBook(null);
             }}
             isInBookshelf={isInBookshelf(selectedBook.id)}
+            onAIInsights={() => {
+              setInsightsBook(selectedBook);
+              setSelectedBook(null);
+            }}
           />
         )}
 
