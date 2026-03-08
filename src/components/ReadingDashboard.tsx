@@ -1,7 +1,7 @@
 import { useMemo, useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter';
-import { ReadingHeatmap } from './ReadingHeatmap';
+import { FlipClockStreak } from './FlipClockStreak';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { 
