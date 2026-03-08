@@ -1,7 +1,8 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ReadingHeatmap } from './ReadingHeatmap';
 import { Book } from '@/types/book';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   BookOpen, Target, Clock, TrendingUp, Award, Calendar, 
   Flame, Zap, Star, Trophy, ChevronRight, Sparkles
