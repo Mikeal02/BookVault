@@ -176,8 +176,6 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
 
       {/* Quick Stats Grid with Parallax */}
       <ParallaxStatsGrid stats={stats} />
-        ))}
-      </div>
 
       {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
