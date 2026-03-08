@@ -240,26 +240,26 @@ const TimelineView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) 
   );
 };
 
-// ── Cover Wall View (Masonry) ──
+// ── Cover Wall View (Masonry) — with hover reveal and staggered entrance ──
 const CoverWallView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) => void }) => {
-  // Simple masonry: alternate between 2 sizes
   return (
-    <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-2 space-y-2">
+    <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-2.5 space-y-2.5">
       {books.map((book, i) => (
         <motion.div
           key={book.id}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: i * 0.02, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, scale: 0.88, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: i * 0.015, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           onClick={() => onSelect(book)}
           className="break-inside-avoid cursor-pointer group relative overflow-hidden rounded-xl"
+          whileHover={{ scale: 1.02 }}
         >
           <div className="relative">
             {book.imageLinks?.thumbnail ? (
               <img
                 src={book.imageLinks.thumbnail}
                 alt={book.title}
-                className="w-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-105"
+                className="w-full object-cover rounded-xl transition-transform duration-700 group-hover:scale-110"
                 loading="lazy"
               />
             ) : (
@@ -267,15 +267,27 @@ const CoverWallView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book)
                 <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-full h-full rounded-xl" />
               </div>
             )}
-            {/* Hover overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl flex items-end p-3">
-              <div>
-                <p className="text-xs font-bold text-background line-clamp-2">{book.title}</p>
-                <p className="text-[10px] text-background/70">{book.authors?.[0]}</p>
-                {book.readingStatus === 'finished' && (
-                  <span className="inline-block mt-1 px-1.5 py-0.5 rounded-full bg-success/90 text-[9px] font-bold text-white">✓ Done</span>
-                )}
-              </div>
+            {/* Gradient overlay on hover */}
+            <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl flex items-end p-3">
+              <motion.div
+                initial={{ y: 8, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                className="w-full"
+              >
+                <p className="text-xs font-bold text-background line-clamp-2 leading-tight">{book.title}</p>
+                <p className="text-[10px] text-background/70 mt-0.5">{book.authors?.[0]}</p>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  {book.readingStatus === 'finished' && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-success/90 text-[9px] font-bold text-white">✓ Done</span>
+                  )}
+                  {book.readingStatus === 'reading' && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-primary/90 text-[9px] font-bold text-white">{Math.round(book.readingProgress || 0)}%</span>
+                  )}
+                  {book.personalRating && book.personalRating > 0 && (
+                    <span className="text-[10px] text-warning">{'★'.repeat(book.personalRating)}</span>
+                  )}
+                </div>
+              </motion.div>
             </div>
           </div>
         </motion.div>
