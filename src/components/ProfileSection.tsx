@@ -157,7 +157,7 @@ export const ProfileSection = ({ books, currentUser, userEmail, userId }: Profil
   const genreChartData = stats.topGenres.map(([name, value], index) => ({
     name: name.length > 12 ? name.substring(0, 12) + '...' : name,
     value,
-    fill: ['#14b8a6', '#f97316', '#8b5cf6', '#eab308', '#ef4444'][index]
+    fill: ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--warning))', 'hsl(var(--success))'][index]
   }));
 
   const readingTimeLabel = useMemo(() => {
