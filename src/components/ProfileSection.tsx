@@ -202,7 +202,7 @@ export const ProfileSection = ({ books, currentUser, userEmail, userId }: Profil
                 </span>
               </div>
               <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-secondary flex items-center justify-center shadow-lg">
-                <Sparkles className="w-5 h-5 text-white" />
+                <Sparkles className="w-5 h-5 text-secondary-foreground" />
               </div>
             </div>
 
