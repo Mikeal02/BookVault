@@ -389,6 +389,7 @@ const Index = () => {
         bookshelfCount={bookshelf.length}
         onLogout={handleLogout}
         currentUser={currentUser}
+        userEmail={user?.email}
       />
 
       {/* Main content area — offset by sidebar width */}
