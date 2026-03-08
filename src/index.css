@@ -122,6 +122,29 @@
     @apply border-border;
   }
 
+  /* Smooth theme palette transitions — applied to root so all CSS-var-driven
+     colors (backgrounds, gradients, borders, shadows) animate fluidly */
+  :root,
+  :root * {
+    transition-property: background-color, border-color, color, fill, stroke, box-shadow, outline-color;
+    transition-duration: 0.35s;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Opt-out for things that should stay instant */
+  button, a, input, textarea, select,
+  [data-radix-popper-content-wrapper],
+  [data-state],
+  .no-theme-transition,
+  .no-theme-transition * {
+    transition-duration: 0s !important;
+  }
+
+  /* Re-enable short transitions for interactive elements (hover/focus) */
+  button, a {
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.2s, opacity 0.2s !important;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
