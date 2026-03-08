@@ -1,13 +1,13 @@
 
 import { useState } from 'react';
-import { Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart, Music, Menu, Trophy, GitCompareArrows, FolderOpen, FileText } from 'lucide-react';
+import { Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart, Music, Menu, Trophy, GitCompareArrows, FolderOpen, FileText, Share2 } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 
 interface NavigationProps {
-  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations';
+  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing';
   onViewChange: (view: NavigationProps['currentView']) => void;
   bookshelfCount: number;
 }
@@ -28,6 +28,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
     { id: 'atmosphere' as const, label: 'Ambience', icon: Music, description: 'Reading soundscapes' },
     { id: 'challenges' as const, label: 'Challenges', icon: Trophy, description: 'Earn XP & badges' },
     { id: 'comparison' as const, label: 'Compare', icon: GitCompareArrows, description: 'Compare books' },
+    { id: 'sharing' as const, label: 'Share', icon: Share2, description: 'Share your reading' },
     { id: 'profile' as const, label: 'Profile', icon: User, description: 'Your profile' }
   ];
 

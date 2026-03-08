@@ -23,6 +23,8 @@ const formatAIResponse = (content: string) => {
   let listItems: string[] = [];
   let listType: 'ul' | 'ol' | null = null;
   let blockquoteLines: string[] = [];
+  let tableRows: string[][] = [];
+  let tableHeaders: string[] = [];
 
   const flushList = () => {
     if (listItems.length > 0 && listType) {
@@ -49,6 +51,41 @@ const formatAIResponse = (content: string) => {
         </blockquote>
       );
       blockquoteLines = [];
+    }
+  };
+
+  const flushTable = () => {
+    if (tableHeaders.length > 0 || tableRows.length > 0) {
+      elements.push(
+        <div key={elements.length} className="overflow-x-auto my-3 rounded-lg border border-border">
+          <table className="w-full text-sm">
+            {tableHeaders.length > 0 && (
+              <thead>
+                <tr className="bg-primary/10">
+                  {tableHeaders.map((h, i) => (
+                    <th key={i} className="px-3 py-2 text-left font-semibold text-foreground border-b border-border">
+                      {formatInlineText(h)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+            )}
+            <tbody>
+              {tableRows.map((row, i) => (
+                <tr key={i} className={i % 2 === 0 ? 'bg-muted/20' : 'bg-muted/40'}>
+                  {row.map((cell, j) => (
+                    <td key={j} className="px-3 py-2 border-b border-border/50">
+                      {formatInlineText(cell)}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+      tableHeaders = [];
+      tableRows = [];
     }
   };
 
@@ -112,6 +149,26 @@ const formatAIResponse = (content: string) => {
 
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
+
+    // Handle markdown tables
+    if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
+      flushList();
+      flushBlockquote();
+      const cells = trimmedLine.slice(1, -1).split('|').map(c => c.trim());
+      // Check if this is a separator row (| :--- | :--- |)
+      if (cells.every(c => /^:?-+:?$/.test(c))) {
+        // This is the separator — previous row was the header
+        return;
+      }
+      if (tableHeaders.length === 0 && tableRows.length === 0) {
+        tableHeaders = cells;
+      } else {
+        tableRows.push(cells);
+      }
+      return;
+    } else {
+      flushTable();
+    }
 
     // Handle blockquotes
     if (trimmedLine.startsWith('>')) {
@@ -210,6 +267,7 @@ const formatAIResponse = (content: string) => {
 
   flushList();
   flushBlockquote();
+  flushTable();
 
   return elements;
 };
