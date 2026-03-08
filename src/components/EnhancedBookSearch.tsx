@@ -154,7 +154,7 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Search by title, author, ISBN..."
-                className="w-full pl-11 pr-10 py-3.5 bg-muted/40 border border-border rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200 text-foreground placeholder-muted-foreground text-sm"
+                className="w-full pl-11 pr-10 py-3.5 bg-muted/30 border border-border/80 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-300 text-foreground placeholder-muted-foreground text-sm shadow-sm focus:shadow-md"
               />
               {query && (
                 <button

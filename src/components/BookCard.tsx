@@ -193,12 +193,12 @@ export const BookCard = ({
         <button
           onClick={handleActionClick}
           disabled={showAddButton && isInBookshelf}
-          className={`w-full py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+          className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
             showAddButton
               ? isInBookshelf
                 ? 'bg-success/10 text-success border border-success/20 cursor-not-allowed'
-                : 'gradient-primary text-primary-foreground hover:opacity-90 shadow-sm hover:shadow-md'
-              : 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive hover:text-destructive-foreground'
+                : 'gradient-primary text-primary-foreground hover:opacity-90 shadow-md hover:shadow-lg hover:scale-[1.02]'
+              : 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive hover:text-destructive-foreground hover:scale-[1.02]'
           }`}
         >
           {showAddButton ? (
