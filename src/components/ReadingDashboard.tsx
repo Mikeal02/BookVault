@@ -339,7 +339,7 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
       <ReadingHeatmap books={books} />
 
       {/* Quick Actions */}
-      <div className="grid sm:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <button
           onClick={() => onViewChange('challenges')}
           className="glass-card rounded-2xl p-5 text-left hover-lift transition-all group"
@@ -371,6 +371,28 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
           </div>
           <h4 className="font-semibold text-sm">For You</h4>
           <p className="text-xs text-muted-foreground mt-1">Personalized picks</p>
+          <ChevronRight className="w-4 h-4 text-muted-foreground mt-2 group-hover:translate-x-1 transition-transform" />
+        </button>
+        <button
+          onClick={() => onViewChange('lists')}
+          className="glass-card rounded-2xl p-5 text-left hover-lift transition-all group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-primary flex items-center justify-center mb-3 shadow-lg">
+            <BookOpen className="w-5 h-5 text-white" />
+          </div>
+          <h4 className="font-semibold text-sm">Reading Lists</h4>
+          <p className="text-xs text-muted-foreground mt-1">Curated collections</p>
+          <ChevronRight className="w-4 h-4 text-muted-foreground mt-2 group-hover:translate-x-1 transition-transform" />
+        </button>
+        <button
+          onClick={() => onViewChange('annotations')}
+          className="glass-card rounded-2xl p-5 text-left hover-lift transition-all group"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary to-secondary/70 flex items-center justify-center mb-3 shadow-lg">
+            <Star className="w-5 h-5 text-white" />
+          </div>
+          <h4 className="font-semibold text-sm">Annotations</h4>
+          <p className="text-xs text-muted-foreground mt-1">Notes & highlights</p>
           <ChevronRight className="w-4 h-4 text-muted-foreground mt-2 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
