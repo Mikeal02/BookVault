@@ -71,25 +71,25 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
   const [realStreak, setRealStreak] = useState<number | null>(null);
   const [weeklySessionData, setWeeklySessionData] = useState<{ day: string; minutes: number; pages: number }[]>([]);
 
-  // Calculate real streak from reading_sessions
+  // Calculate real streak and weekly data from reading_sessions
   useEffect(() => {
-    const calcStreak = async () => {
+    const loadSessionData = async () => {
       const { data: sessions } = await supabase
         .from('reading_sessions')
-        .select('session_date')
+        .select('session_date, duration_minutes, pages_read')
         .order('session_date', { ascending: false })
-        .limit(90);
+        .limit(200);
 
       if (!sessions || sessions.length === 0) {
         setRealStreak(0);
+        setWeeklySessionData(buildEmptyWeek());
         return;
       }
 
-      // Count consecutive days with sessions
+      // Calculate streak
       let streak = 0;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
       const sessionDates = new Set(
         sessions.map(s => {
           const d = new Date(s.session_date!);
@@ -97,22 +97,48 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
           return d.getTime();
         })
       );
-
       for (let i = 0; i < 90; i++) {
         const checkDate = new Date(today);
         checkDate.setDate(checkDate.getDate() - i);
         if (sessionDates.has(checkDate.getTime())) {
           streak++;
         } else if (i === 0) {
-          // Today might not have a session yet, check yesterday
           continue;
         } else {
           break;
         }
       }
       setRealStreak(streak);
+
+      // Build weekly data from real sessions
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const weekData: Record<string, { minutes: number; pages: number }> = {};
+      dayNames.forEach(d => { weekData[d] = { minutes: 0, pages: 0 }; });
+
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+      sevenDaysAgo.setHours(0, 0, 0, 0);
+
+      sessions.forEach(s => {
+        const d = new Date(s.session_date!);
+        if (d >= sevenDaysAgo) {
+          const dayName = dayNames[d.getDay()];
+          weekData[dayName].minutes += s.duration_minutes || 0;
+          weekData[dayName].pages += s.pages_read || 0;
+        }
+      });
+
+      // Build array starting from today going back 7 days
+      const result = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const name = dayNames[d.getDay()];
+        result.push({ day: name, minutes: weekData[name].minutes, pages: weekData[name].pages });
+      }
+      setWeeklySessionData(result);
     };
-    calcStreak();
+    loadSessionData();
   }, []);
 
   const stats = useMemo(() => {
