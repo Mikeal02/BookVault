@@ -398,22 +398,7 @@ const Index = () => {
         style={{ marginLeft: sidebarWidth }}
       >
         <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-[1400px] mx-auto">
-          {/* Desktop page header — lightweight since branding is in sidebar */}
-          {!isMobile && (
-            <motion.div
-              className="mb-6"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <h1 className="text-2xl font-display font-bold text-foreground tracking-tight">
-                {allItems.find(i => i.id === currentView)?.label || 'Dashboard'}
-              </h1>
-              <p className="text-muted-foreground text-xs mt-0.5">
-                {allItems.find(i => i.id === currentView)?.description || 'Your reading overview'}
-              </p>
-            </motion.div>
-          )}
+          {/* Page header is handled by each section component */}
 
           {/* Main Content with page transitions */}
           <AnimatePresence mode="wait">
