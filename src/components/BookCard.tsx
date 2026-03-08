@@ -13,6 +13,23 @@ interface BookCardProps {
   showAddButton: boolean;
 }
 
+const CoverImage = ({ book, className }: { book: Book; className?: string }) => {
+  const [failed, setFailed] = useState(false);
+  
+  if (!book.imageLinks?.thumbnail || failed) {
+    return <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className={className || ''} />;
+  }
+
+  return (
+    <img
+      src={book.imageLinks.thumbnail}
+      alt={book.title}
+      className={`object-cover ${className || ''}`}
+      onError={() => setFailed(true)}
+    />
+  );
+};
+
 export const BookCard = ({
   book,
   onSelect,
