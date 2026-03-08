@@ -333,6 +333,7 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
                   onChange={(e) => { setFreeOnly(e.target.checked); if (query) handleSearch(); }}
                   className="rounded border-border" />
                 Free to read
+              </label>
             </div>
           )}
         </div>
