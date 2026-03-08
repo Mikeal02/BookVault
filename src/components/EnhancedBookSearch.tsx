@@ -4,6 +4,7 @@ import { Search, Clock, TrendingUp, X, Filter, SortAsc, Sparkles, BookOpen, Star
 import { searchBooks, SearchFilters } from '@/services/googleBooks';
 import { Book } from '@/types/book';
 import { BookCard } from './BookCard';
+import { BookCardSkeleton } from './BookCardSkeleton';
 import { Button } from '@/components/ui/button';
 
 interface EnhancedBookSearchProps {
