@@ -240,7 +240,7 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
                 <Area
                   type="monotone"
                   dataKey="minutes"
-                  stroke="hsl(158 65% 36%)"
+                  stroke="hsl(222 72% 52%)"
                   strokeWidth={3}
                   fill="url(#colorMinutes)"
                 />
