@@ -47,6 +47,19 @@ const Index = () => {
   const [readingGoal, setReadingGoal] = useState<number>(12);
   const isMobile = useIsMobile();
 
+  // Keyboard shortcuts
+  const navViews = ['dashboard', 'search', 'shelf', 'stats', 'recommendations', 'quotes', 'mood', 'atmosphere', 'challenges'] as const;
+  useKeyboardShortcuts(
+    navViews.map((view, i) => ({
+      key: String(i + 1),
+      handler: () => setCurrentView(view),
+      description: `Navigate to ${view}`,
+    })).concat([
+      { key: '/', handler: () => setCurrentView('search'), description: 'Focus search' },
+      { key: 'Escape', handler: () => { setSelectedBook(null); setManagingBook(null); setReadingSessionBook(null); setInsightsBook(null); }, description: 'Close modals' },
+    ])
+  );
+
   // Read sidebar collapsed state for layout offset
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window !== 'undefined') {
