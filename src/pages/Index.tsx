@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { LoginPage } from '@/components/LoginPage';
 import { EnhancedBookSearch } from '@/components/EnhancedBookSearch';
 import { BookRecommendations } from '@/components/BookRecommendations';
@@ -401,92 +402,99 @@ const Index = () => {
           bookshelfCount={bookshelf.length} 
         />
 
-        {/* Main Content */}
-        <div className="animate-fade-in">
-          {currentView === 'dashboard' && (
-            <ReadingDashboard
-              books={bookshelf}
-              currentUser={currentUser}
-              onViewChange={setCurrentView}
-            />
-          )}
-          
-          {currentView === 'search' && (
-            <EnhancedBookSearch
-              onBookSelect={handleBookSelect}
-              onAddToBookshelf={addToBookshelf}
-              isInBookshelf={isInBookshelf}
-            />
-          )}
-          
-          {currentView === 'recommendations' && (
-            <BookRecommendations
-              userBooks={bookshelf}
-              onBookSelect={handleBookSelect}
-              onAddToBookshelf={addToBookshelf}
-              isInBookshelf={isInBookshelf}
-            />
-          )}
-          
-          {currentView === 'shelf' && (
-            <MyBookshelf
-              books={bookshelf}
-              onBookSelect={handleBookSelect}
-              onRemoveFromBookshelf={removeFromBookshelf}
-              onUpdateBook={updateBookInShelf}
-              onManageBook={handleManageBook}
-            />
-          )}
-          
-          {currentView === 'stats' && (
-            <StatsDashboard 
-              books={bookshelf} 
-              currentUser={currentUser}
-            />
-          )}
+        {/* Main Content with page transitions */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentView}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {currentView === 'dashboard' && (
+              <ReadingDashboard
+                books={bookshelf}
+                currentUser={currentUser}
+                onViewChange={setCurrentView}
+              />
+            )}
+            
+            {currentView === 'search' && (
+              <EnhancedBookSearch
+                onBookSelect={handleBookSelect}
+                onAddToBookshelf={addToBookshelf}
+                isInBookshelf={isInBookshelf}
+              />
+            )}
+            
+            {currentView === 'recommendations' && (
+              <BookRecommendations
+                userBooks={bookshelf}
+                onBookSelect={handleBookSelect}
+                onAddToBookshelf={addToBookshelf}
+                isInBookshelf={isInBookshelf}
+              />
+            )}
+            
+            {currentView === 'shelf' && (
+              <MyBookshelf
+                books={bookshelf}
+                onBookSelect={handleBookSelect}
+                onRemoveFromBookshelf={removeFromBookshelf}
+                onUpdateBook={updateBookInShelf}
+                onManageBook={handleManageBook}
+              />
+            )}
+            
+            {currentView === 'stats' && (
+              <StatsDashboard 
+                books={bookshelf} 
+                currentUser={currentUser}
+              />
+            )}
 
-          {currentView === 'profile' && (
-            <ProfileSection
-              books={bookshelf}
-              currentUser={currentUser}
-              userEmail={user?.email}
-              userId={user?.id}
-            />
-          )}
+            {currentView === 'profile' && (
+              <ProfileSection
+                books={bookshelf}
+                currentUser={currentUser}
+                userEmail={user?.email}
+                userId={user?.id}
+              />
+            )}
 
-          {currentView === 'quotes' && (
-            <QuoteCollection books={bookshelf} />
-          )}
+            {currentView === 'quotes' && (
+              <QuoteCollection books={bookshelf} />
+            )}
 
-          {currentView === 'mood' && (
-            <ReadingMoodJournal books={bookshelf} />
-          )}
+            {currentView === 'mood' && (
+              <ReadingMoodJournal books={bookshelf} />
+            )}
 
+            {currentView === 'atmosphere' && (
+              <ReadingAtmosphere books={bookshelf} />
+            )}
 
-          {currentView === 'atmosphere' && (
-            <ReadingAtmosphere books={bookshelf} />
-          )}
+            {currentView === 'challenges' && (
+              <ReadingChallenges books={bookshelf} />
+            )}
 
-          {currentView === 'challenges' && (
-            <ReadingChallenges books={bookshelf} />
-          )}
+            {currentView === 'comparison' && (
+              <BookComparison books={bookshelf} onBookSelect={handleBookSelect} />
+            )}
 
-          {currentView === 'comparison' && (
-            <BookComparison books={bookshelf} onBookSelect={handleBookSelect} />
-          )}
+            {currentView === 'lists' && (
+              <ReadingLists books={bookshelf} onBookSelect={handleBookSelect} />
+            )}
 
-          {currentView === 'lists' && (
-            <ReadingLists books={bookshelf} onBookSelect={handleBookSelect} />
-          )}
+            {currentView === 'annotations' && (
+              <BookAnnotations books={bookshelf} onBookSelect={handleBookSelect} />
+            )}
 
-          {currentView === 'annotations' && (
-            <BookAnnotations books={bookshelf} onBookSelect={handleBookSelect} />
-          )}
-
-          {currentView === 'sharing' && (
-            <SocialSharing books={bookshelf} />
-          )}
-        </div>
+            {currentView === 'sharing' && (
+              <SocialSharing books={bookshelf} />
+            )}
+          </motion.div>
+        </AnimatePresence>
 
         {/* Modals */}
         {selectedBook && (
