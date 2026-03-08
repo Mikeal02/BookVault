@@ -461,7 +461,7 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
               {new Date().getFullYear()} Reading Goal
             </h3>
             <span className="text-sm font-bold px-3 py-1.5 rounded-full bg-primary/10 text-primary">
-              {stats.booksThisYear}/24 books
+              {stats.booksThisYear}/{stats.readingGoal} books
             </span>
           </div>
           
