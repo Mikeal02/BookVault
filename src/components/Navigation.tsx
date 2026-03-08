@@ -28,6 +28,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
     { id: 'atmosphere' as const, label: 'Ambience', icon: Music, description: 'Reading soundscapes' },
     { id: 'challenges' as const, label: 'Challenges', icon: Trophy, description: 'Earn XP & badges' },
     { id: 'comparison' as const, label: 'Compare', icon: GitCompareArrows, description: 'Compare books' },
+    { id: 'sharing' as const, label: 'Share', icon: Share2, description: 'Share your reading' },
     { id: 'profile' as const, label: 'Profile', icon: User, description: 'Your profile' }
   ];
 
