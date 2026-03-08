@@ -415,6 +415,7 @@ const Index = () => {
           {/* Page header is handled by each section component */}
 
           {/* Main Content with page transitions */}
+          <ErrorBoundary>
           <AnimatePresence mode="wait">
             <motion.div
               key={currentView}
