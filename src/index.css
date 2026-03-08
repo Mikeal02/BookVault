@@ -469,30 +469,30 @@
   transform: scale(1.04);
 }
 
-/* Gradient text */
+/* Gradient text — theme-aware */
 .gradient-text {
-  background: linear-gradient(135deg, hsl(222 72% 52%) 0%, hsl(250 65% 52%) 100%);
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-coral {
-  background: linear-gradient(135deg, hsl(340 65% 58%) 0%, hsl(320 55% 52%) 100%);
+  background: linear-gradient(135deg, hsl(var(--secondary)) 0%, hsl(var(--secondary) / 0.75) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-mixed {
-  background: linear-gradient(135deg, hsl(222 72% 58%) 0%, hsl(340 65% 58%) 100%);
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .gradient-text-warm {
-  background: linear-gradient(135deg, hsl(222 72% 58%) 0%, hsl(250 65% 60%) 100%);
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent) / 0.8) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
