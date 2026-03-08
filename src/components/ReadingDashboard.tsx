@@ -5,7 +5,7 @@ import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   BookOpen, Target, Clock, TrendingUp, Award, Calendar, 
-  Flame, Zap, Star, Trophy, ChevronRight, Sparkles
+  Flame, Zap, Star, Trophy, ChevronRight, Sparkles, BarChart3
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
