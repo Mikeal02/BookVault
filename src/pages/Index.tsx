@@ -14,10 +14,11 @@ import { ReadingDashboard } from '@/components/ReadingDashboard';
 import { ProfileSection } from '@/components/ProfileSection';
 import { QuoteCollection } from '@/components/QuoteCollection';
 import { ReadingMoodJournal } from '@/components/ReadingMoodJournal';
-
 import { ReadingAtmosphere } from '@/components/ReadingAtmosphere';
 import { ReadingChallenges } from '@/components/ReadingChallenges';
 import { BookComparison } from '@/components/BookComparison';
+import { ReadingLists } from '@/components/ReadingLists';
+import { BookAnnotations } from '@/components/BookAnnotations';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
