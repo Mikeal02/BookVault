@@ -698,10 +698,10 @@
 .progress-ring { transform: rotate(-90deg); }
 .progress-ring-circle { transition: stroke-dashoffset 1s ease-out; }
 
-/* Luxury divider */
+/* Luxury divider — theme-aware */
 .luxury-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, hsl(var(--border)), hsl(222 72% 52% / 0.3), hsl(var(--border)), transparent);
+  background: linear-gradient(90deg, transparent, hsl(var(--border)), hsl(var(--primary) / 0.3), hsl(var(--border)), transparent);
 }
 
 /* Loading skeleton with sapphire shimmer */
