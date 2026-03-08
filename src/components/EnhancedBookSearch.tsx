@@ -315,14 +315,24 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
               </div>
 
               <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasCovers}
+                <input type="checkbox" checked={hasCovers}
                   onChange={(e) => { setHasCovers(e.target.checked); if (query) handleSearch(); }}
-                  className="rounded border-border"
-                />
+                  className="rounded border-border" />
                 With covers only
               </label>
+
+              <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+                <input type="checkbox" checked={ebookOnly}
+                  onChange={(e) => { setEbookOnly(e.target.checked); if (query) handleSearch(); }}
+                  className="rounded border-border" />
+                eBooks only
+              </label>
+
+              <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+                <input type="checkbox" checked={freeOnly}
+                  onChange={(e) => { setFreeOnly(e.target.checked); if (query) handleSearch(); }}
+                  className="rounded border-border" />
+                Free to read
             </div>
           )}
         </div>
