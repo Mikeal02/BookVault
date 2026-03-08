@@ -121,6 +121,8 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
     minRating > 0,
     hasCovers,
     sortBy !== 'relevance',
+    ebookOnly,
+    freeOnly,
   ].filter(Boolean).length;
 
   return (
