@@ -13,6 +13,7 @@ interface ReadingDashboardProps {
   books: Book[];
   currentUser: string;
   onViewChange: (view: 'search' | 'shelf' | 'stats' | 'recommendations' | 'challenges' | 'lists' | 'annotations') => void;
+  readingGoal?: number;
 }
 
 const cardVariants = {
