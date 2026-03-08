@@ -69,6 +69,7 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
 
 export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDashboardProps) => {
   const [realStreak, setRealStreak] = useState<number | null>(null);
+  const [weeklySessionData, setWeeklySessionData] = useState<{ day: string; minutes: number; pages: number }[]>([]);
 
   // Calculate real streak from reading_sessions
   useEffect(() => {
