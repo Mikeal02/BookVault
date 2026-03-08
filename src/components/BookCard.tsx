@@ -63,14 +63,16 @@ export const BookCard = ({
 
   return (
     <div className="group relative glass-card rounded-2xl overflow-hidden cursor-pointer hover-lift transition-all duration-400">
+      {/* Top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/0 via-primary/40 to-secondary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10" />
       <div onClick={onSelect} className="p-4">
         {/* Cover with 3:4 aspect ratio */}
-        <div className="relative mb-3 overflow-hidden rounded-lg aspect-[3/4]">
+        <div className="relative mb-3 overflow-hidden rounded-lg aspect-[3/4] ring-1 ring-border/50 group-hover:ring-primary/20 transition-all duration-300">
           <CoverImage book={book} className="w-full h-full rounded-lg" />
           
           {/* Hover overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 via-transparent to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-4">
-            <div className="w-10 h-10 rounded-full bg-background/90 flex items-center justify-center backdrop-blur-sm">
+          <div className="absolute inset-0 bg-gradient-to-t from-foreground/50 via-foreground/5 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-400 flex items-end justify-center pb-4">
+            <div className="w-10 h-10 rounded-full bg-background/95 flex items-center justify-center backdrop-blur-sm shadow-lg border border-primary/20">
               <BookOpen className="w-5 h-5 text-primary" />
             </div>
           </div>
@@ -191,12 +193,12 @@ export const BookCard = ({
         <button
           onClick={handleActionClick}
           disabled={showAddButton && isInBookshelf}
-          className={`w-full py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+          className={`w-full py-2.5 px-4 rounded-xl text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 ${
             showAddButton
               ? isInBookshelf
                 ? 'bg-success/10 text-success border border-success/20 cursor-not-allowed'
-                : 'gradient-primary text-primary-foreground hover:opacity-90 shadow-sm hover:shadow-md'
-              : 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive hover:text-destructive-foreground'
+                : 'gradient-primary text-primary-foreground hover:opacity-90 shadow-md hover:shadow-lg hover:scale-[1.02]'
+              : 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive hover:text-destructive-foreground hover:scale-[1.02]'
           }`}
         >
           {showAddButton ? (
