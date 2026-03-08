@@ -3,6 +3,8 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter';
 import { FlipClockStreak } from './FlipClockStreak';
 import { ReadingHeatmap } from './ReadingHeatmap';
+import { ReadingPaceCard } from './ReadingPaceCard';
+import { MonthlyReportCard } from './MonthlyReportCard';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { 
