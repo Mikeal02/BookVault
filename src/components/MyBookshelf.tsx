@@ -147,7 +147,7 @@ const SpineView = ({ books, onSelect, onManage }: { books: Book[]; onSelect: (b:
   );
 };
 
-// ── Timeline View ──
+// ── Timeline View — horizontal scrolling timeline with connection lines ──
 const TimelineView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) => void }) => {
   // Group books by month
   const grouped = books.reduce((acc, book) => {
@@ -165,43 +165,74 @@ const TimelineView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) 
   });
 
   return (
-    <div className="relative pl-8">
-      {/* Vertical line */}
-      <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/40 via-secondary/30 to-transparent" />
+    <div className="relative pl-10">
+      {/* Vertical timeline line with gradient */}
+      <div className="absolute left-4 top-0 bottom-0 w-[2px]">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary via-secondary/50 to-transparent rounded-full" />
+        {/* Animated pulse traveling down */}
+        <motion.div
+          className="absolute left-0 w-[2px] h-8 bg-gradient-to-b from-primary to-transparent rounded-full"
+          animate={{ top: ['0%', '100%'] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+        />
+      </div>
 
       {entries.map(([month, monthBooks], gi) => (
         <motion.div
           key={month}
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -24 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: gi * 0.1, duration: 0.4 }}
-          className="mb-8 relative"
+          transition={{ delay: gi * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="mb-10 relative"
         >
-          {/* Dot on timeline */}
-          <div className="absolute -left-[22px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-background shadow-sm" />
+          {/* Timeline dot with ring */}
+          <div className="absolute -left-[26px] top-1 flex items-center justify-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: gi * 0.08 + 0.1, type: 'spring', stiffness: 300 }}
+              className="w-4 h-4 rounded-full bg-primary shadow-[0_0_12px_hsl(var(--primary)/0.4)] ring-4 ring-background"
+            />
+          </div>
 
-          <h3 className="text-sm font-bold text-foreground mb-3">{month}</h3>
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {monthBooks.map((book, i) => (
-              <motion.div
-                key={book.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: gi * 0.1 + i * 0.05 }}
-                onClick={() => onSelect(book)}
-                className="flex-shrink-0 w-24 cursor-pointer group"
-              >
-                <div className="aspect-[2/3] rounded-lg overflow-hidden ring-1 ring-border/40 group-hover:ring-primary/40 transition-all shadow-sm group-hover:shadow-lg mb-1.5">
-                  {book.imageLinks?.thumbnail ? (
-                    <img src={book.imageLinks.thumbnail} alt={book.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-full h-full" />
-                  )}
-                </div>
-                <p className="text-[11px] font-medium text-foreground line-clamp-2 leading-tight">{book.title}</p>
-                <p className="text-[10px] text-muted-foreground line-clamp-1">{book.authors?.[0]}</p>
-              </motion.div>
-            ))}
+          <div className="glass-card rounded-xl p-4 ml-2">
+            <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+              <span className="gradient-text">{month}</span>
+              <span className="text-[10px] text-muted-foreground font-normal">({monthBooks.length} book{monthBooks.length > 1 ? 's' : ''})</span>
+            </h3>
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+              {monthBooks.map((book, i) => (
+                <motion.div
+                  key={book.id}
+                  initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ delay: gi * 0.08 + i * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                  onClick={() => onSelect(book)}
+                  className="flex-shrink-0 w-28 cursor-pointer group"
+                >
+                  <div className="relative aspect-[2/3] rounded-lg overflow-hidden ring-1 ring-border/40 group-hover:ring-primary/50 transition-all duration-300 shadow-sm group-hover:shadow-xl mb-1.5">
+                    {book.imageLinks?.thumbnail ? (
+                      <img src={book.imageLinks.thumbnail} alt={book.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                      <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-full h-full" />
+                    )}
+                    {/* Status indicator */}
+                    {book.readingStatus === 'finished' && (
+                      <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-success/90 flex items-center justify-center">
+                        <span className="text-[9px] text-white font-bold">✓</span>
+                      </div>
+                    )}
+                    {book.readingStatus === 'reading' && book.readingProgress !== undefined && (
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted/50">
+                        <div className="h-full bg-primary rounded-full" style={{ width: `${book.readingProgress}%` }} />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[11px] font-semibold text-foreground line-clamp-2 leading-tight group-hover:text-primary transition-colors">{book.title}</p>
+                  <p className="text-[10px] text-muted-foreground line-clamp-1">{book.authors?.[0]}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </motion.div>
       ))}
