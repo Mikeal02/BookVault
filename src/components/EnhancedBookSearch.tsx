@@ -51,6 +51,8 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
   const [category, setCategory] = useState<SearchFilters['category']>('all');
   const [minRating, setMinRating] = useState<number>(0);
   const [hasCovers, setHasCovers] = useState(false);
+  const [ebookOnly, setEbookOnly] = useState(false);
+  const [freeOnly, setFreeOnly] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('bookapp_recent_searches');
