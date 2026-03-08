@@ -51,6 +51,8 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
   const [category, setCategory] = useState<SearchFilters['category']>('all');
   const [minRating, setMinRating] = useState<number>(0);
   const [hasCovers, setHasCovers] = useState(false);
+  const [ebookOnly, setEbookOnly] = useState(false);
+  const [freeOnly, setFreeOnly] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('bookapp_recent_searches');
@@ -78,6 +80,8 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
         category,
         minRating: minRating > 0 ? minRating : undefined,
         hasCovers,
+        ebookOnly,
+        freeOnly,
       };
 
       const results = await searchBooks(searchQuery, 40, filters);
@@ -117,6 +121,8 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
     minRating > 0,
     hasCovers,
     sortBy !== 'relevance',
+    ebookOnly,
+    freeOnly,
   ].filter(Boolean).length;
 
   return (
@@ -309,13 +315,24 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
               </div>
 
               <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={hasCovers}
+                <input type="checkbox" checked={hasCovers}
                   onChange={(e) => { setHasCovers(e.target.checked); if (query) handleSearch(); }}
-                  className="rounded border-border"
-                />
+                  className="rounded border-border" />
                 With covers only
+              </label>
+
+              <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+                <input type="checkbox" checked={ebookOnly}
+                  onChange={(e) => { setEbookOnly(e.target.checked); if (query) handleSearch(); }}
+                  className="rounded border-border" />
+                eBooks only
+              </label>
+
+              <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+                <input type="checkbox" checked={freeOnly}
+                  onChange={(e) => { setFreeOnly(e.target.checked); if (query) handleSearch(); }}
+                  className="rounded border-border" />
+                Free to read
               </label>
             </div>
           )}

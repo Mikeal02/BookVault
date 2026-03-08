@@ -23,6 +23,31 @@ export interface Book {
     amazon?: string;
     barnes?: string;
   };
+  // === Enhanced metadata ===
+  // Series & related works
+  seriesName?: string;
+  seriesPosition?: number;
+  editionCount?: number;
+  relatedWorkIds?: string[];
+  // Availability & pricing
+  isEbook?: boolean;
+  hasEpub?: boolean;
+  hasPdf?: boolean;
+  listPrice?: { amount: number; currencyCode: string };
+  retailPrice?: { amount: number; currencyCode: string };
+  saleability?: 'FOR_SALE' | 'FREE' | 'NOT_FOR_SALE' | 'FOR_PREORDER';
+  freeReading?: boolean; // Open Library borrow
+  // Content previews
+  textSnippet?: string;
+  firstSentence?: string;
+  maturityRating?: 'NOT_MATURE' | 'MATURE';
+  readingDifficulty?: 'easy' | 'moderate' | 'advanced';
+  isbn10?: string;
+  isbn13?: string;
+  // Subjects / rich categories
+  subjects?: string[];
+  subjectPlaces?: string[];
+  subjectPeople?: string[];
   // Personal bookshelf fields
   tags?: string[];
   notes?: string;
@@ -62,9 +87,24 @@ export interface GoogleBookItem {
     language?: string;
     previewLink?: string;
     infoLink?: string;
+    maturityRating?: string;
+    industryIdentifiers?: { type: string; identifier: string }[];
+    seriesInfo?: {
+      bookDisplayNumber?: string;
+      shortSeriesBookTitle?: string;
+    };
   };
   saleInfo?: {
     buyLink?: string;
+    saleability?: string;
+    isEbook?: boolean;
+    listPrice?: { amount: number; currencyCode: string };
+    retailPrice?: { amount: number; currencyCode: string };
+    epub?: { isAvailable: boolean };
+    pdf?: { isAvailable: boolean };
+  };
+  searchInfo?: {
+    textSnippet?: string;
   };
 }
 

@@ -1,4 +1,3 @@
-
 import { Book } from '@/types/book';
 
 // === API Endpoints ===
@@ -39,30 +38,67 @@ const buildCoverUrls = (item: any): { thumbnail?: string; smallThumbnail?: strin
   };
 };
 
+// === Reading difficulty estimation ===
+const estimateReadingDifficulty = (pageCount?: number, subjects?: string[]): 'easy' | 'moderate' | 'advanced' | undefined => {
+  if (!pageCount && !subjects?.length) return undefined;
+  
+  const hardSubjects = ['philosophy', 'mathematics', 'physics', 'quantum', 'advanced', 'academic', 'theoretical'];
+  const easySubjects = ['children', 'juvenile', 'young adult', 'comics', 'graphic novel', 'picture book'];
+  
+  const subjectsLower = (subjects || []).map(s => s.toLowerCase());
+  
+  if (easySubjects.some(es => subjectsLower.some(s => s.includes(es)))) return 'easy';
+  if (hardSubjects.some(hs => subjectsLower.some(s => s.includes(hs)))) return 'advanced';
+  if (pageCount && pageCount > 600) return 'advanced';
+  if (pageCount && pageCount < 200) return 'easy';
+  return 'moderate';
+};
+
+// === Series detection from Open Library ===
+const detectSeries = (item: any): { seriesName?: string; seriesPosition?: number } => {
+  // Check subtitle for series patterns like "Book 1 of ..."
+  const subtitle = item.subtitle || '';
+  const title = item.title || '';
+  const combined = `${title} ${subtitle}`;
+  
+  // Common series patterns
+  const patterns = [
+    /(?:book|vol(?:ume)?\.?|part|#)\s*(\d+)\s*(?:of|in|:)\s*(?:the\s+)?(.+?)(?:\s+series)?$/i,
+    /\((.+?)(?:\s+series)?,?\s*#?(\d+)\)/i,
+    /\((.+?)\s+book\s+(\d+)\)/i,
+    /:\s*(.+?)\s+(?:book|vol)\s+(\d+)/i,
+  ];
+  
+  for (const pattern of patterns) {
+    const match = combined.match(pattern);
+    if (match) {
+      // Determine which group is series name vs number
+      const num = parseInt(match[1]) || parseInt(match[2]);
+      const name = isNaN(parseInt(match[1])) ? match[1] : match[2];
+      if (name && num) {
+        return { seriesName: name.trim(), seriesPosition: num };
+      }
+    }
+  }
+  
+  return {};
+};
+
 // === Relevance Scoring ===
-// Weighted scoring: cover availability, ratings, metadata completeness
 const computeRelevanceScore = (book: Book, queryTerms: string[]): number => {
   let score = 0;
-
-  // Cover availability (high weight)
   if (book.imageLinks?.thumbnail) score += 30;
-
-  // Ratings quality
-  if (book.averageRating) {
-    score += book.averageRating * 4; // up to 20
-  }
-  if (book.ratingsCount) {
-    score += Math.min(20, Math.log10(book.ratingsCount + 1) * 5);
-  }
-
-  // Metadata completeness
+  if (book.averageRating) score += book.averageRating * 4;
+  if (book.ratingsCount) score += Math.min(20, Math.log10(book.ratingsCount + 1) * 5);
   if (book.description) score += 5;
   if (book.pageCount) score += 3;
   if (book.categories?.length) score += 3;
   if (book.publishedDate) score += 2;
   if (book.publisher) score += 2;
+  if (book.isEbook) score += 3;
+  if (book.seriesName) score += 4;
+  if (book.textSnippet) score += 2;
 
-  // Title/author match quality
   const titleLower = book.title.toLowerCase();
   const authorLower = (book.authors?.[0] || '').toLowerCase();
   for (const term of queryTerms) {
@@ -71,7 +107,6 @@ const computeRelevanceScore = (book: Book, queryTerms: string[]): number => {
     if (authorLower.includes(term)) score += 10;
   }
 
-  // Recency bonus (slight preference for newer books)
   if (book.publishedDate) {
     const year = parseInt(book.publishedDate);
     if (year > 2020) score += 5;
@@ -89,6 +124,10 @@ const transformOpenLibraryBook = (item: any): Book => {
   const title = item.title || 'Unknown Title';
   const buyLinks = generatePurchaseLinks(title, authors[0]);
   const id = item.key?.replace('/works/', 'ol_') || `ol_${Math.random().toString(36).slice(2)}`;
+  const isbn13 = item.isbn?.find((i: string) => i.length === 13);
+  const isbn10 = item.isbn?.find((i: string) => i.length === 10);
+  const subjects = item.subject?.slice(0, 10) || [];
+  const series = detectSeries(item);
 
   return {
     id,
@@ -98,7 +137,7 @@ const transformOpenLibraryBook = (item: any): Book => {
     publishedDate: item.first_publish_year?.toString(),
     publisher: item.publisher?.[0],
     pageCount: item.number_of_pages_median || undefined,
-    categories: item.subject?.slice(0, 5) || [],
+    categories: subjects.slice(0, 5),
     imageLinks: covers.thumbnail ? covers : undefined,
     averageRating: item.ratings_average ? Math.round(item.ratings_average * 10) / 10 : undefined,
     ratingsCount: item.ratings_count || undefined,
@@ -106,11 +145,22 @@ const transformOpenLibraryBook = (item: any): Book => {
     previewLink: item.key ? `https://openlibrary.org${item.key}` : undefined,
     infoLink: item.key ? `https://openlibrary.org${item.key}` : undefined,
     buyLinks,
+    // Enhanced fields
+    editionCount: item.edition_count || undefined,
+    firstSentence: item.first_sentence?.value || undefined,
+    isbn10: isbn10 || undefined,
+    isbn13: isbn13 || undefined,
+    subjects,
+    subjectPlaces: item.subject_place?.slice(0, 5) || undefined,
+    subjectPeople: item.person?.slice(0, 5) || item.subject_people?.slice(0, 5) || undefined,
+    freeReading: item.has_fulltext || false,
+    readingDifficulty: estimateReadingDifficulty(item.number_of_pages_median, subjects),
+    ...series,
   };
 };
 
 const transformGoogleBookToBook = (item: any): Book => {
-  const { volumeInfo } = item;
+  const { volumeInfo, saleInfo, searchInfo } = item;
   const buyLinks = generatePurchaseLinks(volumeInfo.title, volumeInfo.authors?.[0]);
 
   let thumbnail = volumeInfo.imageLinks?.thumbnail;
@@ -121,6 +171,33 @@ const transformGoogleBookToBook = (item: any): Book => {
   }
   if (smallThumbnail) {
     smallThumbnail = smallThumbnail.replace('http://', 'https://');
+  }
+
+  // Extract ISBNs
+  const identifiers = volumeInfo.industryIdentifiers || [];
+  const isbn13 = identifiers.find((id: any) => id.type === 'ISBN_13')?.identifier;
+  const isbn10 = identifiers.find((id: any) => id.type === 'ISBN_10')?.identifier;
+
+  // Series info from Google
+  const seriesInfo = volumeInfo.seriesInfo;
+  let seriesName: string | undefined;
+  let seriesPosition: number | undefined;
+  if (seriesInfo?.shortSeriesBookTitle) {
+    seriesName = seriesInfo.shortSeriesBookTitle;
+    seriesPosition = parseInt(seriesInfo.bookDisplayNumber || '') || undefined;
+  }
+
+  // If no explicit series info, try to detect from title
+  if (!seriesName) {
+    const detected = detectSeries({ title: volumeInfo.title, subtitle: volumeInfo.subtitle });
+    seriesName = detected.seriesName;
+    seriesPosition = detected.seriesPosition;
+  }
+
+  // Clean textSnippet HTML
+  let textSnippet = searchInfo?.textSnippet;
+  if (textSnippet) {
+    textSnippet = textSnippet.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, ' ').trim();
   }
 
   return {
@@ -139,6 +216,20 @@ const transformGoogleBookToBook = (item: any): Book => {
     previewLink: volumeInfo.previewLink,
     infoLink: volumeInfo.infoLink,
     buyLinks,
+    // Enhanced fields
+    isEbook: saleInfo?.isEbook || false,
+    hasEpub: saleInfo?.epub?.isAvailable || false,
+    hasPdf: saleInfo?.pdf?.isAvailable || false,
+    listPrice: saleInfo?.listPrice || undefined,
+    retailPrice: saleInfo?.retailPrice || undefined,
+    saleability: saleInfo?.saleability as Book['saleability'] || undefined,
+    textSnippet,
+    maturityRating: volumeInfo.maturityRating as Book['maturityRating'] || undefined,
+    isbn10,
+    isbn13,
+    seriesName,
+    seriesPosition,
+    readingDifficulty: estimateReadingDifficulty(volumeInfo.pageCount, volumeInfo.categories),
   };
 };
 
@@ -148,7 +239,7 @@ const searchOpenLibrary = async (query: string, limit: number = 100): Promise<Bo
     const params = new URLSearchParams({
       q: query,
       limit: Math.min(limit, 100).toString(),
-      fields: 'key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count,ratings_average,isbn,subtitle',
+      fields: 'key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count,ratings_average,isbn,subtitle,edition_count,has_fulltext,subject_place,person,subject_people',
     });
 
     const response = await fetch(`${OPEN_LIBRARY_SEARCH_URL}?${params}`);
@@ -187,6 +278,8 @@ export interface SearchFilters {
   minRating?: number;
   language?: string;
   hasCovers?: boolean;
+  ebookOnly?: boolean;
+  freeOnly?: boolean;
 }
 
 export const searchBooks = async (query: string, maxResults: number = 40, filters?: SearchFilters): Promise<Book[]> => {
@@ -194,45 +287,69 @@ export const searchBooks = async (query: string, maxResults: number = 40, filter
     const searchQuery = query.trim();
     const queryTerms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length > 1);
 
-    // Build category-qualified queries
     let olQuery = searchQuery;
     let gbQuery = searchQuery;
     
     if (filters?.category && filters.category !== 'all') {
       const subjectMap: Record<string, string> = {
-        'fiction': 'fiction',
-        'non-fiction': 'nonfiction',
-        'science': 'science',
-        'history': 'history',
-        'biography': 'biography',
-        'technology': 'technology computers',
+        'fiction': 'fiction', 'non-fiction': 'nonfiction', 'science': 'science',
+        'history': 'history', 'biography': 'biography', 'technology': 'technology computers',
       };
       const subject = subjectMap[filters.category] || filters.category;
       olQuery = `${searchQuery} subject:${subject}`;
       gbQuery = `${searchQuery}+subject:${subject}`;
     }
 
-    // Search both APIs in parallel
     const [openLibResults, googleResults] = await Promise.all([
       searchOpenLibrary(olQuery, Math.min(maxResults * 2, 100)),
       searchGoogleBooks(gbQuery, 40),
     ]);
 
-    // Merge: Google first for better covers, Open Library for breadth
+    // Merge with Google first for richer metadata (sale info, snippets)
     const all = [...googleResults, ...openLibResults];
 
-    // Deduplicate by normalized title+author
-    const seen = new Set<string>();
-    const deduped = all.filter(book => {
+    // Deduplicate by normalized title+author, merging enhanced fields
+    const seen = new Map<string, Book>();
+    for (const book of all) {
       const key = `${book.title.toLowerCase().replace(/[^a-z0-9]/g, '')}-${(book.authors[0] || '').toLowerCase().replace(/[^a-z0-9]/g, '')}`;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+      const existing = seen.get(key);
+      if (existing) {
+        // Merge: keep richer fields from either source
+        seen.set(key, {
+          ...existing,
+          description: existing.description || book.description,
+          imageLinks: existing.imageLinks || book.imageLinks,
+          averageRating: existing.averageRating || book.averageRating,
+          ratingsCount: Math.max(existing.ratingsCount || 0, book.ratingsCount || 0) || undefined,
+          pageCount: existing.pageCount || book.pageCount,
+          isEbook: existing.isEbook || book.isEbook,
+          hasEpub: existing.hasEpub || book.hasEpub,
+          hasPdf: existing.hasPdf || book.hasPdf,
+          listPrice: existing.listPrice || book.listPrice,
+          retailPrice: existing.retailPrice || book.retailPrice,
+          saleability: existing.saleability || book.saleability,
+          textSnippet: existing.textSnippet || book.textSnippet,
+          firstSentence: existing.firstSentence || book.firstSentence,
+          maturityRating: existing.maturityRating || book.maturityRating,
+          editionCount: existing.editionCount || book.editionCount,
+          seriesName: existing.seriesName || book.seriesName,
+          seriesPosition: existing.seriesPosition || book.seriesPosition,
+          subjects: (existing.subjects?.length || 0) > (book.subjects?.length || 0) ? existing.subjects : book.subjects,
+          subjectPlaces: existing.subjectPlaces || book.subjectPlaces,
+          subjectPeople: existing.subjectPeople || book.subjectPeople,
+          freeReading: existing.freeReading || book.freeReading,
+          readingDifficulty: existing.readingDifficulty || book.readingDifficulty,
+          isbn10: existing.isbn10 || book.isbn10,
+          isbn13: existing.isbn13 || book.isbn13,
+        });
+      } else {
+        seen.set(key, book);
+      }
+    }
+
+    let filtered = Array.from(seen.values());
 
     // Apply filters
-    let filtered = deduped;
-
     if (filters?.yearRange?.min || filters?.yearRange?.max) {
       filtered = filtered.filter(book => {
         if (!book.publishedDate) return false;
@@ -256,9 +373,16 @@ export const searchBooks = async (query: string, maxResults: number = 40, filter
       filtered = filtered.filter(book => book.imageLinks?.thumbnail);
     }
 
-    // Sort by weighted relevance score
+    if (filters?.ebookOnly) {
+      filtered = filtered.filter(book => book.isEbook || book.hasEpub || book.hasPdf);
+    }
+
+    if (filters?.freeOnly) {
+      filtered = filtered.filter(book => book.freeReading || book.saleability === 'FREE');
+    }
+
+    // Sort
     const sortBy = filters?.sortBy || 'relevance';
-    
     if (sortBy === 'relevance') {
       filtered.sort((a, b) => computeRelevanceScore(b, queryTerms) - computeRelevanceScore(a, queryTerms));
     } else if (sortBy === 'newest') {

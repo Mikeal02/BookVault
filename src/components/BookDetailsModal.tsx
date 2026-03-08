@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { X, Star, Plus, Trash2, ExternalLink, ShoppingCart, Clock, Play, Settings } from 'lucide-react';
+import { X, Star, Plus, Trash2, ExternalLink, ShoppingCart, Clock, Play, Settings, Layers, Tablet, BookMarked, Globe, Users, MapPin, Brain } from 'lucide-react';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
 import { BookCoverPlaceholder } from './BookCoverPlaceholder';
@@ -279,39 +279,187 @@ export const BookDetailsModal = ({
                       </div>
                     )}
 
-                    {/* Basic Info */}
+                    {/* Series Info */}
+                    {book.seriesName && (
+                      <div className="bg-accent/5 rounded-xl p-4 sm:p-5 border border-accent/10">
+                        <h4 className="font-semibold text-foreground mb-2 flex items-center text-sm sm:text-base">
+                          <Layers className="w-4 h-4 mr-2 text-accent" />
+                          Part of a Series
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          <span className="font-semibold text-foreground">{book.seriesName}</span>
+                          {book.seriesPosition && <span> — Book #{book.seriesPosition}</span>}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Availability & Format */}
+                    {(book.isEbook || book.hasEpub || book.hasPdf || book.freeReading || book.retailPrice || book.saleability) && (
+                      <div className="bg-primary/5 rounded-xl p-4 sm:p-5 border border-primary/10">
+                        <h4 className="font-semibold text-foreground mb-3 flex items-center text-sm sm:text-base">
+                          <Tablet className="w-4 h-4 mr-2 text-primary" />
+                          Availability & Formats
+                        </h4>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          {book.isEbook && (
+                            <span className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium flex items-center gap-1.5">
+                              <Tablet className="w-3 h-3" /> eBook Available
+                            </span>
+                          )}
+                          {book.hasEpub && (
+                            <span className="px-3 py-1.5 rounded-lg bg-muted text-muted-foreground text-xs font-medium">ePub</span>
+                          )}
+                          {book.hasPdf && (
+                            <span className="px-3 py-1.5 rounded-lg bg-muted text-muted-foreground text-xs font-medium">PDF</span>
+                          )}
+                          {book.freeReading && (
+                            <span className="px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium flex items-center gap-1.5">
+                              <BookMarked className="w-3 h-3" /> Free to Borrow
+                            </span>
+                          )}
+                          {book.saleability === 'FREE' && (
+                            <span className="px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium">Free</span>
+                          )}
+                          {book.saleability === 'FOR_PREORDER' && (
+                            <span className="px-3 py-1.5 rounded-lg bg-warning/10 text-warning text-xs font-medium">Pre-order</span>
+                          )}
+                        </div>
+                        {(book.retailPrice || book.listPrice) && (
+                          <div className="flex items-center gap-3 text-sm">
+                            {book.retailPrice && (
+                              <span className="font-semibold text-foreground">
+                                {book.retailPrice.currencyCode === 'USD' ? '$' : book.retailPrice.currencyCode + ' '}{book.retailPrice.amount.toFixed(2)}
+                              </span>
+                            )}
+                            {book.listPrice && book.retailPrice && book.listPrice.amount > book.retailPrice.amount && (
+                              <span className="text-muted-foreground line-through text-xs">
+                                ${book.listPrice.amount.toFixed(2)}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Content Preview */}
+                    {(book.textSnippet || book.firstSentence) && (
+                      <div className="bg-muted/30 rounded-xl p-4 sm:p-5 border border-border">
+                        <h4 className="font-semibold text-foreground mb-3 flex items-center text-sm sm:text-base">
+                          <span className="mr-2">📝</span>
+                          Preview
+                        </h4>
+                        {book.firstSentence && (
+                          <div className="mb-3">
+                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Opening Line</span>
+                            <p className="text-sm text-foreground italic mt-1 border-l-2 border-primary/30 pl-3">
+                              "{book.firstSentence}"
+                            </p>
+                          </div>
+                        )}
+                        {book.textSnippet && (
+                          <div>
+                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Excerpt</span>
+                            <p className="text-sm text-muted-foreground mt-1">{book.textSnippet}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Book Details */}
                     <div className="bg-muted/30 rounded-xl p-4 sm:p-5 border border-border">
                       <h4 className="font-semibold text-foreground mb-4 flex items-center text-sm sm:text-base">
                         <span className="mr-2">ℹ️</span>
                         Book Details
                       </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
                         {book.publishedDate && (
-                          <div className="flex items-center p-2 bg-card rounded">
-                            <span className="font-medium text-muted-foreground w-20">Published:</span>
+                          <div className="flex items-center p-2 bg-card rounded gap-2">
+                            <span className="font-medium text-muted-foreground w-20">Published</span>
                             <span className="text-foreground">{formatDate(book.publishedDate)}</span>
                           </div>
                         )}
                         {book.publisher && (
-                          <div className="flex items-center p-2 bg-card rounded">
-                            <span className="font-medium text-muted-foreground w-20">Publisher:</span>
+                          <div className="flex items-center p-2 bg-card rounded gap-2">
+                            <span className="font-medium text-muted-foreground w-20">Publisher</span>
                             <span className="text-foreground truncate">{book.publisher}</span>
                           </div>
                         )}
                         {book.pageCount && (
-                          <div className="flex items-center p-2 bg-card rounded">
-                            <span className="font-medium text-muted-foreground w-20">Pages:</span>
+                          <div className="flex items-center p-2 bg-card rounded gap-2">
+                            <span className="font-medium text-muted-foreground w-20">Pages</span>
                             <span className="text-foreground">{book.pageCount}</span>
                           </div>
                         )}
                         {book.language && (
-                          <div className="flex items-center p-2 bg-card rounded">
-                            <span className="font-medium text-muted-foreground w-20">Language:</span>
+                          <div className="flex items-center p-2 bg-card rounded gap-2">
+                            <span className="font-medium text-muted-foreground w-20">Language</span>
                             <span className="text-foreground capitalize">{book.language}</span>
+                          </div>
+                        )}
+                        {book.isbn13 && (
+                          <div className="flex items-center p-2 bg-card rounded gap-2">
+                            <span className="font-medium text-muted-foreground w-20">ISBN-13</span>
+                            <span className="text-foreground font-mono text-xs">{book.isbn13}</span>
+                          </div>
+                        )}
+                        {book.editionCount && book.editionCount > 1 && (
+                          <div className="flex items-center p-2 bg-card rounded gap-2">
+                            <span className="font-medium text-muted-foreground w-20">Editions</span>
+                            <span className="text-foreground">{book.editionCount} editions</span>
+                          </div>
+                        )}
+                        {book.readingDifficulty && (
+                          <div className="flex items-center p-2 bg-card rounded gap-2">
+                            <Brain className="w-3.5 h-3.5 text-muted-foreground" />
+                            <span className="font-medium text-muted-foreground w-16">Level</span>
+                            <span className={`text-foreground capitalize px-2 py-0.5 rounded text-xs font-medium ${
+                              book.readingDifficulty === 'easy' ? 'bg-success/10 text-success' :
+                              book.readingDifficulty === 'moderate' ? 'bg-primary/10 text-primary' :
+                              'bg-secondary/10 text-secondary'
+                            }`}>
+                              {book.readingDifficulty === 'easy' ? 'Quick Read' : book.readingDifficulty === 'moderate' ? 'Standard' : 'Deep Read'}
+                            </span>
+                          </div>
+                        )}
+                        {book.maturityRating && (
+                          <div className="flex items-center p-2 bg-card rounded gap-2">
+                            <span className="font-medium text-muted-foreground w-20">Maturity</span>
+                            <span className="text-foreground">{book.maturityRating === 'MATURE' ? '🔞 Mature' : '✅ All Ages'}</span>
                           </div>
                         )}
                       </div>
                     </div>
+
+                    {/* Subject People & Places */}
+                    {(book.subjectPeople?.length || book.subjectPlaces?.length) && (
+                      <div className="bg-secondary/5 rounded-xl p-4 sm:p-5 border border-secondary/10">
+                        <h4 className="font-semibold text-foreground mb-3 text-sm sm:text-base">Featured In</h4>
+                        {book.subjectPeople && book.subjectPeople.length > 0 && (
+                          <div className="mb-3">
+                            <div className="flex items-center gap-1.5 mb-2 text-xs text-muted-foreground">
+                              <Users className="w-3.5 h-3.5" /> Characters & People
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {book.subjectPeople.map((person, i) => (
+                                <span key={i} className="px-2.5 py-1 bg-secondary/10 text-secondary rounded-md text-xs font-medium">{person}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {book.subjectPlaces && book.subjectPlaces.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-1.5 mb-2 text-xs text-muted-foreground">
+                              <MapPin className="w-3.5 h-3.5" /> Places & Settings
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {book.subjectPlaces.map((place, i) => (
+                                <span key={i} className="px-2.5 py-1 bg-accent/10 text-accent rounded-md text-xs font-medium">{place}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Rating */}
                     {book.averageRating && (
