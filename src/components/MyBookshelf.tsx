@@ -29,78 +29,125 @@ const viewModes = [
   { mode: 'wall' as ViewMode, icon: Image, label: 'Wall' },
 ];
 
-// ── Spine View ──
+// ── Spine View — 3D bookshelf with realistic spines ──
 const SpineView = ({ books, onSelect, onManage }: { books: Book[]; onSelect: (b: Book) => void; onManage: (b: Book) => void }) => {
   const spineColors = [
-    'from-primary/80 to-primary/60',
-    'from-secondary/80 to-secondary/60',
-    'from-accent/80 to-accent/60',
-    'from-success/80 to-success/60',
-    'from-warning/80 to-warning/60',
-    'from-primary/60 to-secondary/40',
-    'from-secondary/60 to-accent/40',
+    'from-[hsl(222,72%,52%)] to-[hsl(250,65%,42%)]',
+    'from-[hsl(340,65%,58%)] to-[hsl(320,55%,45%)]',
+    'from-[hsl(162,68%,36%)] to-[hsl(170,60%,28%)]',
+    'from-[hsl(38,92%,52%)] to-[hsl(28,80%,42%)]',
+    'from-[hsl(280,60%,55%)] to-[hsl(260,55%,42%)]',
+    'from-[hsl(190,70%,45%)] to-[hsl(200,65%,35%)]',
+    'from-[hsl(10,80%,55%)] to-[hsl(0,70%,42%)]',
   ];
 
   return (
     <div className="relative">
-      {/* Shelf background */}
-      <div className="bg-gradient-to-b from-muted/30 to-muted/10 rounded-2xl p-6 border border-border/30">
-        <div className="flex items-end gap-1 overflow-x-auto pb-4 min-h-[220px]">
-          {books.map((book, i) => {
-            const height = Math.max(140, Math.min(220, (book.pageCount || 250) * 0.5));
-            const width = Math.max(28, Math.min(48, (book.pageCount || 250) * 0.1));
-            return (
-              <motion.div
-                key={book.id}
-                initial={{ opacity: 0, y: 40, rotateY: -30 }}
-                animate={{ opacity: 1, y: 0, rotateY: 0 }}
-                transition={{ delay: i * 0.03, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                onClick={() => onSelect(book)}
-                className="group cursor-pointer flex-shrink-0 relative"
-                style={{ perspective: '400px' }}
-              >
-                <div
-                  className={`relative bg-gradient-to-b ${spineColors[i % spineColors.length]} rounded-sm shadow-md hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2 group-hover:rotate-[-2deg]`}
-                  style={{ width: `${width}px`, height: `${height}px` }}
-                >
-                  {/* Spine text */}
-                  <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-                    <span
-                      className="text-[9px] font-bold text-primary-foreground whitespace-nowrap"
-                      style={{
-                        writingMode: 'vertical-rl',
-                        textOrientation: 'mixed',
-                        transform: 'rotate(180deg)',
-                        maxHeight: `${height - 16}px`,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                      }}
+      {/* Bookshelf with 3D perspective */}
+      <div className="relative rounded-2xl overflow-hidden" style={{ perspective: '1000px' }}>
+        {/* Wall texture */}
+        <div className="absolute inset-0 bg-gradient-to-b from-muted/20 to-muted/40 rounded-2xl" />
+        
+        {/* Shelf rows */}
+        {[0, 1].map(row => {
+          const rowBooks = books.slice(row * Math.ceil(books.length / 2), (row + 1) * Math.ceil(books.length / 2));
+          if (rowBooks.length === 0) return null;
+          return (
+            <div key={row} className="relative">
+              <div className="flex items-end gap-[2px] overflow-x-auto px-6 pt-6 pb-0 min-h-[200px]">
+                {rowBooks.map((book, i) => {
+                  const height = Math.max(150, Math.min(200, (book.pageCount || 250) * 0.45));
+                  const width = Math.max(30, Math.min(52, (book.pageCount || 250) * 0.12));
+                  return (
+                    <motion.div
+                      key={book.id}
+                      initial={{ opacity: 0, y: 40, rotateY: -25 }}
+                      animate={{ opacity: 1, y: 0, rotateY: 0 }}
+                      transition={{ delay: (row * rowBooks.length + i) * 0.025, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                      onClick={() => onSelect(book)}
+                      onDoubleClick={() => onManage(book)}
+                      className="group cursor-pointer flex-shrink-0 relative"
+                      style={{ perspective: '500px', transformStyle: 'preserve-3d' }}
                     >
-                      {book.title}
-                    </span>
-                  </div>
-                  {/* 3D edge */}
-                  <div className="absolute top-0 right-0 w-[3px] h-full bg-black/10 rounded-r-sm" />
-                  <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/20 rounded-t-sm" />
-                </div>
-                {/* Tooltip on hover */}
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-foreground text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 shadow-lg">
-                  <p className="font-semibold">{book.title}</p>
-                  <p className="opacity-70 text-[10px]">{book.authors?.[0]}</p>
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-foreground" />
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-        {/* Shelf plank */}
-        <div className="h-3 bg-gradient-to-b from-border/60 to-border/30 rounded-b-lg shadow-inner -mx-2" />
+                      <motion.div
+                        whileHover={{ rotateY: -15, translateY: -8, translateZ: 10 }}
+                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                        className="relative"
+                        style={{ transformStyle: 'preserve-3d' }}
+                      >
+                        {/* Spine face */}
+                        <div
+                          className={`relative bg-gradient-to-b ${spineColors[i % spineColors.length]} rounded-[2px] shadow-lg group-hover:shadow-xl transition-shadow`}
+                          style={{ width: `${width}px`, height: `${height}px` }}
+                        >
+                          {/* Embossed text */}
+                          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                            <span
+                              className="text-[9px] font-bold text-white/90 drop-shadow-sm whitespace-nowrap"
+                              style={{
+                                writingMode: 'vertical-rl',
+                                textOrientation: 'mixed',
+                                transform: 'rotate(180deg)',
+                                maxHeight: `${height - 20}px`,
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                              }}
+                            >
+                              {book.title}
+                            </span>
+                          </div>
+                          {/* Spine ridges */}
+                          <div className="absolute top-2 left-0 right-0 h-px bg-white/15" />
+                          <div className="absolute bottom-2 left-0 right-0 h-px bg-white/15" />
+                          {/* 3D right edge — simulates depth */}
+                          <div className="absolute top-0 right-0 w-[4px] h-full bg-black/20 rounded-r-[2px]" />
+                          <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/25 rounded-t-[2px]" />
+                          <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-black/10" />
+                        </div>
+                        {/* Front cover peek (on hover) */}
+                        <div
+                          className="absolute top-0 h-full bg-card/90 border border-border/40 rounded-r-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden"
+                          style={{
+                            left: `${width}px`,
+                            width: `${Math.max(60, width * 2)}px`,
+                            transformOrigin: 'left center',
+                            transform: 'rotateY(-5deg)',
+                          }}
+                        >
+                          {book.imageLinks?.thumbnail ? (
+                            <img src={book.imageLinks.thumbnail} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center p-1">
+                              <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-full h-full text-[8px]" />
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-foreground text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+                        <p className="font-semibold">{book.title}</p>
+                        <p className="opacity-70 text-[10px]">{book.authors?.[0]}</p>
+                        {book.readingStatus === 'finished' && <p className="text-success text-[10px] mt-0.5">✓ Finished</p>}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-foreground" />
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+              {/* Wooden shelf plank */}
+              <div className="relative h-4 mx-2">
+                <div className="absolute inset-0 bg-gradient-to-b from-amber-800/40 via-amber-900/30 to-amber-950/20 dark:from-amber-800/20 dark:via-amber-900/15 dark:to-amber-950/10 rounded-b-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)]" />
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-700/20 to-transparent" />
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 };
 
-// ── Timeline View ──
+// ── Timeline View — horizontal scrolling timeline with connection lines ──
 const TimelineView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) => void }) => {
   // Group books by month
   const grouped = books.reduce((acc, book) => {
@@ -118,43 +165,74 @@ const TimelineView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) 
   });
 
   return (
-    <div className="relative pl-8">
-      {/* Vertical line */}
-      <div className="absolute left-3 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/40 via-secondary/30 to-transparent" />
+    <div className="relative pl-10">
+      {/* Vertical timeline line with gradient */}
+      <div className="absolute left-4 top-0 bottom-0 w-[2px]">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary via-secondary/50 to-transparent rounded-full" />
+        {/* Animated pulse traveling down */}
+        <motion.div
+          className="absolute left-0 w-[2px] h-8 bg-gradient-to-b from-primary to-transparent rounded-full"
+          animate={{ top: ['0%', '100%'] }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+        />
+      </div>
 
       {entries.map(([month, monthBooks], gi) => (
         <motion.div
           key={month}
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: -24 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: gi * 0.1, duration: 0.4 }}
-          className="mb-8 relative"
+          transition={{ delay: gi * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          className="mb-10 relative"
         >
-          {/* Dot on timeline */}
-          <div className="absolute -left-[22px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-background shadow-sm" />
+          {/* Timeline dot with ring */}
+          <div className="absolute -left-[26px] top-1 flex items-center justify-center">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: gi * 0.08 + 0.1, type: 'spring', stiffness: 300 }}
+              className="w-4 h-4 rounded-full bg-primary shadow-[0_0_12px_hsl(var(--primary)/0.4)] ring-4 ring-background"
+            />
+          </div>
 
-          <h3 className="text-sm font-bold text-foreground mb-3">{month}</h3>
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {monthBooks.map((book, i) => (
-              <motion.div
-                key={book.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: gi * 0.1 + i * 0.05 }}
-                onClick={() => onSelect(book)}
-                className="flex-shrink-0 w-24 cursor-pointer group"
-              >
-                <div className="aspect-[2/3] rounded-lg overflow-hidden ring-1 ring-border/40 group-hover:ring-primary/40 transition-all shadow-sm group-hover:shadow-lg mb-1.5">
-                  {book.imageLinks?.thumbnail ? (
-                    <img src={book.imageLinks.thumbnail} alt={book.title} className="w-full h-full object-cover" />
-                  ) : (
-                    <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-full h-full" />
-                  )}
-                </div>
-                <p className="text-[11px] font-medium text-foreground line-clamp-2 leading-tight">{book.title}</p>
-                <p className="text-[10px] text-muted-foreground line-clamp-1">{book.authors?.[0]}</p>
-              </motion.div>
-            ))}
+          <div className="glass-card rounded-xl p-4 ml-2">
+            <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
+              <span className="gradient-text">{month}</span>
+              <span className="text-[10px] text-muted-foreground font-normal">({monthBooks.length} book{monthBooks.length > 1 ? 's' : ''})</span>
+            </h3>
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+              {monthBooks.map((book, i) => (
+                <motion.div
+                  key={book.id}
+                  initial={{ opacity: 0, scale: 0.85, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ delay: gi * 0.08 + i * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                  onClick={() => onSelect(book)}
+                  className="flex-shrink-0 w-28 cursor-pointer group"
+                >
+                  <div className="relative aspect-[2/3] rounded-lg overflow-hidden ring-1 ring-border/40 group-hover:ring-primary/50 transition-all duration-300 shadow-sm group-hover:shadow-xl mb-1.5">
+                    {book.imageLinks?.thumbnail ? (
+                      <img src={book.imageLinks.thumbnail} alt={book.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                      <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-full h-full" />
+                    )}
+                    {/* Status indicator */}
+                    {book.readingStatus === 'finished' && (
+                      <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-success/90 flex items-center justify-center">
+                        <span className="text-[9px] text-white font-bold">✓</span>
+                      </div>
+                    )}
+                    {book.readingStatus === 'reading' && book.readingProgress !== undefined && (
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-muted/50">
+                        <div className="h-full bg-primary rounded-full" style={{ width: `${book.readingProgress}%` }} />
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[11px] font-semibold text-foreground line-clamp-2 leading-tight group-hover:text-primary transition-colors">{book.title}</p>
+                  <p className="text-[10px] text-muted-foreground line-clamp-1">{book.authors?.[0]}</p>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </motion.div>
       ))}
@@ -162,26 +240,26 @@ const TimelineView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) 
   );
 };
 
-// ── Cover Wall View (Masonry) ──
+// ── Cover Wall View (Masonry) — with hover reveal and staggered entrance ──
 const CoverWallView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) => void }) => {
-  // Simple masonry: alternate between 2 sizes
   return (
-    <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-2 space-y-2">
+    <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-2.5 space-y-2.5">
       {books.map((book, i) => (
         <motion.div
           key={book.id}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: i * 0.02, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          initial={{ opacity: 0, scale: 0.88, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: i * 0.015, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           onClick={() => onSelect(book)}
           className="break-inside-avoid cursor-pointer group relative overflow-hidden rounded-xl"
+          whileHover={{ scale: 1.02 }}
         >
           <div className="relative">
             {book.imageLinks?.thumbnail ? (
               <img
                 src={book.imageLinks.thumbnail}
                 alt={book.title}
-                className="w-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-105"
+                className="w-full object-cover rounded-xl transition-transform duration-700 group-hover:scale-110"
                 loading="lazy"
               />
             ) : (
@@ -189,15 +267,27 @@ const CoverWallView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book)
                 <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-full h-full rounded-xl" />
               </div>
             )}
-            {/* Hover overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl flex items-end p-3">
-              <div>
-                <p className="text-xs font-bold text-background line-clamp-2">{book.title}</p>
-                <p className="text-[10px] text-background/70">{book.authors?.[0]}</p>
-                {book.readingStatus === 'finished' && (
-                  <span className="inline-block mt-1 px-1.5 py-0.5 rounded-full bg-success/90 text-[9px] font-bold text-white">✓ Done</span>
-                )}
-              </div>
+            {/* Gradient overlay on hover */}
+            <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl flex items-end p-3">
+              <motion.div
+                initial={{ y: 8, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                className="w-full"
+              >
+                <p className="text-xs font-bold text-background line-clamp-2 leading-tight">{book.title}</p>
+                <p className="text-[10px] text-background/70 mt-0.5">{book.authors?.[0]}</p>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  {book.readingStatus === 'finished' && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-success/90 text-[9px] font-bold text-white">✓ Done</span>
+                  )}
+                  {book.readingStatus === 'reading' && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-primary/90 text-[9px] font-bold text-white">{Math.round(book.readingProgress || 0)}%</span>
+                  )}
+                  {book.personalRating && book.personalRating > 0 && (
+                    <span className="text-[10px] text-warning">{'★'.repeat(book.personalRating)}</span>
+                  )}
+                </div>
+              </motion.div>
             </div>
           </div>
         </motion.div>

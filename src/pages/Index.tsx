@@ -22,6 +22,7 @@ import { BookAnnotations } from '@/components/BookAnnotations';
 import { SocialSharing } from '@/components/SocialSharing';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { AIBookInsights } from '@/components/AIBookInsights';
+import { ISBNScanner } from '@/components/ISBNScanner';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { Book } from '@/types/book';
@@ -38,7 +39,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner'>('dashboard');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [managingBook, setManagingBook] = useState<Book | null>(null);
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
@@ -507,6 +508,14 @@ const Index = () => {
               {currentView === 'sharing' && (
                 <SocialSharing books={bookshelf} />
               )}
+
+              {currentView === 'scanner' && (
+                <ISBNScanner
+                  onBookFound={handleBookSelect}
+                  onAddToBookshelf={addToBookshelf}
+                  isInBookshelf={isInBookshelf}
+                />
+              )}
             </motion.div>
           </AnimatePresence>
           </ErrorBoundary>
@@ -563,6 +572,7 @@ const Index = () => {
       {/* Floating Action Button */}
       <FloatingActionButton
         onAddBook={() => setCurrentView('search')}
+        onScanISBN={() => setCurrentView('scanner')}
         onStartSession={() => {
           const readingBook = bookshelf.find(b => b.readingStatus === 'reading');
           if (readingBook) {

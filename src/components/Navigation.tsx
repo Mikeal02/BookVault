@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart,
   Music, Menu, Trophy, GitCompareArrows, FolderOpen, FileText, Share2,
-  ChevronRight, X, PanelLeftClose, PanelLeft, LogOut
+  ChevronRight, X, PanelLeftClose, PanelLeft, LogOut, ScanBarcode
 } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { ThemePalettePicker } from './ThemePalettePicker';
@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface NavigationProps {
-  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing';
+  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner';
   onViewChange: (view: NavigationProps['currentView']) => void;
   bookshelfCount: number;
   onLogout?: () => void;
@@ -37,6 +37,7 @@ const navGroups: NavGroup[] = [
     label: 'Discover',
     items: [
       { id: 'search', label: 'Search', icon: Search, description: 'Find new books' },
+      { id: 'scanner', label: 'ISBN Scan', icon: ScanBarcode, description: 'Scan barcode' },
       { id: 'recommendations', label: 'For You', icon: Sparkles, description: 'Personalized picks' },
       { id: 'comparison', label: 'Compare', icon: GitCompareArrows, description: 'Compare books' },
     ],

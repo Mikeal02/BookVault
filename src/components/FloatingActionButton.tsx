@@ -1,25 +1,28 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, X, Search, Heart, Timer } from 'lucide-react';
+import { Plus, X, Search, Heart, Timer, ScanBarcode } from 'lucide-react';
 
 interface FloatingActionButtonProps {
   onAddBook: () => void;
   onStartSession: () => void;
   onLogMood: () => void;
+  onScanISBN: () => void;
 }
 
 const actions = [
   { id: 'add', label: 'Add Book', icon: Search, color: 'bg-primary text-primary-foreground shadow-primary/25' },
+  { id: 'scan', label: 'Scan ISBN', icon: ScanBarcode, color: 'bg-accent text-accent-foreground shadow-accent/25' },
   { id: 'session', label: 'Start Session', icon: Timer, color: 'bg-success text-success-foreground shadow-success/25' },
   { id: 'mood', label: 'Log Mood', icon: Heart, color: 'bg-secondary text-secondary-foreground shadow-secondary/25' },
 ] as const;
 
-export const FloatingActionButton = ({ onAddBook, onStartSession, onLogMood }: FloatingActionButtonProps) => {
+export const FloatingActionButton = ({ onAddBook, onStartSession, onLogMood, onScanISBN }: FloatingActionButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleAction = (id: string) => {
     setIsOpen(false);
     if (id === 'add') onAddBook();
+    else if (id === 'scan') onScanISBN();
     else if (id === 'session') onStartSession();
     else if (id === 'mood') onLogMood();
   };
