@@ -171,9 +171,12 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
       .slice(0, 3)
       .map(([genre]) => genre);
 
-    const weeklyData = Array.from({ length: 7 }, (_, i) => {
-      const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i];
-      return { day, minutes: Math.floor(Math.random() * 60) + 15, pages: Math.floor(Math.random() * 30) + 10 };
+    // Use real session data if available, else show zeros
+    const weeklyData = weeklySessionData.length > 0 ? weeklySessionData : Array.from({ length: 7 }, (_, i) => {
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      return { day: dayNames[d.getDay()], minutes: 0, pages: 0 };
     });
 
     const statusData = [
