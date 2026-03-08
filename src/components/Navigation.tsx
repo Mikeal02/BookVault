@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart,
   Music, Menu, Trophy, GitCompareArrows, FolderOpen, FileText, Share2,
-  ChevronRight, X, PanelLeftClose, PanelLeft, LogOut
+  ChevronRight, X, PanelLeftClose, PanelLeft, LogOut, ScanBarcode
 } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { ThemePalettePicker } from './ThemePalettePicker';
