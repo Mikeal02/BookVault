@@ -479,6 +479,10 @@ const Index = () => {
           {currentView === 'annotations' && (
             <BookAnnotations books={bookshelf} onBookSelect={handleBookSelect} />
           )}
+
+          {currentView === 'sharing' && (
+            <SocialSharing books={bookshelf} />
+          )}
         </div>
 
         {/* Modals */}
