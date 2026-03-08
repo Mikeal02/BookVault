@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LoginPage } from '@/components/LoginPage';
 import { EnhancedBookSearch } from '@/components/EnhancedBookSearch';
@@ -22,6 +22,8 @@ import { BookAnnotations } from '@/components/BookAnnotations';
 import { SocialSharing } from '@/components/SocialSharing';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { AIBookInsights } from '@/components/AIBookInsights';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
