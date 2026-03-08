@@ -666,7 +666,7 @@
   animation-delay: -8s;
 }
 
-/* Stats card with sapphire top accent */
+/* Stats card with theme-aware top accent */
 .stat-card {
   @apply relative overflow-hidden rounded-2xl p-6 transition-all duration-300;
 }
@@ -677,7 +677,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, hsl(222 72% 52%) 0%, hsl(250 65% 52%) 40%, hsl(340 65% 58%) 100%);
+  background: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 40%, hsl(var(--secondary)) 100%);
 }
 
 /* Achievement badges */
