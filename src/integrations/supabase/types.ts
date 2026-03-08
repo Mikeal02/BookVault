@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      book_annotations: {
+        Row: {
+          annotation_type: string
+          book_id: string
+          chapter: string | null
+          color: string | null
+          content: string
+          created_at: string | null
+          id: string
+          is_favorite: boolean | null
+          page_number: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          annotation_type?: string
+          book_id: string
+          chapter?: string | null
+          color?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          page_number?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          annotation_type?: string
+          book_id?: string
+          chapter?: string | null
+          color?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          page_number?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -47,6 +89,80 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      reading_list_items: {
+        Row: {
+          added_at: string | null
+          book_id: string
+          id: string
+          list_id: string
+          notes: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          added_at?: string | null
+          book_id: string
+          id?: string
+          list_id: string
+          notes?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          added_at?: string | null
+          book_id?: string
+          id?: string
+          list_id?: string
+          notes?: string | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_list_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "reading_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reading_lists: {
+        Row: {
+          cover_color: string | null
+          created_at: string | null
+          description: string | null
+          icon: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          sort_order: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cover_color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          sort_order?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cover_color?: string | null
+          created_at?: string | null
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          sort_order?: number | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
