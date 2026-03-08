@@ -23,6 +23,8 @@ const formatAIResponse = (content: string) => {
   let listItems: string[] = [];
   let listType: 'ul' | 'ol' | null = null;
   let blockquoteLines: string[] = [];
+  let tableRows: string[][] = [];
+  let tableHeaders: string[] = [];
 
   const flushList = () => {
     if (listItems.length > 0 && listType) {
