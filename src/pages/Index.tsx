@@ -509,6 +509,7 @@ const Index = () => {
               )}
             </motion.div>
           </AnimatePresence>
+          </ErrorBoundary>
         </div>
       </div>
 
