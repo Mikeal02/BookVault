@@ -174,30 +174,8 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
         </div>
       </motion.div>
 
-      {/* Quick Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { icon: BookOpen, label: 'Total Books', value: stats.totalBooks, color: 'primary', suffix: '' },
-          { icon: Target, label: 'Completed', value: stats.finishedBooks, color: 'success', suffix: '' },
-          { icon: Clock, label: 'Reading Time', value: Math.floor(stats.totalReadingTime / 60), color: 'secondary', suffix: 'h' },
-          { icon: Zap, label: 'Currently Reading', value: stats.readingBooks, color: 'warning', suffix: '' },
-        ].map((stat, index) => (
-          <motion.div
-            key={stat.label}
-            custom={index}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            className="stat-card glass-card hover-lift rounded-2xl"
-          >
-            <div className={`w-12 h-12 rounded-xl bg-${stat.color}/10 flex items-center justify-center mb-4`}>
-              <stat.icon className={`w-6 h-6 text-${stat.color}`} />
-            </div>
-            <p className="text-3xl font-black mb-1 tracking-tight">
-              {stat.value}{stat.suffix}
-            </p>
-            <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
-          </motion.div>
+      {/* Quick Stats Grid with Parallax */}
+      <ParallaxStatsGrid stats={stats} />
         ))}
       </div>
 
