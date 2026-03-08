@@ -207,7 +207,7 @@ export const StatsDashboard = ({ books, currentUser }: StatsDashboardProps) => {
                 <Area
                   type="monotone"
                   dataKey="books"
-                  stroke="#4c6ef5"
+                  stroke="hsl(var(--primary))"
                   fill="url(#colorBooks)"
                   strokeWidth={3}
                 />
