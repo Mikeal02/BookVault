@@ -93,7 +93,11 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="absolute inset-0 gradient-mesh opacity-50" />
+        <div className="aurora-container">
+          <div className="aurora-blob-1" />
+          <div className="aurora-blob-2" />
+          <div className="aurora-blob-3" />
+        </div>
         <div className="relative z-10">
           <motion.div
             className="w-24 h-24 mx-auto mb-6 rounded-full gradient-primary flex items-center justify-center"
@@ -128,9 +132,12 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="absolute inset-0 gradient-mesh opacity-30" />
-        <div className="absolute top-0 right-0 w-72 h-72 blob-1 opacity-40" />
-        <div className="absolute bottom-0 left-0 w-56 h-56 blob-2 opacity-30" />
+        {/* Aurora effect */}
+        <div className="aurora-container">
+          <div className="aurora-blob-1" />
+          <div className="aurora-blob-2" />
+          <div className="aurora-blob-3" />
+        </div>
         
         <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
           <div className="text-center lg:text-left">
