@@ -5,6 +5,7 @@
     "": {
       "name": "vite_react_shadcn_ts",
       "dependencies": {
+        "@aspect-ratio/core": "^1.0.0",
         "@hookform/resolvers": "^3.9.0",
         "@lovable.dev/cloud-auth-js": "^0.0.2",
         "@radix-ui/react-accordion": "^1.2.0",
@@ -82,6 +83,8 @@
   },
   "packages": {
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
+
+    "@aspect-ratio/core": ["@aspect-ratio/core@1.0.0", "", {}, "sha512-Nyy3ObJamoRZLknXISDfK7FhfO3uVp+3FwzGYnpfIU6Q1g9GW/UtxpvNumqEdlBZHMars4Gcrc/Qu60Y8tuYWw=="],
 
     "@babel/helper-string-parser": ["@babel/helper-string-parser@7.25.9", "", {}, "sha512-4A/SCr/2KLd5jrtOMFzaKjVtAei3+2r/NChoBNoZ3EyP/+GlhoaEGoWOZUmFmoITP7zOJyHIMm+DYRd8o3PvHA=="],
 
