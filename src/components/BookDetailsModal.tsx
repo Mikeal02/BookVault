@@ -14,6 +14,7 @@ interface BookDetailsModalProps {
   onUpdateBook: (book: Book) => void;
   onStartReadingSession?: () => void;
   onManageBook?: () => void;
+  onAIInsights?: () => void;
   isInBookshelf: boolean;
 }
 
