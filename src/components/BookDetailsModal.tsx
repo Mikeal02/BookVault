@@ -117,7 +117,7 @@ export const BookDetailsModal = ({
       }}
     >
       <div 
-        className="bg-card rounded-t-3xl sm:rounded-2xl w-full sm:max-w-5xl flex flex-col shadow-2xl animate-scale-in border border-border"
+        className="bg-card rounded-t-3xl sm:rounded-2xl w-full sm:max-w-5xl flex flex-col shadow-2xl animate-scale-in border border-border/80 relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         style={{ 
           overscrollBehavior: 'contain',
@@ -125,8 +125,11 @@ export const BookDetailsModal = ({
           height: 'auto',
         }}
       >
+        {/* Top accent gradient line */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary z-10" />
         {/* Header */}
-        <div className="p-4 sm:p-6 border-b border-border bg-gradient-to-r from-primary/5 to-secondary/5 flex-shrink-0">
+        <div className="p-4 sm:p-6 border-b border-border/60 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 flex-shrink-0 relative overflow-hidden">
+          <div className="absolute -top-20 -right-20 w-48 h-48 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
           <div className="flex justify-between items-start">
             <div className="flex-1 min-w-0">
               <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1 sm:mb-2 pr-8 line-clamp-2">
