@@ -384,43 +384,29 @@ export const ReadingAtmosphere = ({ books }: ReadingAtmosphereProps) => {
   const updateVolume = useCallback((soundId: string, value: number[]) => {
     const newVolume = value[0];
     setVolumes(prev => ({ ...prev, [soundId]: newVolume }));
+    const vol = isMuted ? 0 : (masterVolume / 100) * (newVolume / 100);
     
-    const audio = audioRefs.current[soundId];
-    if (audio) {
-      audio.volume = isMuted ? 0 : (masterVolume / 100) * (newVolume / 100);
+    if (audioRefs.current[soundId]) {
+      audioRefs.current[soundId].volume = vol;
+    }
+    if (synthRefs.current[soundId]) {
+      synthRefs.current[soundId].gain.gain.value = vol;
     }
   }, [masterVolume, isMuted]);
 
   const stopAll = useCallback(() => {
-    Object.entries(audioRefs.current).forEach(([id, audio]) => {
-      audio.pause();
-      audio.currentTime = 0;
-    });
+    Object.values(audioRefs.current).forEach(audio => { audio.pause(); audio.currentTime = 0; });
+    Object.values(synthRefs.current).forEach(s => { try { s.stop(); } catch {} });
+    synthRefs.current = {};
     setActiveSounds(new Set());
   }, []);
 
   const applySuggested = useCallback(async () => {
-    // First stop all current sounds
     stopAll();
-    
-    // Then start suggested sounds
     for (const id of suggestedSounds) {
-      const audio = audioRefs.current[id];
-      if (audio) {
-        if (!volumes[id]) {
-          setVolumes(v => ({ ...v, [id]: 50 }));
-        }
-        const individualVolume = volumes[id] || 50;
-        audio.volume = isMuted ? 0 : (masterVolume / 100) * (individualVolume / 100);
-        try {
-          await audio.play();
-        } catch (error) {
-          console.error('Error playing audio:', error);
-        }
-      }
+      await toggleSound(id);
     }
-    setActiveSounds(new Set(suggestedSounds));
-  }, [suggestedSounds, volumes, masterVolume, isMuted, stopAll]);
+  }, [suggestedSounds, stopAll, toggleSound]);
 
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in">
