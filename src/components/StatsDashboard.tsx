@@ -213,8 +213,8 @@ export const StatsDashboard = ({ books, currentUser }: StatsDashboardProps) => {
                 />
                 <defs>
                   <linearGradient id="colorBooks" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4c6ef5" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#4c6ef5" stopOpacity={0.05}/>
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.05}/>
                   </linearGradient>
                 </defs>
               </AreaChart>
