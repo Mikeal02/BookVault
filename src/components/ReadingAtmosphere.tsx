@@ -38,79 +38,237 @@ interface ReadingAtmosphereProps {
   books: Book[];
 }
 
-// Free ambient sound URLs - using reliable sources
+// Ambient sound generator using Web Audio API for reliable playback
+class AmbientSoundGenerator {
+  private audioContext: AudioContext | null = null;
+  private nodes: AudioNode[] = [];
+  private gainNode: GainNode | null = null;
+  
+  private getCtx() {
+    if (!this.audioContext) this.audioContext = new AudioContext();
+    return this.audioContext;
+  }
+
+  createRain(): { gain: GainNode; stop: () => void } {
+    const ctx = this.getCtx();
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(ctx.destination);
+    
+    // Brown noise for rain
+    const bufferSize = 2 * ctx.sampleRate;
+    const buffer = ctx.createBuffer(2, bufferSize, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buffer.getChannelData(ch);
+      let last = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        data[i] = (last + (0.02 * white)) / 1.02;
+        last = data[i];
+        data[i] *= 3.5;
+      }
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    
+    // High-pass filter for rain character
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 800;
+    source.connect(filter);
+    filter.connect(gain);
+    source.start();
+    
+    return { gain, stop: () => { source.stop(); } };
+  }
+
+  createFireplace(): { gain: GainNode; stop: () => void } {
+    const ctx = this.getCtx();
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(ctx.destination);
+    
+    // Crackle noise
+    const bufferSize = 2 * ctx.sampleRate;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() > 0.97 ? (Math.random() * 2 - 1) * 0.5 : (Math.random() * 2 - 1) * 0.01;
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 2000;
+    source.connect(filter);
+    filter.connect(gain);
+    source.start();
+    
+    return { gain, stop: () => { source.stop(); } };
+  }
+
+  createOcean(): { gain: GainNode; stop: () => void } {
+    const ctx = this.getCtx();
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(ctx.destination);
+    
+    // Pink noise for ocean
+    const bufferSize = 4 * ctx.sampleRate;
+    const buffer = ctx.createBuffer(2, bufferSize, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buffer.getChannelData(ch);
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + white * 0.0555179;
+        b1 = 0.99332 * b1 + white * 0.0750759;
+        b2 = 0.96900 * b2 + white * 0.1538520;
+        b3 = 0.86650 * b3 + white * 0.3104856;
+        b4 = 0.55000 * b4 + white * 0.5329522;
+        b5 = -0.7616 * b5 - white * 0.0168980;
+        data[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
+        // Add wave modulation
+        data[i] *= 0.5 + 0.5 * Math.sin(i / (ctx.sampleRate * 4));
+        b6 = white * 0.115926;
+      }
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1500;
+    source.connect(filter);
+    filter.connect(gain);
+    source.start();
+    
+    return { gain, stop: () => { source.stop(); } };
+  }
+
+  createWind(): { gain: GainNode; stop: () => void } {
+    const ctx = this.getCtx();
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(ctx.destination);
+    
+    // Filtered white noise for wind
+    const bufferSize = 4 * ctx.sampleRate;
+    const buffer = ctx.createBuffer(2, bufferSize, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buffer.getChannelData(ch);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * (0.3 + 0.7 * Math.sin(i / (ctx.sampleRate * 6)));
+      }
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    
+    const bpFilter = ctx.createBiquadFilter();
+    bpFilter.type = 'bandpass';
+    bpFilter.frequency.value = 400;
+    bpFilter.Q.value = 0.5;
+    source.connect(bpFilter);
+    bpFilter.connect(gain);
+    source.start();
+    
+    return { gain, stop: () => { source.stop(); } };
+  }
+
+  createIce(): { gain: GainNode; stop: () => void } {
+    const ctx = this.getCtx();
+    const gain = ctx.createGain();
+    gain.gain.value = 0;
+    gain.connect(ctx.destination);
+    
+    // Sparse crackle + wind undertone
+    const bufferSize = 3 * ctx.sampleRate;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      const base = (Math.random() * 2 - 1) * 0.02;
+      const crackle = Math.random() > 0.995 ? (Math.random() * 2 - 1) * 0.8 : 0;
+      data[i] = base + crackle;
+    }
+    const source = ctx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'highpass';
+    filter.frequency.value = 2000;
+    source.connect(filter);
+    filter.connect(gain);
+    source.start();
+    
+    return { gain, stop: () => { source.stop(); } };
+  }
+}
+
+const soundGen = new AmbientSoundGenerator();
+
+// Sound configuration
 const soundscapes: SoundOption[] = [
   { 
-    id: 'rain', 
-    name: 'Gentle Rain', 
-    icon: CloudRain, 
+    id: 'rain', name: 'Gentle Rain', icon: CloudRain, 
     color: 'from-blue-500 to-cyan-500',
     genres: ['mystery', 'thriller', 'noir', 'drama'],
     description: 'Soft rainfall on a window',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/rain-01.mp3'
+    audioUrl: '__synth__'
   },
   { 
-    id: 'fireplace', 
-    name: 'Cozy Fireplace', 
-    icon: Flame, 
+    id: 'fireplace', name: 'Cozy Fireplace', icon: Flame, 
     color: 'from-orange-500 to-red-500',
     genres: ['romance', 'historical', 'fantasy', 'fiction'],
     description: 'Crackling fire warmth',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/campfire-1.mp3'
+    audioUrl: '__synth__'
   },
   { 
-    id: 'ocean', 
-    name: 'Ocean Waves', 
-    icon: Waves, 
+    id: 'ocean', name: 'Ocean Waves', icon: Waves, 
     color: 'from-teal-500 to-blue-500',
     genres: ['romance', 'adventure', 'travel', 'beach'],
     description: 'Gentle waves on shore',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/ocean-wave-2.mp3'
+    audioUrl: '__synth__'
   },
   { 
-    id: 'Farm', 
-    name: 'Farm Ambience', 
-    icon: Tractor, 
+    id: 'Farm', name: 'Farm Ambience', icon: Tractor, 
     color: 'from-amber-500 to-orange-500',
     genres: ['contemporary', 'urban', 'slice of life', 'literary'],
     description: 'Daytime Farm Ambience',
     audioUrl: '/mp3_files/Farm.mp3'
   },
   { 
-    id: 'night', 
-    name: 'Night Ambience', 
-    icon: Moon, 
+    id: 'night', name: 'Night Ambience', icon: Moon, 
     color: 'from-indigo-500 to-purple-500',
     genres: ['horror', 'mystery', 'thriller', 'supernatural'],
     description: 'Crickets and night sounds',
     audioUrl: '/mp3_files/night.mp3'
   },
   { 
-    id: 'wind', 
-    name: 'Gentle Wind', 
-    icon: Wind, 
+    id: 'wind', name: 'Gentle Wind', icon: Wind, 
     color: 'from-slate-400 to-gray-500',
     genres: ['drama', 'contemporary', 'literary', 'philosophical'],
     description: 'Soft breeze through trees',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/wind-howl-01.mp3'
+    audioUrl: '__synth__'
   },
   { 
-    id: 'birds', 
-    name: 'Morning Birds', 
-    icon: Bird, 
+    id: 'birds', name: 'Morning Birds', icon: Bird, 
     color: 'from-yellow-400 to-orange-400',
     genres: ['romance', 'feel good', 'comedy', 'light'],
     description: 'Cheerful birdsong',
     audioUrl: '/mp3_files/bird.mp3'
   },
   { 
-    id: 'ice', 
-    name: 'Ice Ambience', 
-    icon: Snowflake, 
+    id: 'ice', name: 'Ice Ambience', icon: Snowflake, 
     color: 'from-cyan-400 to-blue-400',
     genres: ['adventure', 'fantasy', 'nature', 'outdoors'],
     description: 'Ice cracking and winter sounds',
-    audioUrl: 'https://www.soundjay.com/nature/sounds/ice-cracking-01.mp3'
+    audioUrl: '__synth__'
   },
 ];
 
@@ -123,15 +281,16 @@ export const ReadingAtmosphere = ({ books }: ReadingAtmosphereProps) => {
   const [suggestedSounds, setSuggestedSounds] = useState<string[]>([]);
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
 
-  // Store audio elements
+  // Store audio elements (mp3) and synth nodes
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
+  const synthRefs = useRef<Record<string, { gain: GainNode; stop: () => void }>>({});
 
   const currentlyReading = books.filter(b => b.readingStatus === 'reading');
 
-  // Initialize audio elements
+  // Initialize mp3-based audio elements only
   useEffect(() => {
     soundscapes.forEach(sound => {
-      if (!audioRefs.current[sound.id]) {
+      if (sound.audioUrl !== '__synth__' && !audioRefs.current[sound.id]) {
         const audio = new Audio(sound.audioUrl);
         audio.loop = true;
         audio.preload = 'none';
@@ -139,22 +298,22 @@ export const ReadingAtmosphere = ({ books }: ReadingAtmosphereProps) => {
       }
     });
 
-    // Cleanup on unmount
     return () => {
-      Object.values(audioRefs.current).forEach(audio => {
-        audio.pause();
-        audio.src = '';
-      });
+      Object.values(audioRefs.current).forEach(audio => { audio.pause(); audio.src = ''; });
+      Object.values(synthRefs.current).forEach(s => { try { s.stop(); } catch {} });
       audioRefs.current = {};
+      synthRefs.current = {};
     };
   }, []);
 
-  // Update volumes when master volume or individual volumes change
+  // Update volumes
   useEffect(() => {
-    Object.entries(audioRefs.current).forEach(([id, audio]) => {
-      const individualVolume = volumes[id] || 50;
-      audio.volume = isMuted ? 0 : (masterVolume / 100) * (individualVolume / 100);
-    });
+    const vol = (id: string) => {
+      const iv = volumes[id] || 50;
+      return isMuted ? 0 : (masterVolume / 100) * (iv / 100);
+    };
+    Object.entries(audioRefs.current).forEach(([id, audio]) => { audio.volume = vol(id); });
+    Object.entries(synthRefs.current).forEach(([id, synth]) => { synth.gain.gain.value = vol(id); });
   }, [masterVolume, volumes, isMuted]);
 
   // Get sound suggestions based on current book genres
@@ -171,32 +330,48 @@ export const ReadingAtmosphere = ({ books }: ReadingAtmosphereProps) => {
     }
   }, [currentBook]);
 
+  const startSynth = (soundId: string): { gain: GainNode; stop: () => void } => {
+    switch (soundId) {
+      case 'rain': return soundGen.createRain();
+      case 'fireplace': return soundGen.createFireplace();
+      case 'ocean': return soundGen.createOcean();
+      case 'wind': return soundGen.createWind();
+      case 'ice': return soundGen.createIce();
+      default: return soundGen.createRain();
+    }
+  };
+
   const toggleSound = useCallback(async (soundId: string) => {
-    const audio = audioRefs.current[soundId];
-    if (!audio) return;
+    const sound = soundscapes.find(s => s.id === soundId);
+    if (!sound) return;
+    const isSynth = sound.audioUrl === '__synth__';
 
     if (activeSounds.has(soundId)) {
-      // Stop the sound
-      audio.pause();
-      audio.currentTime = 0;
-      setActiveSounds(prev => {
-        const next = new Set(prev);
-        next.delete(soundId);
-        return next;
-      });
-    } else {
-      // Start the sound
-      setLoadingStates(prev => ({ ...prev, [soundId]: true }));
-      
-      if (!volumes[soundId]) {
-        setVolumes(v => ({ ...v, [soundId]: 50 }));
+      // Stop
+      if (isSynth && synthRefs.current[soundId]) {
+        try { synthRefs.current[soundId].stop(); } catch {}
+        delete synthRefs.current[soundId];
+      } else if (audioRefs.current[soundId]) {
+        audioRefs.current[soundId].pause();
+        audioRefs.current[soundId].currentTime = 0;
       }
-      
-      const individualVolume = volumes[soundId] || 50;
-      audio.volume = isMuted ? 0 : (masterVolume / 100) * (individualVolume / 100);
-      
+      setActiveSounds(prev => { const n = new Set(prev); n.delete(soundId); return n; });
+    } else {
+      // Start
+      setLoadingStates(prev => ({ ...prev, [soundId]: true }));
+      if (!volumes[soundId]) setVolumes(v => ({ ...v, [soundId]: 50 }));
+      const iv = volumes[soundId] || 50;
+      const vol = isMuted ? 0 : (masterVolume / 100) * (iv / 100);
+
       try {
-        await audio.play();
+        if (isSynth) {
+          const synth = startSynth(soundId);
+          synth.gain.gain.value = vol;
+          synthRefs.current[soundId] = synth;
+        } else {
+          const audio = audioRefs.current[soundId];
+          if (audio) { audio.volume = vol; await audio.play(); }
+        }
         setActiveSounds(prev => new Set([...prev, soundId]));
       } catch (error) {
         console.error('Error playing audio:', error);
@@ -209,43 +384,29 @@ export const ReadingAtmosphere = ({ books }: ReadingAtmosphereProps) => {
   const updateVolume = useCallback((soundId: string, value: number[]) => {
     const newVolume = value[0];
     setVolumes(prev => ({ ...prev, [soundId]: newVolume }));
+    const vol = isMuted ? 0 : (masterVolume / 100) * (newVolume / 100);
     
-    const audio = audioRefs.current[soundId];
-    if (audio) {
-      audio.volume = isMuted ? 0 : (masterVolume / 100) * (newVolume / 100);
+    if (audioRefs.current[soundId]) {
+      audioRefs.current[soundId].volume = vol;
+    }
+    if (synthRefs.current[soundId]) {
+      synthRefs.current[soundId].gain.gain.value = vol;
     }
   }, [masterVolume, isMuted]);
 
   const stopAll = useCallback(() => {
-    Object.entries(audioRefs.current).forEach(([id, audio]) => {
-      audio.pause();
-      audio.currentTime = 0;
-    });
+    Object.values(audioRefs.current).forEach(audio => { audio.pause(); audio.currentTime = 0; });
+    Object.values(synthRefs.current).forEach(s => { try { s.stop(); } catch {} });
+    synthRefs.current = {};
     setActiveSounds(new Set());
   }, []);
 
   const applySuggested = useCallback(async () => {
-    // First stop all current sounds
     stopAll();
-    
-    // Then start suggested sounds
     for (const id of suggestedSounds) {
-      const audio = audioRefs.current[id];
-      if (audio) {
-        if (!volumes[id]) {
-          setVolumes(v => ({ ...v, [id]: 50 }));
-        }
-        const individualVolume = volumes[id] || 50;
-        audio.volume = isMuted ? 0 : (masterVolume / 100) * (individualVolume / 100);
-        try {
-          await audio.play();
-        } catch (error) {
-          console.error('Error playing audio:', error);
-        }
-      }
+      await toggleSound(id);
     }
-    setActiveSounds(new Set(suggestedSounds));
-  }, [suggestedSounds, volumes, masterVolume, isMuted, stopAll]);
+  }, [suggestedSounds, stopAll, toggleSound]);
 
   return (
     <div className="space-y-4 sm:space-y-6 animate-fade-in">
