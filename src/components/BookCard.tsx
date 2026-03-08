@@ -62,7 +62,7 @@ export const BookCard = ({
   };
 
   return (
-    <div className="group relative glass-card rounded-xl overflow-hidden cursor-pointer hover-lift">
+    <div className="group relative glass-card rounded-2xl overflow-hidden cursor-pointer hover-lift transition-all duration-400">
       <div onClick={onSelect} className="p-4">
         {/* Cover with 3:4 aspect ratio */}
         <div className="relative mb-3 overflow-hidden rounded-lg aspect-[3/4]">
