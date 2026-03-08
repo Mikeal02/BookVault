@@ -11,6 +11,7 @@ interface FloatingActionButtonProps {
 
 const actions = [
   { id: 'add', label: 'Add Book', icon: Search, color: 'bg-primary text-primary-foreground shadow-primary/25' },
+  { id: 'scan', label: 'Scan ISBN', icon: ScanBarcode, color: 'bg-accent text-accent-foreground shadow-accent/25' },
   { id: 'session', label: 'Start Session', icon: Timer, color: 'bg-success text-success-foreground shadow-success/25' },
   { id: 'mood', label: 'Log Mood', icon: Heart, color: 'bg-secondary text-secondary-foreground shadow-secondary/25' },
 ] as const;
