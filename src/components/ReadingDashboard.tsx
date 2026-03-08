@@ -47,9 +47,9 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
     });
 
     const statusData = [
-      { name: 'Finished', value: finishedBooks.length, color: 'hsl(158 65% 36%)' },
-      { name: 'Reading', value: readingBooks.length, color: 'hsl(36 80% 52%)' },
-      { name: 'To Read', value: books.filter(book => book.readingStatus === 'not-read').length, color: 'hsl(225 14% 40%)' }
+      { name: 'Finished', value: finishedBooks.length, color: 'hsl(162 68% 36%)' },
+      { name: 'Reading', value: readingBooks.length, color: 'hsl(222 72% 52%)' },
+      { name: 'To Read', value: books.filter(book => book.readingStatus === 'not-read').length, color: 'hsl(340 65% 58%)' }
     ].filter(d => d.value > 0);
 
     const achievements = [
@@ -214,8 +214,8 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
               <AreaChart data={stats.weeklyData}>
                 <defs>
                   <linearGradient id="colorMinutes" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(158 65% 36%)" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="hsl(158 65% 36%)" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="hsl(222 72% 52%)" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="hsl(222 72% 52%)" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <XAxis 
@@ -240,7 +240,7 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
                 <Area
                   type="monotone"
                   dataKey="minutes"
-                  stroke="hsl(158 65% 36%)"
+                  stroke="hsl(222 72% 52%)"
                   strokeWidth={3}
                   fill="url(#colorMinutes)"
                 />

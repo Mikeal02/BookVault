@@ -31,9 +31,9 @@ export default {
 		},
 	extend: {
 			fontFamily: {
-				'serif': ['Cormorant Garamond', 'Georgia', 'serif'],
-				'display': ['Cormorant Garamond', 'Georgia', 'serif'],
-				'sans': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+				'serif': ['Playfair Display', 'Georgia', 'serif'],
+				'display': ['Playfair Display', 'Georgia', 'serif'],
+				'sans': ['DM Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
