@@ -68,7 +68,7 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
   );
 };
 
-export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDashboardProps) => {
+export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal: userGoal = 12 }: ReadingDashboardProps) => {
   const [realStreak, setRealStreak] = useState<number | null>(null);
   const [weeklySessionData, setWeeklySessionData] = useState<{ day: string; minutes: number; pages: number }[]>([]);
 

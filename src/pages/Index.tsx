@@ -429,6 +429,7 @@ const Index = () => {
                 books={bookshelf}
                 currentUser={currentUser}
                 onViewChange={setCurrentView}
+                readingGoal={readingGoal}
               />
             )}
             
