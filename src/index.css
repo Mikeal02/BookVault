@@ -571,9 +571,9 @@
   background: hsl(var(--primary) / 0.35);
 }
 
-/* Selection */
+/* Selection — uses primary token so it follows the active palette */
 ::selection {
-  background: hsl(222 72% 52% / 0.25);
+  background: hsl(var(--primary) / 0.25);
   color: hsl(var(--foreground));
 }
 
