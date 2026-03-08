@@ -175,7 +175,7 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
       recentBooks,
       goalProgress: Math.min((booksThisYear / 24) * 100, 100)
     };
-  }, [books]);
+  }, [books, realStreak]);
 
   if (books.length === 0) {
     return (
