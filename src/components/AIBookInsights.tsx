@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Brain, Link2, CalendarCheck, X, Loader2, BookOpen } from 'lucide-react';
+import { Sparkles, Brain, Link2, CalendarCheck, X, Loader2, BookOpen, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Book } from '@/types/book';
+import { toast } from 'sonner';
 
 interface AIBookInsightsProps {
   book: Book;
@@ -23,13 +24,27 @@ export const AIBookInsights = ({ book, userBooks, onClose }: AIBookInsightsProps
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const handleCopy = useCallback(async () => {
+    if (!content) return;
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      toast.success('Copied to clipboard');
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error('Failed to copy');
+    }
+  }, [content]);
 
   const fetchInsight = useCallback(async (type: InsightType) => {
     setActiveType(type);
     setContent('');
     setLoading(true);
     setError(null);
+    setCopied(false);
 
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-book-insights`;
@@ -48,6 +63,8 @@ export const AIBookInsights = ({ book, userBooks, onClose }: AIBookInsightsProps
 
       if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}));
+        if (resp.status === 429) throw new Error('Rate limit reached. Please try again in a moment.');
+        if (resp.status === 402) throw new Error('AI credits exhausted. Please add credits in Settings.');
         throw new Error(errData.error || `Error ${resp.status}`);
       }
 
@@ -81,7 +98,6 @@ export const AIBookInsights = ({ book, userBooks, onClose }: AIBookInsightsProps
           } catch { /* partial JSON */ }
         }
       }
-
       setLoading(false);
     } catch (err: any) {
       setError(err.message || 'Failed to generate insights');
@@ -95,19 +111,34 @@ export const AIBookInsights = ({ book, userBooks, onClose }: AIBookInsightsProps
     }
   }, [content]);
 
+  // Prevent body scroll
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 bg-background/80 backdrop-blur-md flex items-center justify-center p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="bg-card border border-border rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: 24, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 16 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        className="bg-card border border-border rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden"
+      >
+        {/* Top accent */}
+        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary z-10" />
+
         {/* Header */}
         <div className="p-5 border-b border-border bg-gradient-to-r from-primary/5 to-secondary/5 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl gradient-mixed flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl gradient-mixed flex items-center justify-center shadow-lg">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -115,9 +146,20 @@ export const AIBookInsights = ({ book, userBooks, onClose }: AIBookInsightsProps
               <p className="text-sm text-muted-foreground line-clamp-1">{book.title}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors">
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {content && (
+              <button
+                onClick={handleCopy}
+                className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground hover:text-foreground"
+                title="Copy to clipboard"
+              >
+                {copied ? <Check className="w-4 h-4 text-success" /> : <Copy className="w-4 h-4" />}
+              </button>
+            )}
+            <button onClick={onClose} className="p-2 hover:bg-muted rounded-full transition-colors">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Insight Type Selector */}
@@ -132,7 +174,7 @@ export const AIBookInsights = ({ book, userBooks, onClose }: AIBookInsightsProps
                   activeType === opt.type
                     ? 'border-primary/30 bg-primary/10 shadow-sm'
                     : 'border-border hover:border-primary/20 hover:bg-muted/50'
-                }`}
+                } disabled:opacity-50`}
               >
                 <opt.icon className={`w-4 h-4 mb-1.5 ${activeType === opt.type ? 'text-primary' : 'text-muted-foreground'}`} />
                 <p className="text-xs font-semibold">{opt.label}</p>
@@ -146,20 +188,35 @@ export const AIBookInsights = ({ book, userBooks, onClose }: AIBookInsightsProps
         <div ref={contentRef} className="flex-1 overflow-y-auto p-5 min-h-[200px]">
           {!activeType && !loading && (
             <div className="flex flex-col items-center justify-center h-full text-center py-12">
-              <BookOpen className="w-12 h-12 text-muted-foreground/20 mb-4" />
+              <motion.div
+                animate={{ y: [-2, 2, -2] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <BookOpen className="w-12 h-12 text-muted-foreground/20 mb-4" />
+              </motion.div>
               <p className="text-muted-foreground text-sm">Select an insight type above to get AI-powered analysis</p>
             </div>
           )}
 
           {loading && !content && (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-6 h-6 animate-spin text-primary mr-3" />
-              <span className="text-muted-foreground text-sm">Generating insights...</span>
+            <div className="flex flex-col items-center justify-center py-12 gap-3">
+              <div className="relative">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <motion.div
+                  className="absolute inset-0 rounded-full border-2 border-primary/20"
+                  animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+              </div>
+              <span className="text-muted-foreground text-sm">Analyzing {book.title}...</span>
             </div>
           )}
 
           {error && (
             <div className="text-center py-8">
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-destructive/10 flex items-center justify-center">
+                <X className="w-6 h-6 text-destructive" />
+              </div>
               <p className="text-destructive text-sm mb-3">{error}</p>
               <Button variant="outline" size="sm" onClick={() => activeType && fetchInsight(activeType)}>
                 Try Again
@@ -168,14 +225,19 @@ export const AIBookInsights = ({ book, userBooks, onClose }: AIBookInsightsProps
           )}
 
           {content && (
-            <div className="ai-response prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: formatMarkdown(content) }} />
+            <motion.div
+              className="ai-response prose prose-sm max-w-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              dangerouslySetInnerHTML={{ __html: formatMarkdown(content) }}
+            />
           )}
 
           {loading && content && (
             <span className="inline-block w-2 h-4 bg-primary/60 animate-pulse ml-0.5 rounded-sm" />
           )}
         </div>
-      </div>
+      </motion.div>
     </motion.div>
   );
 };
@@ -187,6 +249,8 @@ function formatMarkdown(text: string): string {
     .replace(/^# (.+)$/gm, '<h1 class="text-xl font-bold mt-6 mb-3 text-foreground">$1</h1>')
     .replace(/\*\*(.+?)\*\*/g, '<strong class="text-primary font-semibold">$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/^- \[x\] (.+)$/gm, '<li class="text-sm ml-4 list-none flex items-center gap-2"><span class="text-success">✓</span> <span class="line-through text-muted-foreground">$1</span></li>')
+    .replace(/^- \[ \] (.+)$/gm, '<li class="text-sm ml-4 list-none flex items-center gap-2"><span class="text-muted-foreground">○</span> $1</li>')
     .replace(/^- (.+)$/gm, '<li class="text-sm ml-4 list-disc">$1</li>')
     .replace(/^(\d+)\. (.+)$/gm, '<li class="text-sm ml-4 list-decimal">$1. $2</li>')
     .replace(/\n\n/g, '<br/><br/>')

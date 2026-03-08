@@ -119,6 +119,21 @@ export const BookCard = ({
             {book.authors?.join(', ') || 'Unknown Author'}
           </div>
 
+          {/* Reading progress for shelf books */}
+          {book.readingStatus === 'reading' && book.readingProgress !== undefined && book.readingProgress > 0 && (
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className="h-full gradient-primary rounded-full transition-all duration-500" style={{ width: `${Math.min(book.readingProgress, 100)}%` }} />
+              </div>
+              <span className="text-[10px] font-semibold text-primary">{Math.round(book.readingProgress)}%</span>
+            </div>
+          )}
+          {book.readingStatus === 'finished' && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-success">
+              <Star className="w-2.5 h-2.5 fill-current" /> Completed
+            </span>
+          )}
+
           {/* Series + year row */}
           <div className="flex items-center gap-2 text-[10px] text-muted-foreground/70">
             {book.publishedDate && (
