@@ -605,10 +605,10 @@
   width: 100%;
 }
 
-/* Focus styles */
+/* Focus styles — theme-aware */
 .focus-ring:focus {
   outline: none;
-  box-shadow: 0 0 0 3px hsl(222 72% 52% / 0.25);
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.25);
 }
 
 /* Button variants — theme-aware */
