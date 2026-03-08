@@ -55,8 +55,7 @@ const Index = () => {
   const [managingBook, setManagingBook] = useState<Book | null>(null);
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
   const [insightsBook, setInsightsBook] = useState<Book | null>(null);
-  const [bookshelf, setBookshelf] = useState<Book[]>([]);
-  const [readingGoal, setReadingGoal] = useState<number>(12);
+  const { bookshelf, setBookshelf, loadBooks, addBook: addToBookshelf, updateBook: updateBookInShelf, removeBook: removeFromBookshelf, isInBookshelf } = useBookshelf(user?.id);
   const isMobile = useIsMobile();
 
   // Keyboard shortcuts
