@@ -80,6 +80,8 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
         category,
         minRating: minRating > 0 ? minRating : undefined,
         hasCovers,
+        ebookOnly,
+        freeOnly,
       };
 
       const results = await searchBooks(searchQuery, 40, filters);
