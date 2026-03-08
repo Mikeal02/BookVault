@@ -517,6 +517,10 @@ const Index = () => {
                   isInBookshelf={isInBookshelf}
                 />
               )}
+
+              {currentView === 'wrapped' && (
+                <ReadingWrapped books={bookshelf} currentUser={currentUser} />
+              )}
             </motion.div>
           </AnimatePresence>
           </ErrorBoundary>
