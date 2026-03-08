@@ -27,7 +27,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 const SIDEBAR_COLLAPSED_KEY = 'bookvault_sidebar_collapsed';
 
