@@ -136,43 +136,7 @@ const Index = () => {
         setShowOnboarding(true);
       }
 
-      const { data: userBooks, error } = await supabase
-        .from('user_books')
-        .select('*')
-        .eq('user_id', authUser.id);
-
-      if (error) {
-        console.error('Error loading books:', error);
-      } else if (userBooks) {
-        const books: Book[] = userBooks.map(ub => ({
-          id: ub.book_id,
-          title: ub.title,
-          authors: ub.authors || [],
-          description: ub.description || undefined,
-          publishedDate: ub.published_date || undefined,
-          publisher: ub.publisher || undefined,
-          pageCount: ub.page_count || undefined,
-          categories: ub.categories || undefined,
-          imageLinks: ub.thumbnail_url ? { thumbnail: ub.thumbnail_url } : undefined,
-          averageRating: ub.average_rating ? Number(ub.average_rating) : undefined,
-          ratingsCount: ub.ratings_count || undefined,
-          language: ub.language || undefined,
-          previewLink: ub.preview_link || undefined,
-          infoLink: ub.info_link || undefined,
-          readingStatus: (ub.reading_status as 'not-read' | 'reading' | 'finished') || 'not-read',
-          personalRating: ub.personal_rating || undefined,
-          readingProgress: ub.reading_progress || 0,
-          currentPage: ub.current_page || 0,
-          timeSpentReading: ub.time_spent_reading || 0,
-          notes: ub.notes || undefined,
-          myThoughts: ub.my_thoughts || undefined,
-          tags: ub.tags || [],
-          dateAdded: ub.date_added || undefined,
-          dateStarted: ub.date_started || undefined,
-          dateFinished: ub.date_finished || undefined,
-        }));
-        setBookshelf(books);
-      }
+      await loadBooks(authUser.id);
     } catch (error) {
       console.error('Error loading user data:', error);
     } finally {
