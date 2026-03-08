@@ -55,6 +55,7 @@ const navGroups: NavGroup[] = [
     label: 'Activity',
     items: [
       { id: 'stats', label: 'Analytics', icon: BarChart3, description: 'Reading insights' },
+      { id: 'wrapped', label: 'Wrapped', icon: Gift, description: 'Year in review' },
       { id: 'challenges', label: 'Challenges', icon: Trophy, description: 'Earn XP & badges' },
       { id: 'mood', label: 'Mood', icon: Heart, description: 'Mood journal' },
     ],
