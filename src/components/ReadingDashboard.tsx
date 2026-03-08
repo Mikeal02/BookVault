@@ -5,7 +5,7 @@ import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   BookOpen, Target, Clock, TrendingUp, Award, Calendar, 
-  Flame, Zap, Star, Trophy, ChevronRight, Sparkles
+  Flame, Zap, Star, Trophy, ChevronRight, Sparkles, BarChart3
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
@@ -43,7 +43,7 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
   const yValues = [y0, y1, y2, y3];
 
   return (
-    <div ref={ref} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div ref={ref} className="relative grid grid-cols-2 lg:grid-cols-4 gap-4">
       {statItems.map((stat, index) => (
         <motion.div
           key={stat.label}
@@ -69,26 +69,38 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
 
 export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDashboardProps) => {
   const [realStreak, setRealStreak] = useState<number | null>(null);
+  const [weeklySessionData, setWeeklySessionData] = useState<{ day: string; minutes: number; pages: number }[]>([]);
 
-  // Calculate real streak from reading_sessions
+  // Calculate real streak and weekly data from reading_sessions
   useEffect(() => {
-    const calcStreak = async () => {
+    const buildEmptyWeek = () => {
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const result = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        result.push({ day: dayNames[d.getDay()], minutes: 0, pages: 0 });
+      }
+      return result;
+    };
+
+    const loadSessionData = async () => {
       const { data: sessions } = await supabase
         .from('reading_sessions')
-        .select('session_date')
+        .select('session_date, duration_minutes, pages_read')
         .order('session_date', { ascending: false })
-        .limit(90);
+        .limit(200);
 
       if (!sessions || sessions.length === 0) {
         setRealStreak(0);
+        setWeeklySessionData(buildEmptyWeek());
         return;
       }
 
-      // Count consecutive days with sessions
+      // Calculate streak
       let streak = 0;
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
       const sessionDates = new Set(
         sessions.map(s => {
           const d = new Date(s.session_date!);
@@ -96,22 +108,48 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
           return d.getTime();
         })
       );
-
       for (let i = 0; i < 90; i++) {
         const checkDate = new Date(today);
         checkDate.setDate(checkDate.getDate() - i);
         if (sessionDates.has(checkDate.getTime())) {
           streak++;
         } else if (i === 0) {
-          // Today might not have a session yet, check yesterday
           continue;
         } else {
           break;
         }
       }
       setRealStreak(streak);
+
+      // Build weekly data from real sessions
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const weekData: Record<string, { minutes: number; pages: number }> = {};
+      dayNames.forEach(d => { weekData[d] = { minutes: 0, pages: 0 }; });
+
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+      sevenDaysAgo.setHours(0, 0, 0, 0);
+
+      sessions.forEach(s => {
+        const d = new Date(s.session_date!);
+        if (d >= sevenDaysAgo) {
+          const dayName = dayNames[d.getDay()];
+          weekData[dayName].minutes += s.duration_minutes || 0;
+          weekData[dayName].pages += s.pages_read || 0;
+        }
+      });
+
+      // Build array starting from today going back 7 days
+      const result = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const name = dayNames[d.getDay()];
+        result.push({ day: name, minutes: weekData[name].minutes, pages: weekData[name].pages });
+      }
+      setWeeklySessionData(result);
     };
-    calcStreak();
+    loadSessionData();
   }, []);
 
   const stats = useMemo(() => {
@@ -133,9 +171,12 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
       .slice(0, 3)
       .map(([genre]) => genre);
 
-    const weeklyData = Array.from({ length: 7 }, (_, i) => {
-      const day = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][i];
-      return { day, minutes: Math.floor(Math.random() * 60) + 15, pages: Math.floor(Math.random() * 30) + 10 };
+    // Use real session data if available, else show zeros
+    const weeklyData = weeklySessionData.length > 0 ? weeklySessionData : Array.from({ length: 7 }, (_, i) => {
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      return { day: dayNames[d.getDay()], minutes: 0, pages: 0 };
     });
 
     const statusData = [
@@ -175,7 +216,7 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
       recentBooks,
       goalProgress: Math.min((booksThisYear / 24) * 100, 100)
     };
-  }, [books, realStreak]);
+  }, [books, realStreak, weeklySessionData]);
 
   if (books.length === 0) {
     return (
