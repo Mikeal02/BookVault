@@ -1,6 +1,8 @@
 
+import { useState } from 'react';
 import { Star, Plus, Trash2, Calendar, User } from 'lucide-react';
 import { Book } from '@/types/book';
+import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 
 interface BookCardProps {
   book: Book;
@@ -10,6 +12,23 @@ interface BookCardProps {
   isInBookshelf: boolean;
   showAddButton: boolean;
 }
+
+const CoverImage = ({ book, className }: { book: Book; className?: string }) => {
+  const [failed, setFailed] = useState(false);
+  
+  if (!book.imageLinks?.thumbnail || failed) {
+    return <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className={className || ''} />;
+  }
+
+  return (
+    <img
+      src={book.imageLinks.thumbnail}
+      alt={book.title}
+      className={`object-cover ${className || ''}`}
+      onError={() => setFailed(true)}
+    />
+  );
+};
 
 export const BookCard = ({
   book,
@@ -32,15 +51,7 @@ export const BookCard = ({
     <div className="glass-card rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer hover-lift">
       <div onClick={onSelect} className="p-4">
         <div className="relative mb-4">
-          <img
-            src={book.imageLinks?.thumbnail || '/placeholder.svg'}
-            alt={book.title}
-            className="w-full h-48 object-cover rounded-lg"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/placeholder.svg';
-            }}
-          />
+          <CoverImage book={book} className="w-full h-48 rounded-lg" />
           <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
         </div>
 

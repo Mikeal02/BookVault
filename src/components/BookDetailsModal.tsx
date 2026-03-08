@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { X, Star, Plus, Trash2, ExternalLink, ShoppingCart, Clock, Play, Settings } from 'lucide-react';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
+import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 
 
 interface BookDetailsModalProps {
@@ -15,6 +16,23 @@ interface BookDetailsModalProps {
   onManageBook?: () => void;
   isInBookshelf: boolean;
 }
+
+const ModalCoverImage = ({ book }: { book: Book }) => {
+  const [failed, setFailed] = useState(false);
+  
+  if (!book.imageLinks?.thumbnail || failed) {
+    return <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-36 h-52 sm:w-48 sm:h-72 rounded-xl shadow-2xl" />;
+  }
+
+  return (
+    <img
+      src={book.imageLinks.thumbnail}
+      alt={book.title}
+      className="w-36 h-52 sm:w-48 sm:h-72 object-cover rounded-xl shadow-2xl transition-transform duration-300 group-hover:scale-105"
+      onError={() => setFailed(true)}
+    />
+  );
+};
 
 export const BookDetailsModal = ({
   book,
@@ -196,14 +214,7 @@ export const BookDetailsModal = ({
               {/* Book Cover */}
               <div className="lg:w-1/3 p-4 sm:p-6 flex justify-center lg:justify-start bg-gradient-to-b from-muted/30 to-transparent flex-shrink-0">
                 <div className="relative group">
-                  <img
-                    src={book.imageLinks?.thumbnail || '/placeholder.svg'}
-                    alt={book.title}
-                    className="w-36 h-52 sm:w-48 sm:h-72 object-cover rounded-xl shadow-2xl transition-transform duration-300 group-hover:scale-105"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/placeholder.svg';
-                    }}
-                  />
+                  <ModalCoverImage book={book} />
                   <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   
                   {/* Quick Info Overlay */}
