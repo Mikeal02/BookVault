@@ -1,6 +1,8 @@
 
+import { useState } from 'react';
 import { Star, Plus, Trash2, Calendar, User } from 'lucide-react';
 import { Book } from '@/types/book';
+import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 
 interface BookCardProps {
   book: Book;
