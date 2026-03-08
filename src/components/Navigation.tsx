@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart,
   Music, Menu, Trophy, GitCompareArrows, FolderOpen, FileText, Share2,
-  ChevronRight, X, PanelLeftClose, PanelLeft
+  ChevronRight, X, PanelLeftClose, PanelLeft, LogOut
 } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { ThemePalettePicker } from './ThemePalettePicker';
@@ -19,6 +19,7 @@ interface NavigationProps {
   bookshelfCount: number;
   onLogout?: () => void;
   currentUser?: string;
+  userEmail?: string;
 }
 
 type ViewId = NavigationProps['currentView'];
@@ -71,7 +72,45 @@ const allItems = navGroups.flatMap(g => g.items);
 
 const SIDEBAR_COLLAPSED_KEY = 'bookvault_sidebar_collapsed';
 
-export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout, currentUser }: NavigationProps) => {
+// Generate initials for avatar
+const getInitials = (name?: string, email?: string): string => {
+  if (name && name !== 'Reader') {
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  }
+  if (email) return email[0].toUpperCase();
+  return 'U';
+};
+
+// Generate a deterministic hue from a string
+const getAvatarHue = (str: string): number => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return Math.abs(hash) % 360;
+};
+
+const UserAvatar = ({ name, email, size = 'md', onClick }: { name?: string; email?: string; size?: 'sm' | 'md'; onClick?: () => void }) => {
+  const initials = getInitials(name, email);
+  const hue = getAvatarHue(name || email || 'user');
+  const sizeClass = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-9 h-9 text-sm';
+
+  return (
+    <button
+      onClick={onClick}
+      className={`${sizeClass} rounded-xl font-bold flex items-center justify-center flex-shrink-0 transition-all duration-200 hover:scale-105 hover:shadow-md ring-2 ring-primary/20`}
+      style={{
+        background: `linear-gradient(135deg, hsl(${hue} 65% 55%), hsl(${(hue + 40) % 360} 60% 50%))`,
+        color: 'white',
+      }}
+      title={name || email || 'Profile'}
+    >
+      {initials}
+    </button>
+  );
+};
+
+export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout, currentUser, userEmail }: NavigationProps) => {
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
@@ -85,7 +124,6 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
   }, [collapsed]);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [currentView]);
@@ -98,19 +136,22 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
   const currentLabel = allItems.find(i => i.id === currentView)?.label || 'Dashboard';
   const CurrentIcon = allItems.find(i => i.id === currentView)?.icon || Home;
 
-  // ─── MOBILE: Top bar + overlay drawer ───
+  const greeting = (() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  })();
+
+  const displayName = currentUser && currentUser !== 'Reader' ? currentUser : userEmail?.split('@')[0] || 'Reader';
+
+  // ─── MOBILE ───
   if (isMobile) {
     return (
       <>
-        {/* Mobile top bar */}
         <div className="fixed top-0 left-0 right-0 z-50 glass-frosted border-b border-border/50">
           <div className="flex items-center h-14 px-3 gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-xl"
-              onClick={() => setMobileOpen(true)}
-            >
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl" onClick={() => setMobileOpen(true)}>
               <Menu className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -128,10 +169,8 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
             </div>
           </div>
         </div>
-        {/* Spacer for fixed header */}
         <div className="h-14" />
 
-        {/* Mobile overlay */}
         <AnimatePresence>
           {mobileOpen && (
             <>
@@ -150,20 +189,33 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                 transition={{ type: 'spring', damping: 28, stiffness: 300 }}
                 className="fixed top-0 left-0 bottom-0 z-[70] w-[280px] bg-card border-r border-border flex flex-col"
               >
-                {/* Drawer header */}
-                <div className="flex items-center justify-between h-14 px-4 border-b border-border/50">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center p-1.5">
-                      <img src="/favicon.ico" alt="BookVault" className="w-full h-full object-contain" />
+                {/* Drawer header with user */}
+                <div className="px-4 pt-4 pb-3 border-b border-border/50">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center p-1.5">
+                        <img src="/favicon.ico" alt="BookVault" className="w-full h-full object-contain" />
+                      </div>
+                      <span className="font-display text-base font-bold gradient-text">BookVault</span>
                     </div>
-                    <span className="font-display text-base font-bold gradient-text">BookVault</span>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setMobileOpen(false)}>
+                      <X className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setMobileOpen(false)}>
-                    <X className="w-4 h-4" />
-                  </Button>
+                  {/* User section */}
+                  <button
+                    onClick={() => handleNavClick('profile')}
+                    className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors"
+                  >
+                    <UserAvatar name={currentUser} email={userEmail} size="sm" />
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="text-[11px] text-muted-foreground/70">{greeting}</p>
+                      <p className="text-sm font-semibold text-foreground truncate">{displayName}</p>
+                    </div>
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50" />
+                  </button>
                 </div>
 
-                {/* Nav groups */}
                 <ScrollArea className="flex-1">
                   <div className="p-3 space-y-1">
                     {navGroups.map((group) => (
@@ -202,9 +254,17 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                   </div>
                 </ScrollArea>
 
-                {/* Drawer footer */}
                 <div className="p-3 border-t border-border/50 space-y-2">
                   <DatabaseSyncButton />
+                  {onLogout && (
+                    <button
+                      onClick={onLogout}
+                      className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Sign out</span>
+                    </button>
+                  )}
                 </div>
               </motion.nav>
             </>
@@ -214,18 +274,17 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
     );
   }
 
-  // ─── DESKTOP: Persistent sidebar ───
+  // ─── DESKTOP ───
   return (
     <motion.nav
       animate={{ width: collapsed ? 64 : 240 }}
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
       className="fixed top-0 left-0 bottom-0 z-40 flex flex-col bg-card/80 backdrop-blur-xl border-r border-border/50"
     >
-      {/* Top gradient accent */}
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary opacity-60" />
 
       {/* Logo + collapse toggle */}
-      <div className="flex items-center h-16 px-3 border-b border-border/40 gap-2 flex-shrink-0">
+      <div className="flex items-center h-14 px-3 border-b border-border/40 gap-2 flex-shrink-0">
         <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center p-1.5 flex-shrink-0 shadow-sm">
           <img src="/favicon.ico" alt="BookVault" className="w-full h-full object-contain" />
         </div>
@@ -252,6 +311,32 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
         </Button>
       </div>
 
+      {/* User profile card */}
+      <div className={`border-b border-border/30 ${collapsed ? 'px-2 py-3' : 'px-3 py-3'} flex-shrink-0`}>
+        {collapsed ? (
+          <div className="flex justify-center relative group">
+            <UserAvatar name={currentUser} email={userEmail} size="sm" onClick={() => handleNavClick('profile')} />
+            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-2 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+              <p className="text-[10px] opacity-70">{greeting}</p>
+              <p className="font-semibold">{displayName}</p>
+              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-foreground" />
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => handleNavClick('profile')}
+            className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-muted/30 transition-colors group"
+          >
+            <UserAvatar name={currentUser} email={userEmail} />
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-[10px] text-muted-foreground/60 leading-tight">{greeting}</p>
+              <p className="text-[13px] font-semibold text-foreground truncate leading-tight mt-0.5">{displayName}</p>
+            </div>
+            <ChevronRight className="w-3 h-3 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+          </button>
+        )}
+      </div>
+
       {/* Nav items */}
       <ScrollArea className="flex-1 py-2">
         <div className={collapsed ? 'px-2 space-y-1' : 'px-3 space-y-1'}>
@@ -276,7 +361,6 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                           : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
                       }`}
                     >
-                      {/* Active indicator pill */}
                       {isActive && (
                         <motion.div
                           layoutId="sidebar-active"
@@ -284,7 +368,6 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                         />
                       )}
-                      {/* Active left bar */}
                       {isActive && (
                         <motion.div
                           layoutId="sidebar-bar"
@@ -304,8 +387,6 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                         </span>
                       )}
                     </button>
-
-                    {/* Collapsed tooltip */}
                     {collapsed && (
                       <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 shadow-lg">
                         {item.label}
@@ -330,6 +411,29 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
           <ThemePalettePicker />
           <ThemeToggle />
         </div>
+        {onLogout && !collapsed && (
+          <button
+            onClick={onLogout}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Sign out</span>
+          </button>
+        )}
+        {onLogout && collapsed && (
+          <div className="relative group">
+            <button
+              onClick={onLogout}
+              className="w-full flex justify-center py-2 rounded-xl text-muted-foreground hover:text-destructive transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+              Sign out
+              <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-foreground" />
+            </div>
+          </div>
+        )}
       </div>
     </motion.nav>
   );

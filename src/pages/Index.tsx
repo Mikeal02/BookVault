@@ -26,7 +26,6 @@ import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
-import { LogOut } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const SIDEBAR_COLLAPSED_KEY = 'bookvault_sidebar_collapsed';
@@ -389,6 +388,7 @@ const Index = () => {
         bookshelfCount={bookshelf.length}
         onLogout={handleLogout}
         currentUser={currentUser}
+        userEmail={user?.email}
       />
 
       {/* Main content area — offset by sidebar width */}
@@ -397,46 +397,7 @@ const Index = () => {
         style={{ marginLeft: sidebarWidth }}
       >
         <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-[1400px] mx-auto">
-          {/* Desktop header (mobile header is in Navigation) */}
-          {!isMobile && (
-            <motion.div
-              className="flex justify-between items-center mb-6"
-              initial={{ opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="min-w-0">
-                <h1 className="text-2xl sm:text-3xl font-display font-bold gradient-text tracking-tight">
-                  BookVault
-                </h1>
-                <p className="text-muted-foreground text-xs sm:text-sm">
-                  Your personal reading sanctuary
-                </p>
-              </div>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-1.5 px-3 py-2 glass-card text-muted-foreground hover:text-destructive rounded-xl transition-all duration-300 font-medium text-sm"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Logout</span>
-                </button>
-              </div>
-            </motion.div>
-          )}
-
-          {/* Mobile logout button */}
-          {isMobile && (
-            <div className="flex justify-end mb-3">
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-muted-foreground hover:text-destructive rounded-xl transition-all duration-200 font-medium text-xs"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-                <span>Logout</span>
-              </button>
-            </div>
-          )}
+          {/* Page header is handled by each section component */}
 
           {/* Main Content with page transitions */}
           <AnimatePresence mode="wait">
