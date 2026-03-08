@@ -45,17 +45,17 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
       return (
         <button
           onClick={() => handleNavClick(item.id)}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
             isActive
-              ? 'gradient-primary text-white shadow-lg'
+              ? 'bg-primary/10 text-primary border-l-2 border-primary'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
           }`}
         >
-          <Icon className="w-5 h-5 flex-shrink-0" />
-          <span className="font-semibold">{item.label}</span>
+          <Icon className="w-4.5 h-4.5 flex-shrink-0" />
+          <span className="text-sm">{item.label}</span>
           {item.badge !== undefined && item.badge > 0 && (
-            <span className={`ml-auto px-2 py-0.5 text-xs font-bold rounded-full ${
-              isActive ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'
+            <span className={`ml-auto px-2 py-0.5 text-[10px] font-semibold rounded-full ${
+              isActive ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
             }`}>
               {item.badge}
             </span>
@@ -67,17 +67,20 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
     return (
       <button
         onClick={() => handleNavClick(item.id)}
-        className={`relative flex items-center gap-1.5 px-3 py-2.5 rounded-xl font-medium transition-all duration-300 group whitespace-nowrap flex-shrink-0 ${
+        className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg font-medium transition-all duration-200 group whitespace-nowrap flex-shrink-0 text-sm ${
           isActive
-            ? 'gradient-primary text-white shadow-lg'
-            : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+            ? 'bg-primary/10 text-primary'
+            : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
         }`}
       >
-        <Icon className={`w-4 h-4 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-105'}`} />
-        <span className="font-semibold text-sm">{item.label}</span>
+        {isActive && (
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-primary" />
+        )}
+        <Icon className={`w-4 h-4 transition-transform duration-200 ${isActive ? '' : 'group-hover:scale-105'}`} />
+        <span>{item.label}</span>
         {item.badge !== undefined && item.badge > 0 && (
-          <span className={`ml-1 px-1.5 py-0.5 text-xs font-bold rounded-full transition-colors ${
-            isActive ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'
+          <span className={`ml-0.5 px-1.5 py-0.5 text-[10px] font-semibold rounded-full transition-colors ${
+            isActive ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
           }`}>
             {item.badge}
           </span>
@@ -94,7 +97,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
     <div className="mb-6 sm:mb-8 w-full">
       {/* Mobile Navigation */}
       <div className="md:hidden">
-        <nav className="glass-card rounded-2xl p-2">
+        <nav className="glass-card rounded-xl p-2">
           <div className="flex items-center justify-between gap-2">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
@@ -102,13 +105,13 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0">
+              <SheetContent side="left" className="w-72 p-0 border-r border-border">
                 <div className="flex flex-col h-full">
-                  <div className="p-4 border-b border-border">
-                    <h2 className="text-lg font-bold gradient-text">Navigation</h2>
+                  <div className="p-5 border-b border-border">
+                    <h2 className="text-lg font-display font-semibold text-foreground">Navigation</h2>
                   </div>
                   <ScrollArea className="flex-1 p-3">
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                       {navItems.map((item) => (
                         <NavButton key={item.id} item={item} isMobile />
                       ))}
@@ -122,7 +125,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
             </Sheet>
 
             <div className="flex-1 flex justify-center">
-              <span className="text-sm font-semibold text-muted-foreground">
+              <span className="text-sm font-medium text-foreground">
                 {navItems.find(item => item.id === currentView)?.label}
               </span>
             </div>
@@ -134,10 +137,10 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
 
       {/* Desktop Navigation */}
       <div className="hidden md:block">
-        <nav className="glass-card rounded-2xl p-1.5">
-          <div className="flex items-center gap-1">
+        <nav className="glass-card rounded-xl p-1">
+          <div className="flex items-center gap-0.5">
             <ScrollArea className="flex-1">
-              <div className="flex gap-1 pb-1">
+              <div className="flex gap-0.5 pb-0.5">
                 {navItems.map((item) => (
                   <NavButton key={item.id} item={item} />
                 ))}
