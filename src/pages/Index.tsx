@@ -8,7 +8,6 @@ import { Navigation } from '@/components/Navigation';
 import { BookDetailsModal } from '@/components/BookDetailsModal';
 import { ReadingSessionTracker } from '@/components/ReadingSessionTracker';
 import { OnboardingModal } from '@/components/OnboardingModal';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { StatsDashboard } from '@/components/StatsDashboard';
 import { BookManagementModal } from '@/components/BookManagementModal';
 import { ReadingDashboard } from '@/components/ReadingDashboard';
@@ -23,12 +22,14 @@ import { BookAnnotations } from '@/components/BookAnnotations';
 import { SocialSharing } from '@/components/SocialSharing';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { AIBookInsights } from '@/components/AIBookInsights';
-import { ThemePalettePicker } from '@/components/ThemePalettePicker';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { LogOut } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
+
+const SIDEBAR_COLLAPSED_KEY = 'bookvault_sidebar_collapsed';
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -43,16 +44,30 @@ const Index = () => {
   const [insightsBook, setInsightsBook] = useState<Book | null>(null);
   const [bookshelf, setBookshelf] = useState<Book[]>([]);
   const [readingGoal, setReadingGoal] = useState<number>(12);
+  const isMobile = useIsMobile();
+
+  // Read sidebar collapsed state for layout offset
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
+    }
+    return false;
+  });
+
+  // Listen for sidebar collapse changes
+  useEffect(() => {
+    const check = () => setSidebarCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true');
+    const interval = setInterval(check, 200);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Defer loading user data to avoid deadlock
           setTimeout(() => {
             loadUserData(session.user);
           }, 0);
@@ -62,7 +77,6 @@ const Index = () => {
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -78,7 +92,6 @@ const Index = () => {
 
   const loadUserData = async (authUser: User) => {
     try {
-      // Get profile
       const { data: profile } = await supabase
         .from('profiles')
         .select('*')
@@ -89,18 +102,14 @@ const Index = () => {
         setCurrentUser(profile.username || profile.email || 'Reader');
         setReadingGoal(profile.reading_goal || 12);
         
-        // Only show onboarding if profile exists but has no genres AND no reading goal set (meaning never completed or skipped)
-        // Once user skips, we set reading_goal to 12 as default, so this won't trigger again
         if (!profile.favorite_genres && profile.reading_goal === null) {
           setShowOnboarding(true);
         }
       } else {
         setCurrentUser(authUser.email?.split('@')[0] || 'Reader');
-        // New users without a profile will get onboarding
         setShowOnboarding(true);
       }
 
-      // Load user books
       const { data: userBooks, error } = await supabase
         .from('user_books')
         .select('*')
@@ -145,9 +154,7 @@ const Index = () => {
     }
   };
 
-  const handleLogin = () => {
-    // Auth state listener will handle the rest
-  };
+  const handleLogin = () => {};
 
   const handleOnboardingComplete = async (preferences: any) => {
     if (!user) return;
@@ -171,11 +178,10 @@ const Index = () => {
   const handleOnboardingSkip = async () => {
     if (!user) return;
     
-    // Save default values to prevent onboarding from showing again
     try {
       await supabase.from('profiles').upsert({
         user_id: user.id,
-        reading_goal: 12, // Set default reading goal to mark onboarding as completed/skipped
+        reading_goal: 12,
         updated_at: new Date().toISOString()
       });
     } catch (error) {
@@ -325,7 +331,6 @@ const Index = () => {
       };
       await updateBookInShelf(updatedBook);
 
-      // Save reading session
       await supabase.from('reading_sessions').insert({
         user_id: user.id,
         book_id: sessionData.bookId,
@@ -368,218 +373,237 @@ const Index = () => {
     return <LoginPage onLogin={handleLogin} />;
   }
 
+  const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 240;
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <div className="absolute inset-0 gradient-mesh pointer-events-none" />
       <div className="blob-1 -top-60 -right-60 opacity-25" />
       <div className="blob-2 -bottom-60 -left-60 opacity-15" />
       <div className="blob-3 top-1/2 left-1/3 opacity-10" />
-      
-      <div className="relative z-10 container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
-        {/* Header */}
-        <motion.div
-          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-6 sm:mb-8"
-          initial={{ opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl gradient-primary flex items-center justify-center shadow-md p-2 flex-shrink-0">
-              <img src="/favicon.ico" alt="BookVault" className="w-full h-full object-contain" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-display font-bold gradient-text tracking-tight">
-                BookVault
-              </h1>
-              <p className="text-muted-foreground text-xs sm:text-sm truncate">
-                Your personal reading sanctuary
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <ThemePalettePicker />
-            <ThemeToggle />
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-2 glass-card text-muted-foreground hover:text-destructive rounded-xl transition-all duration-300 font-medium text-sm"
+
+      {/* Sidebar Navigation */}
+      <Navigation 
+        currentView={currentView} 
+        onViewChange={setCurrentView} 
+        bookshelfCount={bookshelf.length}
+        onLogout={handleLogout}
+        currentUser={currentUser}
+      />
+
+      {/* Main content area — offset by sidebar width */}
+      <div
+        className="relative z-10 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+        style={{ marginLeft: sidebarWidth }}
+      >
+        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-[1400px] mx-auto">
+          {/* Desktop header (mobile header is in Navigation) */}
+          {!isMobile && (
+            <motion.div
+              className="flex justify-between items-center mb-6"
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
-              <LogOut className="w-4 h-4" />
-              <span className="hidden xs:inline">Logout</span>
-            </button>
-          </div>
-        </motion.div>
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-display font-bold gradient-text tracking-tight">
+                  BookVault
+                </h1>
+                <p className="text-muted-foreground text-xs sm:text-sm">
+                  Your personal reading sanctuary
+                </p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 px-3 py-2 glass-card text-muted-foreground hover:text-destructive rounded-xl transition-all duration-300 font-medium text-sm"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </motion.div>
+          )}
 
-        <Navigation 
-          currentView={currentView} 
-          onViewChange={setCurrentView} 
-          bookshelfCount={bookshelf.length} 
-        />
+          {/* Mobile logout button */}
+          {isMobile && (
+            <div className="flex justify-end mb-3">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-muted-foreground hover:text-destructive rounded-xl transition-all duration-200 font-medium text-xs"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
 
-        {/* Main Content with page transitions */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentView}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          >
-            {currentView === 'dashboard' && (
-              <ReadingDashboard
-                books={bookshelf}
-                currentUser={currentUser}
-                onViewChange={setCurrentView}
-                readingGoal={readingGoal}
-              />
-            )}
-            
-            {currentView === 'search' && (
-              <EnhancedBookSearch
-                onBookSelect={handleBookSelect}
-                onAddToBookshelf={addToBookshelf}
-                isInBookshelf={isInBookshelf}
-              />
-            )}
-            
-            {currentView === 'recommendations' && (
-              <BookRecommendations
-                userBooks={bookshelf}
-                onBookSelect={handleBookSelect}
-                onAddToBookshelf={addToBookshelf}
-                isInBookshelf={isInBookshelf}
-              />
-            )}
-            
-            {currentView === 'shelf' && (
-              <MyBookshelf
-                books={bookshelf}
-                onBookSelect={handleBookSelect}
-                onRemoveFromBookshelf={removeFromBookshelf}
-                onUpdateBook={updateBookInShelf}
-                onManageBook={handleManageBook}
-              />
-            )}
-            
-            {currentView === 'stats' && (
-              <StatsDashboard 
-                books={bookshelf} 
-                currentUser={currentUser}
-              />
-            )}
+          {/* Main Content with page transitions */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentView}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {currentView === 'dashboard' && (
+                <ReadingDashboard
+                  books={bookshelf}
+                  currentUser={currentUser}
+                  onViewChange={setCurrentView}
+                  readingGoal={readingGoal}
+                />
+              )}
+              
+              {currentView === 'search' && (
+                <EnhancedBookSearch
+                  onBookSelect={handleBookSelect}
+                  onAddToBookshelf={addToBookshelf}
+                  isInBookshelf={isInBookshelf}
+                />
+              )}
+              
+              {currentView === 'recommendations' && (
+                <BookRecommendations
+                  userBooks={bookshelf}
+                  onBookSelect={handleBookSelect}
+                  onAddToBookshelf={addToBookshelf}
+                  isInBookshelf={isInBookshelf}
+                />
+              )}
+              
+              {currentView === 'shelf' && (
+                <MyBookshelf
+                  books={bookshelf}
+                  onBookSelect={handleBookSelect}
+                  onRemoveFromBookshelf={removeFromBookshelf}
+                  onUpdateBook={updateBookInShelf}
+                  onManageBook={handleManageBook}
+                />
+              )}
+              
+              {currentView === 'stats' && (
+                <StatsDashboard 
+                  books={bookshelf} 
+                  currentUser={currentUser}
+                />
+              )}
 
-            {currentView === 'profile' && (
-              <ProfileSection
-                books={bookshelf}
-                currentUser={currentUser}
-                userEmail={user?.email}
-                userId={user?.id}
-              />
-            )}
+              {currentView === 'profile' && (
+                <ProfileSection
+                  books={bookshelf}
+                  currentUser={currentUser}
+                  userEmail={user?.email}
+                  userId={user?.id}
+                />
+              )}
 
-            {currentView === 'quotes' && (
-              <QuoteCollection books={bookshelf} />
-            )}
+              {currentView === 'quotes' && (
+                <QuoteCollection books={bookshelf} />
+              )}
 
-            {currentView === 'mood' && (
-              <ReadingMoodJournal books={bookshelf} />
-            )}
+              {currentView === 'mood' && (
+                <ReadingMoodJournal books={bookshelf} />
+              )}
 
-            {currentView === 'atmosphere' && (
-              <ReadingAtmosphere books={bookshelf} />
-            )}
+              {currentView === 'atmosphere' && (
+                <ReadingAtmosphere books={bookshelf} />
+              )}
 
-            {currentView === 'challenges' && (
-              <ReadingChallenges books={bookshelf} />
-            )}
+              {currentView === 'challenges' && (
+                <ReadingChallenges books={bookshelf} />
+              )}
 
-            {currentView === 'comparison' && (
-              <BookComparison books={bookshelf} onBookSelect={handleBookSelect} />
-            )}
+              {currentView === 'comparison' && (
+                <BookComparison books={bookshelf} onBookSelect={handleBookSelect} />
+              )}
 
-            {currentView === 'lists' && (
-              <ReadingLists books={bookshelf} onBookSelect={handleBookSelect} />
-            )}
+              {currentView === 'lists' && (
+                <ReadingLists books={bookshelf} onBookSelect={handleBookSelect} />
+              )}
 
-            {currentView === 'annotations' && (
-              <BookAnnotations books={bookshelf} onBookSelect={handleBookSelect} />
-            )}
+              {currentView === 'annotations' && (
+                <BookAnnotations books={bookshelf} onBookSelect={handleBookSelect} />
+              )}
 
-            {currentView === 'sharing' && (
-              <SocialSharing books={bookshelf} />
-            )}
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Modals */}
-        {selectedBook && (
-          <BookDetailsModal
-            book={selectedBook}
-            onClose={() => setSelectedBook(null)}
-            onAddToBookshelf={addToBookshelf}
-            onRemoveFromBookshelf={removeFromBookshelf}
-            onUpdateBook={updateBookInShelf}
-            onStartReadingSession={() => {
-              setReadingSessionBook(selectedBook);
-              setSelectedBook(null);
-            }}
-            onManageBook={() => {
-              setManagingBook(selectedBook);
-              setSelectedBook(null);
-            }}
-            isInBookshelf={isInBookshelf(selectedBook.id)}
-            onAIInsights={() => {
-              setInsightsBook(selectedBook);
-              setSelectedBook(null);
-            }}
-          />
-        )}
-
-        {managingBook && (
-          <BookManagementModal
-            book={managingBook}
-            onClose={() => setManagingBook(null)}
-            onSave={updateBookInShelf}
-          />
-        )}
-
-        {readingSessionBook && (
-          <ReadingSessionTracker
-            book={readingSessionBook}
-            onSessionComplete={handleReadingSessionComplete}
-            onClose={() => setReadingSessionBook(null)}
-          />
-        )}
-
-        {showOnboarding && (
-          <OnboardingModal
-            onComplete={handleOnboardingComplete}
-            onSkip={handleOnboardingSkip}
-          />
-        )}
-
-        {/* Floating Action Button */}
-        <FloatingActionButton
-          onAddBook={() => setCurrentView('search')}
-          onStartSession={() => {
-            const readingBook = bookshelf.find(b => b.readingStatus === 'reading');
-            if (readingBook) {
-              setReadingSessionBook(readingBook);
-            } else {
-              toast.info('Start reading a book first to begin a session');
-            }
-          }}
-          onLogMood={() => setCurrentView('mood')}
-        />
-
-        {/* AI Book Insights Modal */}
-        {insightsBook && (
-          <AIBookInsights
-            book={insightsBook}
-            userBooks={bookshelf}
-            onClose={() => setInsightsBook(null)}
-          />
-        )}
+              {currentView === 'sharing' && (
+                <SocialSharing books={bookshelf} />
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </div>
+
+      {/* Modals */}
+      {selectedBook && (
+        <BookDetailsModal
+          book={selectedBook}
+          onClose={() => setSelectedBook(null)}
+          onAddToBookshelf={addToBookshelf}
+          onRemoveFromBookshelf={removeFromBookshelf}
+          onUpdateBook={updateBookInShelf}
+          onStartReadingSession={() => {
+            setReadingSessionBook(selectedBook);
+            setSelectedBook(null);
+          }}
+          onManageBook={() => {
+            setManagingBook(selectedBook);
+            setSelectedBook(null);
+          }}
+          isInBookshelf={isInBookshelf(selectedBook.id)}
+          onAIInsights={() => {
+            setInsightsBook(selectedBook);
+            setSelectedBook(null);
+          }}
+        />
+      )}
+
+      {managingBook && (
+        <BookManagementModal
+          book={managingBook}
+          onClose={() => setManagingBook(null)}
+          onSave={updateBookInShelf}
+        />
+      )}
+
+      {readingSessionBook && (
+        <ReadingSessionTracker
+          book={readingSessionBook}
+          onSessionComplete={handleReadingSessionComplete}
+          onClose={() => setReadingSessionBook(null)}
+        />
+      )}
+
+      {showOnboarding && (
+        <OnboardingModal
+          onComplete={handleOnboardingComplete}
+          onSkip={handleOnboardingSkip}
+        />
+      )}
+
+      {/* Floating Action Button */}
+      <FloatingActionButton
+        onAddBook={() => setCurrentView('search')}
+        onStartSession={() => {
+          const readingBook = bookshelf.find(b => b.readingStatus === 'reading');
+          if (readingBook) {
+            setReadingSessionBook(readingBook);
+          } else {
+            toast.info('Start reading a book first to begin a session');
+          }
+        }}
+        onLogMood={() => setCurrentView('mood')}
+      />
+
+      {/* AI Book Insights Modal */}
+      {insightsBook && (
+        <AIBookInsights
+          book={insightsBook}
+          userBooks={bookshelf}
+          onClose={() => setInsightsBook(null)}
+        />
+      )}
     </div>
   );
 };
