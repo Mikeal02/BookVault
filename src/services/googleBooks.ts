@@ -6,13 +6,9 @@ const OPEN_LIBRARY_SEARCH_URL = 'https://openlibrary.org/search.json';
 const GOOGLE_BOOKS_API_URL = 'https://www.googleapis.com/books/v1/volumes';
 
 // === Cover Image Resolution ===
-// Try multiple sources for the best possible cover image
 const getOpenLibraryCover = (coverId?: number, isbn?: string, olid?: string): string | undefined => {
-  // Priority 1: Cover ID (highest quality)
   if (coverId) return `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`;
-  // Priority 2: ISBN (most reliable identifier)
   if (isbn) return `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`;
-  // Priority 3: Edition OLID
   if (olid) return `https://covers.openlibrary.org/b/olid/${olid}-L.jpg`;
   return undefined;
 };
@@ -22,7 +18,6 @@ const getGoogleBooksCover = (isbn?: string): string | undefined => {
   return `https://books.google.com/books/content?id=&printsec=frontcover&img=1&zoom=1&source=gbs_api&vid=ISBN${isbn}`;
 };
 
-// Build a list of cover URLs to try in order of quality
 const buildCoverUrls = (item: any): { thumbnail?: string; smallThumbnail?: string } => {
   const coverId = item.cover_i;
   const isbn13 = item.isbn?.[0];
@@ -42,6 +37,49 @@ const buildCoverUrls = (item: any): { thumbnail?: string; smallThumbnail?: strin
       ? `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`
       : thumbnail,
   };
+};
+
+// === Relevance Scoring ===
+// Weighted scoring: cover availability, ratings, metadata completeness
+const computeRelevanceScore = (book: Book, queryTerms: string[]): number => {
+  let score = 0;
+
+  // Cover availability (high weight)
+  if (book.imageLinks?.thumbnail) score += 30;
+
+  // Ratings quality
+  if (book.averageRating) {
+    score += book.averageRating * 4; // up to 20
+  }
+  if (book.ratingsCount) {
+    score += Math.min(20, Math.log10(book.ratingsCount + 1) * 5);
+  }
+
+  // Metadata completeness
+  if (book.description) score += 5;
+  if (book.pageCount) score += 3;
+  if (book.categories?.length) score += 3;
+  if (book.publishedDate) score += 2;
+  if (book.publisher) score += 2;
+
+  // Title/author match quality
+  const titleLower = book.title.toLowerCase();
+  const authorLower = (book.authors?.[0] || '').toLowerCase();
+  for (const term of queryTerms) {
+    if (titleLower.includes(term)) score += 15;
+    if (titleLower.startsWith(term)) score += 10;
+    if (authorLower.includes(term)) score += 10;
+  }
+
+  // Recency bonus (slight preference for newer books)
+  if (book.publishedDate) {
+    const year = parseInt(book.publishedDate);
+    if (year > 2020) score += 5;
+    else if (year > 2010) score += 3;
+    else if (year > 2000) score += 1;
+  }
+
+  return score;
 };
 
 // === Transformers ===
@@ -75,13 +113,11 @@ const transformGoogleBookToBook = (item: any): Book => {
   const { volumeInfo } = item;
   const buyLinks = generatePurchaseLinks(volumeInfo.title, volumeInfo.authors?.[0]);
 
-  // Get the best available thumbnail from Google
   let thumbnail = volumeInfo.imageLinks?.thumbnail;
   let smallThumbnail = volumeInfo.imageLinks?.smallThumbnail;
 
-  // Upgrade to higher quality by modifying zoom parameter
   if (thumbnail) {
-    thumbnail = thumbnail.replace('http://', 'https://').replace('zoom=1', 'zoom=2');
+    thumbnail = thumbnail.replace('http://', 'https://').replace('zoom=1', 'zoom=3');
   }
   if (smallThumbnail) {
     smallThumbnail = smallThumbnail.replace('http://', 'https://');
@@ -144,18 +180,46 @@ const searchGoogleBooks = async (query: string, limit: number = 40): Promise<Boo
   }
 };
 
-export const searchBooks = async (query: string, maxResults: number = 40): Promise<Book[]> => {
+export interface SearchFilters {
+  sortBy?: 'relevance' | 'newest' | 'rating' | 'popularity';
+  category?: 'all' | 'fiction' | 'non-fiction' | 'science' | 'history' | 'biography' | 'technology';
+  yearRange?: { min?: number; max?: number };
+  minRating?: number;
+  language?: string;
+  hasCovers?: boolean;
+}
+
+export const searchBooks = async (query: string, maxResults: number = 40, filters?: SearchFilters): Promise<Book[]> => {
   try {
     const searchQuery = query.trim();
+    const queryTerms = searchQuery.toLowerCase().split(/\s+/).filter(t => t.length > 1);
 
-    // Search both APIs in parallel for maximum coverage
+    // Build category-qualified queries
+    let olQuery = searchQuery;
+    let gbQuery = searchQuery;
+    
+    if (filters?.category && filters.category !== 'all') {
+      const subjectMap: Record<string, string> = {
+        'fiction': 'fiction',
+        'non-fiction': 'nonfiction',
+        'science': 'science',
+        'history': 'history',
+        'biography': 'biography',
+        'technology': 'technology computers',
+      };
+      const subject = subjectMap[filters.category] || filters.category;
+      olQuery = `${searchQuery} subject:${subject}`;
+      gbQuery = `${searchQuery}+subject:${subject}`;
+    }
+
+    // Search both APIs in parallel
     const [openLibResults, googleResults] = await Promise.all([
-      searchOpenLibrary(searchQuery, Math.min(maxResults * 2, 100)),
-      searchGoogleBooks(searchQuery, 40),
+      searchOpenLibrary(olQuery, Math.min(maxResults * 2, 100)),
+      searchGoogleBooks(gbQuery, 40),
     ]);
 
-    // Merge results: Open Library first (bigger catalog), Google second (better covers sometimes)
-    const all = [...openLibResults, ...googleResults];
+    // Merge: Google first for better covers, Open Library for breadth
+    const all = [...googleResults, ...openLibResults];
 
     // Deduplicate by normalized title+author
     const seen = new Set<string>();
@@ -166,11 +230,46 @@ export const searchBooks = async (query: string, maxResults: number = 40): Promi
       return true;
     });
 
-    // Prioritize books WITH covers, then sort by having ratings
-    const withCovers = deduped.filter(b => b.imageLinks?.thumbnail);
-    const withoutCovers = deduped.filter(b => !b.imageLinks?.thumbnail);
+    // Apply filters
+    let filtered = deduped;
 
-    return [...withCovers, ...withoutCovers].slice(0, maxResults);
+    if (filters?.yearRange?.min || filters?.yearRange?.max) {
+      filtered = filtered.filter(book => {
+        if (!book.publishedDate) return false;
+        const year = parseInt(book.publishedDate);
+        if (isNaN(year)) return false;
+        if (filters.yearRange?.min && year < filters.yearRange.min) return false;
+        if (filters.yearRange?.max && year > filters.yearRange.max) return false;
+        return true;
+      });
+    }
+
+    if (filters?.minRating) {
+      filtered = filtered.filter(book => (book.averageRating || 0) >= filters.minRating!);
+    }
+
+    if (filters?.language && filters.language !== 'all') {
+      filtered = filtered.filter(book => book.language === filters.language);
+    }
+
+    if (filters?.hasCovers) {
+      filtered = filtered.filter(book => book.imageLinks?.thumbnail);
+    }
+
+    // Sort by weighted relevance score
+    const sortBy = filters?.sortBy || 'relevance';
+    
+    if (sortBy === 'relevance') {
+      filtered.sort((a, b) => computeRelevanceScore(b, queryTerms) - computeRelevanceScore(a, queryTerms));
+    } else if (sortBy === 'newest') {
+      filtered.sort((a, b) => (parseInt(b.publishedDate || '0') || 0) - (parseInt(a.publishedDate || '0') || 0));
+    } else if (sortBy === 'rating') {
+      filtered.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
+    } else if (sortBy === 'popularity') {
+      filtered.sort((a, b) => (b.ratingsCount || 0) - (a.ratingsCount || 0));
+    }
+
+    return filtered.slice(0, maxResults);
   } catch (error) {
     console.error('Error searching books:', error);
     throw error;

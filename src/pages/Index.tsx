@@ -369,25 +369,25 @@ const Index = () => {
       
       <div className="relative z-10 container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 mb-6 sm:mb-8">
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <div className="w-10 h-10 sm:w-12 md:w-14 sm:h-12 md:h-14 rounded-xl sm:rounded-2xl gradient-primary flex items-center justify-center shadow-lg animate-float p-1.5 sm:p-2 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-6 sm:mb-8">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg gradient-primary flex items-center justify-center shadow-sm p-2 flex-shrink-0">
               <img src="/favicon.ico" alt="BookVault" className="w-full h-full object-contain" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold gradient-text-mixed">
+              <h1 className="text-2xl sm:text-3xl font-display font-semibold text-foreground tracking-tight">
                 BookVault
               </h1>
-              <p className="text-muted-foreground mt-0.5 sm:mt-1 text-xs sm:text-sm md:text-base truncate">
+              <p className="text-muted-foreground text-xs sm:text-sm truncate">
                 Your personal reading sanctuary
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 glass-card text-foreground hover:bg-destructive hover:text-destructive-foreground rounded-lg sm:rounded-xl transition-all duration-200 font-medium text-sm sm:text-base"
+              className="flex items-center gap-1.5 px-3 py-2 glass-card text-muted-foreground hover:text-destructive rounded-lg transition-all duration-200 font-medium text-sm"
             >
               <LogOut className="w-4 h-4" />
               <span className="hidden xs:inline">Logout</span>

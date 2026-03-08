@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
-import { Search, Clock, TrendingUp, X, Filter, SortAsc, Sparkles, BookOpen, Star } from 'lucide-react';
-import { searchBooks } from '@/services/googleBooks';
+import { Search, Clock, TrendingUp, X, Filter, SortAsc, Sparkles, BookOpen, Star, Sliders } from 'lucide-react';
+import { searchBooks, SearchFilters } from '@/services/googleBooks';
 import { Book } from '@/types/book';
 import { BookCard } from './BookCard';
 import { Button } from '@/components/ui/button';
@@ -24,24 +24,37 @@ const getRotatedPopularSearches = () => {
   return shuffled.slice(0, 8);
 };
 
+const categories = [
+  { value: 'all', label: 'All' },
+  { value: 'fiction', label: 'Fiction' },
+  { value: 'non-fiction', label: 'Non-Fiction' },
+  { value: 'science', label: 'Science' },
+  { value: 'history', label: 'History' },
+  { value: 'biography', label: 'Biography' },
+  { value: 'technology', label: 'Technology' },
+] as const;
+
 export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshelf }: EnhancedBookSearchProps) => {
   const [query, setQuery] = useState('');
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [sortBy, setSortBy] = useState<'relevance' | 'newest' | 'rating'>('relevance');
-  const [filterBy, setFilterBy] = useState<'all' | 'fiction' | 'non-fiction'>('all');
+  const [showFilters, setShowFilters] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [booksPerPage] = useState(12);
   const [displayedPopularSearches, setDisplayedPopularSearches] = useState<string[]>([]);
 
+  // Filters
+  const [sortBy, setSortBy] = useState<SearchFilters['sortBy']>('relevance');
+  const [category, setCategory] = useState<SearchFilters['category']>('all');
+  const [minRating, setMinRating] = useState<number>(0);
+  const [hasCovers, setHasCovers] = useState(false);
+
   useEffect(() => {
     const saved = localStorage.getItem('bookapp_recent_searches');
-    if (saved) {
-      setRecentSearches(JSON.parse(saved));
-    }
+    if (saved) setRecentSearches(JSON.parse(saved));
     setDisplayedPopularSearches(getRotatedPopularSearches());
   }, []);
 
@@ -60,24 +73,14 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
     saveRecentSearch(searchQuery.trim());
 
     try {
-      // Build subject-qualified query for better filtering
-      let queryStr = searchQuery;
-      if (filterBy === 'fiction') queryStr = `${searchQuery} subject:fiction`;
-      if (filterBy === 'non-fiction') queryStr = `${searchQuery} subject:nonfiction`;
+      const filters: SearchFilters = {
+        sortBy,
+        category,
+        minRating: minRating > 0 ? minRating : undefined,
+        hasCovers,
+      };
 
-      let results = await searchBooks(queryStr, 40);
-
-      results = results.sort((a, b) => {
-        switch (sortBy) {
-          case 'newest':
-            return (parseInt(b.publishedDate || '0') || 0) - (parseInt(a.publishedDate || '0') || 0);
-          case 'rating':
-            return (b.averageRating || 0) - (a.averageRating || 0);
-          default:
-            return 0;
-        }
-      });
-
+      const results = await searchBooks(searchQuery, 40, filters);
       setBooks(results);
       setCurrentPage(1);
     } catch (err: any) {
@@ -103,33 +106,37 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Don't double-filter: books are already fetched by query from the API
-  const filteredBooks = books;
-
   const paginatedBooks = useMemo(() => {
-    return filteredBooks.slice((currentPage - 1) * booksPerPage, currentPage * booksPerPage);
-  }, [filteredBooks, currentPage, booksPerPage]);
+    return books.slice((currentPage - 1) * booksPerPage, currentPage * booksPerPage);
+  }, [books, currentPage, booksPerPage]);
 
-  const totalPages = Math.ceil(filteredBooks.length / booksPerPage);
+  const totalPages = Math.ceil(books.length / booksPerPage);
+
+  const activeFilterCount = [
+    category !== 'all',
+    minRating > 0,
+    hasCovers,
+    sortBy !== 'relevance',
+  ].filter(Boolean).length;
 
   return (
     <div className="space-y-6">
-      {/* Enhanced Search Header */}
-      <div className="glass-card rounded-2xl p-6">
+      {/* Search Header */}
+      <div className="glass-card rounded-xl p-6 sm:p-8">
         <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold gradient-text-mixed mb-2">
-            Discover Amazing Books
+          <h2 className="text-3xl sm:text-4xl font-display font-semibold text-foreground mb-2">
+            Discover Your Next Read
           </h2>
-          <p className="text-muted-foreground">
-            Search through millions of books and find your next favorite read
+          <p className="text-muted-foreground text-sm">
+            Search across millions of books from multiple sources
           </p>
         </div>
 
-        {/* Enhanced Search Bar */}
-        <div className="relative">
-          <div className="flex space-x-3">
+        {/* Search Bar */}
+        <div className="relative max-w-2xl mx-auto">
+          <div className="flex gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4.5 h-4.5" />
               <input
                 type="text"
                 value={query}
@@ -138,26 +145,26 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                 placeholder="Search by title, author, ISBN..."
-                className="w-full pl-12 pr-4 py-4 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 shadow-sm text-lg text-foreground placeholder-muted-foreground"
+                className="w-full pl-11 pr-10 py-3.5 bg-muted/40 border border-border rounded-lg focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all duration-200 text-foreground placeholder-muted-foreground text-sm"
               />
               {query && (
                 <button
                   onClick={() => setQuery('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
             <Button
               onClick={() => handleSearch()}
               disabled={loading}
-              className="px-8 py-4 gradient-primary text-white hover:opacity-90 rounded-xl shadow-lg text-lg font-semibold"
+              className="px-6 py-3.5 gradient-primary text-primary-foreground hover:opacity-90 rounded-lg shadow-sm font-medium h-auto"
             >
               {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Searching...
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                  <span className="hidden sm:inline">Searching</span>
                 </div>
               ) : (
                 'Search'
@@ -165,33 +172,27 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
             </Button>
           </div>
 
-          {/* Enhanced Search Suggestions */}
+          {/* Suggestions dropdown */}
           {showSuggestions && (
-            <div className="absolute top-full left-0 right-0 mt-2 glass-card rounded-xl shadow-2xl z-50 max-h-96 overflow-y-auto">
+            <div className="absolute top-full left-0 right-0 mt-2 glass-card rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto border border-border">
               {recentSearches.length > 0 && (
                 <div className="p-4 border-b border-border">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 text-muted-foreground mr-2" />
-                      <span className="text-sm font-medium text-muted-foreground">Recent Searches</span>
-                    </div>
+                  <div className="flex items-center mb-2.5">
+                    <Clock className="w-3.5 h-3.5 text-muted-foreground mr-2" />
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Recent</span>
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-0.5">
                     {recentSearches.map((search, index) => (
                       <div key={index} className="flex items-center justify-between group">
                         <button
-                          onClick={() => {
-                            setQuery(search);
-                            handleSearch(search);
-                          }}
-                          className="flex-1 text-left text-sm text-foreground hover:text-primary transition-colors p-2 rounded hover:bg-muted/50"
+                          onClick={() => { setQuery(search); handleSearch(search); }}
+                          className="flex-1 text-left text-sm text-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-muted/50"
                         >
-                          <BookOpen className="w-4 h-4 inline mr-2" />
                           {search}
                         </button>
                         <button
                           onClick={() => clearRecentSearch(search)}
-                          className="opacity-0 group-hover:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-all"
+                          className="opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive transition-all"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -202,30 +203,26 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
               )}
 
               <div className="p-4">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center justify-between mb-2.5">
                   <div className="flex items-center">
-                    <TrendingUp className="w-4 h-4 text-muted-foreground mr-2" />
-                    <span className="text-sm font-medium text-muted-foreground">Popular Searches</span>
+                    <TrendingUp className="w-3.5 h-3.5 text-muted-foreground mr-2" />
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Trending</span>
                   </div>
                   <button
                     onClick={refreshPopularSearches}
-                    className="text-xs text-primary hover:text-primary/80 flex items-center"
+                    className="text-xs text-primary hover:text-primary/80 flex items-center gap-1"
                   >
-                    <Sparkles className="w-3 h-3 mr-1" />
+                    <Sparkles className="w-3 h-3" />
                     Refresh
                   </button>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-1">
                   {displayedPopularSearches.map((search, index) => (
                     <button
                       key={index}
-                      onClick={() => {
-                        setQuery(search);
-                        handleSearch(search);
-                      }}
-                      className="text-left text-sm text-foreground hover:text-primary transition-colors p-2 rounded hover:bg-muted/50 flex items-center"
+                      onClick={() => { setQuery(search); handleSearch(search); }}
+                      className="text-left text-sm text-foreground hover:text-primary transition-colors p-2 rounded-md hover:bg-muted/50 truncate"
                     >
-                      <Star className="w-3 h-3 mr-2 text-highlight" />
                       {search}
                     </button>
                   ))}
@@ -236,70 +233,111 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
         </div>
       </div>
 
-      {/* Enhanced Filters and Sorting */}
+      {/* Filters Bar */}
       {books.length > 0 && (
-        <div className="glass-card rounded-xl p-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Filter className="w-4 h-4 text-muted-foreground" />
-                <select
-                  value={filterBy}
-                  onChange={(e) => setFilterBy(e.target.value as any)}
-                  className="px-3 py-2 bg-muted/50 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent text-foreground"
-                >
-                  <option value="all">All Books</option>
-                  <option value="fiction">Fiction</option>
-                  <option value="non-fiction">Non-Fiction</option>
-                </select>
-              </div>
+        <div className="glass-card rounded-xl p-3 sm:p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`gap-1.5 text-xs ${activeFilterCount > 0 ? 'border-primary text-primary' : ''}`}
+              >
+                <Sliders className="w-3.5 h-3.5" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="ml-1 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
 
+              {/* Category pills */}
+              <div className="flex gap-1 flex-wrap">
+                {categories.map(cat => (
+                  <button
+                    key={cat.value}
+                    onClick={() => { setCategory(cat.value); if (query) handleSearch(); }}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+                      category === cat.value
+                        ? 'bg-primary/10 text-primary border border-primary/20'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="text-xs text-muted-foreground">
+              {books.length} results
+            </div>
+          </div>
+
+          {/* Expanded filters */}
+          {showFilters && (
+            <div className="mt-3 pt-3 border-t border-border flex flex-wrap gap-4 items-center">
               <div className="flex items-center gap-2">
-                <SortAsc className="w-4 h-4 text-muted-foreground" />
+                <SortAsc className="w-3.5 h-3.5 text-muted-foreground" />
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="px-3 py-2 bg-muted/50 border border-border rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent text-foreground"
+                  onChange={(e) => { setSortBy(e.target.value as any); if (query) handleSearch(); }}
+                  className="px-2.5 py-1.5 bg-muted/40 border border-border rounded-md text-xs focus:ring-2 focus:ring-primary/30 text-foreground"
                 >
                   <option value="relevance">Most Relevant</option>
                   <option value="newest">Newest First</option>
                   <option value="rating">Highest Rated</option>
+                  <option value="popularity">Most Popular</option>
                 </select>
               </div>
-            </div>
 
-            <div className="flex items-center gap-4">
-              <div className="text-sm text-muted-foreground font-medium">
-                {filteredBooks.length} results • Page {currentPage} of {totalPages}
+              <div className="flex items-center gap-2">
+                <Star className="w-3.5 h-3.5 text-muted-foreground" />
+                <select
+                  value={minRating}
+                  onChange={(e) => { setMinRating(Number(e.target.value)); if (query) handleSearch(); }}
+                  className="px-2.5 py-1.5 bg-muted/40 border border-border rounded-md text-xs focus:ring-2 focus:ring-primary/30 text-foreground"
+                >
+                  <option value={0}>Any Rating</option>
+                  <option value={3}>3+ Stars</option>
+                  <option value={3.5}>3.5+ Stars</option>
+                  <option value={4}>4+ Stars</option>
+                  <option value={4.5}>4.5+ Stars</option>
+                </select>
               </div>
+
+              <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasCovers}
+                  onChange={(e) => { setHasCovers(e.target.checked); if (query) handleSearch(); }}
+                  className="rounded border-border"
+                />
+                With covers only
+              </label>
             </div>
-          </div>
+          )}
         </div>
       )}
 
-      {/* Error Display */}
+      {/* Error */}
       {error && (
-        <div className="text-center text-destructive bg-destructive/10 p-6 rounded-xl border border-destructive/20">
-          <div className="flex items-center justify-center mb-2">
-            <X className="w-6 h-6 mr-2" />
-            <span className="font-semibold">Search Error</span>
-          </div>
-          <p>{error}</p>
-          <Button
-            onClick={() => handleSearch()}
-            className="mt-4 bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-          >
+        <div className="text-center text-destructive bg-destructive/5 p-6 rounded-xl border border-destructive/10">
+          <p className="text-sm mb-3">{error}</p>
+          <Button onClick={() => handleSearch()} variant="outline" size="sm" className="border-destructive/20 text-destructive">
             Try Again
           </Button>
         </div>
       )}
 
-      {/* Search Results */}
-      {filteredBooks.length > 0 && (
+      {/* Results */}
+      {books.length > 0 && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {paginatedBooks.map((book, index) => (
-              <div key={book.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+              <div key={book.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
                 <BookCard
                   book={book}
                   onSelect={() => onBookSelect(book)}
@@ -311,32 +349,32 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
             ))}
           </div>
 
-          {/* Enhanced Pagination */}
+          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-center items-center mt-8">
-              <div className="flex items-center space-x-2 glass-card rounded-xl p-2">
+              <div className="flex items-center gap-1 glass-card rounded-lg p-1.5">
                 <Button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="disabled:opacity-50 border-border"
+                  className="text-xs"
                 >
                   Previous
                 </Button>
                 
-                <div className="flex space-x-1">
+                <div className="flex gap-0.5">
                   {[...Array(Math.min(5, totalPages))].map((_, i) => {
                     const pageNum = currentPage <= 3 ? i + 1 : currentPage - 2 + i;
-                    if (pageNum > totalPages) return null;
+                    if (pageNum > totalPages || pageNum < 1) return null;
                     
                     return (
                       <button
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
-                        className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                        className={`w-8 h-8 rounded-md text-xs font-medium transition-colors ${
                           currentPage === pageNum
-                            ? 'gradient-primary text-white'
+                            ? 'bg-primary text-primary-foreground'
                             : 'text-muted-foreground hover:bg-muted'
                         }`}
                       >
@@ -349,9 +387,9 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
                 <Button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="disabled:opacity-50 border-border"
+                  className="text-xs"
                 >
                   Next
                 </Button>
@@ -361,33 +399,25 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
         </div>
       )}
 
-      {/* Enhanced Empty States */}
-      {query && !loading && filteredBooks.length === 0 && !error ? (
-        <div className="text-center py-16 glass-card rounded-2xl">
-          <div className="max-w-md mx-auto">
-            <Search className="w-20 h-20 mx-auto text-muted-foreground/30 mb-6" />
-            <h3 className="text-xl font-semibold text-muted-foreground mb-3">No books found</h3>
-            <p className="text-muted-foreground mb-6">
-              Try searching with different keywords or browse our popular searches
-            </p>
-            <div className="flex flex-wrap gap-2 justify-center">
-              {displayedPopularSearches.slice(0, 4).map((search, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setQuery(search);
-                    handleSearch(search);
-                  }}
-                  className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm hover:bg-primary/20 transition-colors"
-                >
-                  {search}
-                </button>
-              ))}
-            </div>
+      {/* Empty state */}
+      {query && !loading && books.length === 0 && !error && (
+        <div className="text-center py-16 glass-card rounded-xl">
+          <Search className="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
+          <h3 className="text-lg font-display font-semibold text-muted-foreground mb-2">No books found</h3>
+          <p className="text-sm text-muted-foreground mb-6">Try different keywords or browse trending searches</p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            {displayedPopularSearches.slice(0, 4).map((search, index) => (
+              <button
+                key={index}
+                onClick={() => { setQuery(search); handleSearch(search); }}
+                className="px-3 py-1.5 bg-primary/5 text-primary rounded-md text-xs font-medium hover:bg-primary/10 transition-colors border border-primary/10"
+              >
+                {search}
+              </button>
+            ))}
           </div>
         </div>
-      ) : null}
-
+      )}
     </div>
   );
 };
