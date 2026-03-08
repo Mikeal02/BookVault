@@ -196,7 +196,7 @@ export const ProfileSection = ({ books, currentUser, userEmail, userId }: Profil
           <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
             {/* Avatar Section */}
             <div className="relative group">
-              <div className="w-32 h-32 rounded-full gradient-primary flex items-center justify-center shadow-2xl ring-4 ring-white dark:ring-gray-800">
+              <div className="w-32 h-32 rounded-full gradient-primary flex items-center justify-center shadow-2xl ring-4 ring-card">
                 <span className="text-5xl font-bold text-white">
                   {profile.username?.charAt(0).toUpperCase() || 'U'}
                 </span>
