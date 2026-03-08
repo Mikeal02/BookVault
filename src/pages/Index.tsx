@@ -1,36 +1,46 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LoginPage } from '@/components/LoginPage';
-import { EnhancedBookSearch } from '@/components/EnhancedBookSearch';
-import { BookRecommendations } from '@/components/BookRecommendations';
-import { MyBookshelf } from '@/components/MyBookshelf';
 import { Navigation } from '@/components/Navigation';
 import { BookDetailsModal } from '@/components/BookDetailsModal';
 import { ReadingSessionTracker } from '@/components/ReadingSessionTracker';
 import { OnboardingModal } from '@/components/OnboardingModal';
-import { StatsDashboard } from '@/components/StatsDashboard';
 import { BookManagementModal } from '@/components/BookManagementModal';
 import { ReadingDashboard } from '@/components/ReadingDashboard';
-import { ProfileSection } from '@/components/ProfileSection';
-import { QuoteCollection } from '@/components/QuoteCollection';
-import { ReadingMoodJournal } from '@/components/ReadingMoodJournal';
-import { ReadingAtmosphere } from '@/components/ReadingAtmosphere';
-import { ReadingChallenges } from '@/components/ReadingChallenges';
-import { BookComparison } from '@/components/BookComparison';
-import { ReadingLists } from '@/components/ReadingLists';
-import { BookAnnotations } from '@/components/BookAnnotations';
-import { SocialSharing } from '@/components/SocialSharing';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
-import { AIBookInsights } from '@/components/AIBookInsights';
-import { ISBNScanner } from '@/components/ISBNScanner';
-import { ReadingWrapped } from '@/components/ReadingWrapped';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useBookshelf } from '@/hooks/useBookshelf';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Loader2 } from 'lucide-react';
+
+// Lazy load heavy components for better initial load
+const EnhancedBookSearch = lazy(() => import('@/components/EnhancedBookSearch').then(m => ({ default: m.EnhancedBookSearch })));
+const BookRecommendations = lazy(() => import('@/components/BookRecommendations').then(m => ({ default: m.BookRecommendations })));
+const MyBookshelf = lazy(() => import('@/components/MyBookshelf').then(m => ({ default: m.MyBookshelf })));
+const StatsDashboard = lazy(() => import('@/components/StatsDashboard').then(m => ({ default: m.StatsDashboard })));
+const ProfileSection = lazy(() => import('@/components/ProfileSection').then(m => ({ default: m.ProfileSection })));
+const QuoteCollection = lazy(() => import('@/components/QuoteCollection').then(m => ({ default: m.QuoteCollection })));
+const ReadingMoodJournal = lazy(() => import('@/components/ReadingMoodJournal').then(m => ({ default: m.ReadingMoodJournal })));
+const ReadingAtmosphere = lazy(() => import('@/components/ReadingAtmosphere').then(m => ({ default: m.ReadingAtmosphere })));
+const ReadingChallenges = lazy(() => import('@/components/ReadingChallenges').then(m => ({ default: m.ReadingChallenges })));
+const BookComparison = lazy(() => import('@/components/BookComparison').then(m => ({ default: m.BookComparison })));
+const ReadingLists = lazy(() => import('@/components/ReadingLists').then(m => ({ default: m.ReadingLists })));
+const BookAnnotations = lazy(() => import('@/components/BookAnnotations').then(m => ({ default: m.BookAnnotations })));
+const SocialSharing = lazy(() => import('@/components/SocialSharing').then(m => ({ default: m.SocialSharing })));
+const AIBookInsights = lazy(() => import('@/components/AIBookInsights').then(m => ({ default: m.AIBookInsights })));
+const ISBNScanner = lazy(() => import('@/components/ISBNScanner').then(m => ({ default: m.ISBNScanner })));
+const ReadingWrapped = lazy(() => import('@/components/ReadingWrapped').then(m => ({ default: m.ReadingWrapped })));
+
+const LazyFallback = () => (
+  <div className="flex items-center justify-center py-24">
+    <Loader2 className="w-8 h-8 text-primary animate-spin" />
+  </div>
+);
 
 const SIDEBAR_COLLAPSED_KEY = 'bookvault_sidebar_collapsed';
 
