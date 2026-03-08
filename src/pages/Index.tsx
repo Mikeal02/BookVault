@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { LoginPage } from '@/components/LoginPage';
 import { EnhancedBookSearch } from '@/components/EnhancedBookSearch';
 import { BookRecommendations } from '@/components/BookRecommendations';
