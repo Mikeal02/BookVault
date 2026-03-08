@@ -365,18 +365,24 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <div className="absolute inset-0 gradient-mesh pointer-events-none" />
-      <div className="blob-1 -top-60 -right-60 opacity-30" />
-      <div className="blob-2 -bottom-60 -left-60 opacity-20" />
+      <div className="blob-1 -top-60 -right-60 opacity-25" />
+      <div className="blob-2 -bottom-60 -left-60 opacity-15" />
+      <div className="blob-3 top-1/2 left-1/3 opacity-10" />
       
       <div className="relative z-10 container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-6 sm:mb-8">
+        <motion.div
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0 mb-6 sm:mb-8"
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        >
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-lg gradient-primary flex items-center justify-center shadow-sm p-2 flex-shrink-0">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl gradient-primary flex items-center justify-center shadow-md p-2 flex-shrink-0">
               <img src="/favicon.ico" alt="BookVault" className="w-full h-full object-contain" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-display font-semibold text-foreground tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-display font-bold gradient-text tracking-tight">
                 BookVault
               </h1>
               <p className="text-muted-foreground text-xs sm:text-sm truncate">
@@ -388,13 +394,13 @@ const Index = () => {
             <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-2 glass-card text-muted-foreground hover:text-destructive rounded-lg transition-all duration-200 font-medium text-sm"
+              className="flex items-center gap-1.5 px-3 py-2 glass-card text-muted-foreground hover:text-destructive rounded-xl transition-all duration-300 font-medium text-sm"
             >
               <LogOut className="w-4 h-4" />
               <span className="hidden xs:inline">Logout</span>
             </button>
           </div>
-        </div>
+        </motion.div>
 
         <Navigation 
           currentView={currentView} 

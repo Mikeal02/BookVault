@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart, Music, Menu, Trophy, GitCompareArrows, FolderOpen, FileText, Share2 } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -45,16 +46,16 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
       return (
         <button
           onClick={() => handleNavClick(item.id)}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all duration-200 ${
+          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-medium transition-all duration-300 ${
             isActive
-              ? 'bg-primary/10 text-primary border-l-2 border-primary'
+              ? 'bg-primary/10 text-primary border-l-3 border-primary shadow-sm'
               : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
           }`}
         >
           <Icon className="w-4.5 h-4.5 flex-shrink-0" />
           <span className="text-sm">{item.label}</span>
           {item.badge !== undefined && item.badge > 0 && (
-            <span className={`ml-auto px-2 py-0.5 text-[10px] font-semibold rounded-full ${
+            <span className={`ml-auto px-2 py-0.5 text-[10px] font-bold rounded-full ${
               isActive ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
             }`}>
               {item.badge}
@@ -67,24 +68,30 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
     return (
       <button
         onClick={() => handleNavClick(item.id)}
-        className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg font-medium transition-all duration-200 group whitespace-nowrap flex-shrink-0 text-sm ${
+        className={`relative flex items-center gap-1.5 px-3 py-2.5 rounded-xl font-medium transition-all duration-300 group whitespace-nowrap flex-shrink-0 text-sm ${
           isActive
-            ? 'bg-primary/10 text-primary'
+            ? 'text-primary'
             : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
         }`}
       >
         {isActive && (
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-primary" />
+          <motion.div
+            layoutId="nav-active-pill"
+            className="absolute inset-0 bg-primary/10 rounded-xl border border-primary/20"
+            transition={{ type: "spring", duration: 0.4, bounce: 0.15 }}
+          />
         )}
-        <Icon className={`w-4 h-4 transition-transform duration-200 ${isActive ? '' : 'group-hover:scale-105'}`} />
-        <span>{item.label}</span>
-        {item.badge !== undefined && item.badge > 0 && (
-          <span className={`ml-0.5 px-1.5 py-0.5 text-[10px] font-semibold rounded-full transition-colors ${
-            isActive ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
-          }`}>
-            {item.badge}
-          </span>
-        )}
+        <span className="relative z-10 flex items-center gap-1.5">
+          <Icon className={`w-4 h-4 transition-all duration-300 ${isActive ? 'text-primary' : 'group-hover:scale-110'}`} />
+          <span>{item.label}</span>
+          {item.badge !== undefined && item.badge > 0 && (
+            <span className={`ml-0.5 px-1.5 py-0.5 text-[10px] font-bold rounded-full transition-colors ${
+              isActive ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
+            }`}>
+              {item.badge}
+            </span>
+          )}
+        </span>
         <div className="hidden lg:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-lg">
           {item.description}
           <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-foreground"></div>
@@ -97,18 +104,18 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
     <div className="mb-6 sm:mb-8 w-full">
       {/* Mobile Navigation */}
       <div className="md:hidden">
-        <nav className="glass-card rounded-xl p-2">
+        <nav className="glass-card rounded-2xl p-2">
           <div className="flex items-center justify-between gap-2">
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10">
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl">
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0 border-r border-border">
+              <SheetContent side="left" className="w-72 p-0 border-r border-border bg-background">
                 <div className="flex flex-col h-full">
                   <div className="p-5 border-b border-border">
-                    <h2 className="text-lg font-display font-semibold text-foreground">Navigation</h2>
+                    <h2 className="text-lg font-display font-bold gradient-text">Navigation</h2>
                   </div>
                   <ScrollArea className="flex-1 p-3">
                     <div className="space-y-0.5">
@@ -125,7 +132,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
             </Sheet>
 
             <div className="flex-1 flex justify-center">
-              <span className="text-sm font-medium text-foreground">
+              <span className="text-sm font-semibold text-foreground">
                 {navItems.find(item => item.id === currentView)?.label}
               </span>
             </div>
@@ -137,7 +144,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
 
       {/* Desktop Navigation */}
       <div className="hidden md:block">
-        <nav className="glass-card rounded-xl p-1">
+        <nav className="glass-card rounded-2xl p-1.5">
           <div className="flex items-center gap-0.5">
             <ScrollArea className="flex-1">
               <div className="flex gap-0.5 pb-0.5">
