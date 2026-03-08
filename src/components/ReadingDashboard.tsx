@@ -47,9 +47,9 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
     });
 
     const statusData = [
-      { name: 'Finished', value: finishedBooks.length, color: 'hsl(158 65% 36%)' },
-      { name: 'Reading', value: readingBooks.length, color: 'hsl(36 80% 52%)' },
-      { name: 'To Read', value: books.filter(book => book.readingStatus === 'not-read').length, color: 'hsl(225 14% 40%)' }
+      { name: 'Finished', value: finishedBooks.length, color: 'hsl(162 68% 36%)' },
+      { name: 'Reading', value: readingBooks.length, color: 'hsl(222 72% 52%)' },
+      { name: 'To Read', value: books.filter(book => book.readingStatus === 'not-read').length, color: 'hsl(340 65% 58%)' }
     ].filter(d => d.value > 0);
 
     const achievements = [
