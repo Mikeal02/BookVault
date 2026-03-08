@@ -32,7 +32,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing'>('dashboard');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [managingBook, setManagingBook] = useState<Book | null>(null);
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
