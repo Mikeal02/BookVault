@@ -415,6 +415,12 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
         </motion.div>
       </div>
 
+      {/* Reading Pace & Monthly Report */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        <ReadingPaceCard books={books} readingGoal={userGoal} />
+        <MonthlyReportCard books={books} />
+      </div>
+
       {/* Bottom Section */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Annual Goal Progress */}
