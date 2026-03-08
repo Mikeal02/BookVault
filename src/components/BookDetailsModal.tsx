@@ -17,6 +17,23 @@ interface BookDetailsModalProps {
   isInBookshelf: boolean;
 }
 
+const ModalCoverImage = ({ book }: { book: Book }) => {
+  const [failed, setFailed] = useState(false);
+  
+  if (!book.imageLinks?.thumbnail || failed) {
+    return <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-36 h-52 sm:w-48 sm:h-72 rounded-xl shadow-2xl" />;
+  }
+
+  return (
+    <img
+      src={book.imageLinks.thumbnail}
+      alt={book.title}
+      className="w-36 h-52 sm:w-48 sm:h-72 object-cover rounded-xl shadow-2xl transition-transform duration-300 group-hover:scale-105"
+      onError={() => setFailed(true)}
+    />
+  );
+};
+
 export const BookDetailsModal = ({
   book,
   onClose,
