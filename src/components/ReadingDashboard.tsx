@@ -73,6 +73,17 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
 
   // Calculate real streak and weekly data from reading_sessions
   useEffect(() => {
+    const buildEmptyWeek = () => {
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const result = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        result.push({ day: dayNames[d.getDay()], minutes: 0, pages: 0 });
+      }
+      return result;
+    };
+
     const loadSessionData = async () => {
       const { data: sessions } = await supabase
         .from('reading_sessions')
