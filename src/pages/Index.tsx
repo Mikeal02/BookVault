@@ -87,6 +87,7 @@ const Index = () => {
 
       if (profile) {
         setCurrentUser(profile.username || profile.email || 'Reader');
+        setReadingGoal(profile.reading_goal || 12);
         
         // Only show onboarding if profile exists but has no genres AND no reading goal set (meaning never completed or skipped)
         // Once user skips, we set reading_goal to 12 as default, so this won't trigger again
