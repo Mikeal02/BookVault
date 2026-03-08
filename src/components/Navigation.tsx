@@ -37,6 +37,7 @@ const navGroups: NavGroup[] = [
     label: 'Discover',
     items: [
       { id: 'search', label: 'Search', icon: Search, description: 'Find new books' },
+      { id: 'scanner', label: 'ISBN Scan', icon: ScanBarcode, description: 'Scan barcode' },
       { id: 'recommendations', label: 'For You', icon: Sparkles, description: 'Personalized picks' },
       { id: 'comparison', label: 'Compare', icon: GitCompareArrows, description: 'Compare books' },
     ],
