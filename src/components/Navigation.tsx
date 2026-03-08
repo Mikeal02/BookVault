@@ -144,8 +144,9 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount }: Naviga
 
       {/* Desktop Navigation */}
       <div className="hidden md:block">
-        <nav className="glass-card rounded-2xl p-1.5 relative overflow-hidden">
-          {/* Subtle gradient accent along bottom edge */}
+        <nav className="glass-card rounded-2xl p-1.5 relative overflow-hidden ring-1 ring-border/30">
+          {/* Top + bottom gradient accent */}
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/15 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
           <div className="flex items-center gap-0.5">
             <ScrollArea className="flex-1">
