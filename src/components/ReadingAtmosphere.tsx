@@ -281,15 +281,16 @@ export const ReadingAtmosphere = ({ books }: ReadingAtmosphereProps) => {
   const [suggestedSounds, setSuggestedSounds] = useState<string[]>([]);
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
 
-  // Store audio elements
+  // Store audio elements (mp3) and synth nodes
   const audioRefs = useRef<Record<string, HTMLAudioElement>>({});
+  const synthRefs = useRef<Record<string, { gain: GainNode; stop: () => void }>>({});
 
   const currentlyReading = books.filter(b => b.readingStatus === 'reading');
 
-  // Initialize audio elements
+  // Initialize mp3-based audio elements only
   useEffect(() => {
     soundscapes.forEach(sound => {
-      if (!audioRefs.current[sound.id]) {
+      if (sound.audioUrl !== '__synth__' && !audioRefs.current[sound.id]) {
         const audio = new Audio(sound.audioUrl);
         audio.loop = true;
         audio.preload = 'none';
@@ -297,22 +298,22 @@ export const ReadingAtmosphere = ({ books }: ReadingAtmosphereProps) => {
       }
     });
 
-    // Cleanup on unmount
     return () => {
-      Object.values(audioRefs.current).forEach(audio => {
-        audio.pause();
-        audio.src = '';
-      });
+      Object.values(audioRefs.current).forEach(audio => { audio.pause(); audio.src = ''; });
+      Object.values(synthRefs.current).forEach(s => { try { s.stop(); } catch {} });
       audioRefs.current = {};
+      synthRefs.current = {};
     };
   }, []);
 
-  // Update volumes when master volume or individual volumes change
+  // Update volumes
   useEffect(() => {
-    Object.entries(audioRefs.current).forEach(([id, audio]) => {
-      const individualVolume = volumes[id] || 50;
-      audio.volume = isMuted ? 0 : (masterVolume / 100) * (individualVolume / 100);
-    });
+    const vol = (id: string) => {
+      const iv = volumes[id] || 50;
+      return isMuted ? 0 : (masterVolume / 100) * (iv / 100);
+    };
+    Object.entries(audioRefs.current).forEach(([id, audio]) => { audio.volume = vol(id); });
+    Object.entries(synthRefs.current).forEach(([id, synth]) => { synth.gain.gain.value = vol(id); });
   }, [masterVolume, volumes, isMuted]);
 
   // Get sound suggestions based on current book genres
@@ -329,32 +330,48 @@ export const ReadingAtmosphere = ({ books }: ReadingAtmosphereProps) => {
     }
   }, [currentBook]);
 
+  const startSynth = (soundId: string): { gain: GainNode; stop: () => void } => {
+    switch (soundId) {
+      case 'rain': return soundGen.createRain();
+      case 'fireplace': return soundGen.createFireplace();
+      case 'ocean': return soundGen.createOcean();
+      case 'wind': return soundGen.createWind();
+      case 'ice': return soundGen.createIce();
+      default: return soundGen.createRain();
+    }
+  };
+
   const toggleSound = useCallback(async (soundId: string) => {
-    const audio = audioRefs.current[soundId];
-    if (!audio) return;
+    const sound = soundscapes.find(s => s.id === soundId);
+    if (!sound) return;
+    const isSynth = sound.audioUrl === '__synth__';
 
     if (activeSounds.has(soundId)) {
-      // Stop the sound
-      audio.pause();
-      audio.currentTime = 0;
-      setActiveSounds(prev => {
-        const next = new Set(prev);
-        next.delete(soundId);
-        return next;
-      });
-    } else {
-      // Start the sound
-      setLoadingStates(prev => ({ ...prev, [soundId]: true }));
-      
-      if (!volumes[soundId]) {
-        setVolumes(v => ({ ...v, [soundId]: 50 }));
+      // Stop
+      if (isSynth && synthRefs.current[soundId]) {
+        try { synthRefs.current[soundId].stop(); } catch {}
+        delete synthRefs.current[soundId];
+      } else if (audioRefs.current[soundId]) {
+        audioRefs.current[soundId].pause();
+        audioRefs.current[soundId].currentTime = 0;
       }
-      
-      const individualVolume = volumes[soundId] || 50;
-      audio.volume = isMuted ? 0 : (masterVolume / 100) * (individualVolume / 100);
-      
+      setActiveSounds(prev => { const n = new Set(prev); n.delete(soundId); return n; });
+    } else {
+      // Start
+      setLoadingStates(prev => ({ ...prev, [soundId]: true }));
+      if (!volumes[soundId]) setVolumes(v => ({ ...v, [soundId]: 50 }));
+      const iv = volumes[soundId] || 50;
+      const vol = isMuted ? 0 : (masterVolume / 100) * (iv / 100);
+
       try {
-        await audio.play();
+        if (isSynth) {
+          const synth = startSynth(soundId);
+          synth.gain.gain.value = vol;
+          synthRefs.current[soundId] = synth;
+        } else {
+          const audio = audioRefs.current[soundId];
+          if (audio) { audio.volume = vol; await audio.play(); }
+        }
         setActiveSounds(prev => new Set([...prev, soundId]));
       } catch (error) {
         console.error('Error playing audio:', error);
