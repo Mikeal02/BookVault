@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { useMemo, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { ReadingHeatmap } from './ReadingHeatmap';
 import { Book } from '@/types/book';
 import { 
@@ -20,6 +20,50 @@ const cardVariants = {
     opacity: 1, y: 0,
     transition: { delay: i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }
   })
+};
+
+const parallaxOffsets = [0, -8, -16, -8]; // staggered depths
+
+const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+
+  const statItems = [
+    { icon: BookOpen, label: 'Total Books', value: stats.totalBooks, color: 'primary', suffix: '' },
+    { icon: Target, label: 'Completed', value: stats.finishedBooks, color: 'success', suffix: '' },
+    { icon: Clock, label: 'Reading Time', value: Math.floor(stats.totalReadingTime / 60), color: 'secondary', suffix: 'h' },
+    { icon: Zap, label: 'Currently Reading', value: stats.readingBooks, color: 'warning', suffix: '' },
+  ];
+
+  const y0 = useTransform(scrollYProgress, [0, 1], [20, -20]);
+  const y1 = useTransform(scrollYProgress, [0, 1], [30, -30]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [40, -40]);
+  const y3 = useTransform(scrollYProgress, [0, 1], [30, -30]);
+  const yValues = [y0, y1, y2, y3];
+
+  return (
+    <div ref={ref} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {statItems.map((stat, index) => (
+        <motion.div
+          key={stat.label}
+          custom={index}
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          style={{ y: yValues[index] }}
+          className="stat-card glass-card hover-lift rounded-2xl"
+        >
+          <div className={`w-12 h-12 rounded-xl bg-${stat.color}/10 flex items-center justify-center mb-4`}>
+            <stat.icon className={`w-6 h-6 text-${stat.color}`} />
+          </div>
+          <p className="text-3xl font-black mb-1 tracking-tight">
+            {stat.value}{stat.suffix}
+          </p>
+          <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
+        </motion.div>
+      ))}
+    </div>
+  );
 };
 
 export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDashboardProps) => {
@@ -174,32 +218,8 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
         </div>
       </motion.div>
 
-      {/* Quick Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { icon: BookOpen, label: 'Total Books', value: stats.totalBooks, color: 'primary', suffix: '' },
-          { icon: Target, label: 'Completed', value: stats.finishedBooks, color: 'success', suffix: '' },
-          { icon: Clock, label: 'Reading Time', value: Math.floor(stats.totalReadingTime / 60), color: 'secondary', suffix: 'h' },
-          { icon: Zap, label: 'Currently Reading', value: stats.readingBooks, color: 'warning', suffix: '' },
-        ].map((stat, index) => (
-          <motion.div
-            key={stat.label}
-            custom={index}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            className="stat-card glass-card hover-lift rounded-2xl"
-          >
-            <div className={`w-12 h-12 rounded-xl bg-${stat.color}/10 flex items-center justify-center mb-4`}>
-              <stat.icon className={`w-6 h-6 text-${stat.color}`} />
-            </div>
-            <p className="text-3xl font-black mb-1 tracking-tight">
-              {stat.value}{stat.suffix}
-            </p>
-            <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
-          </motion.div>
-        ))}
-      </div>
+      {/* Quick Stats Grid with Parallax */}
+      <ParallaxStatsGrid stats={stats} />
 
       {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
