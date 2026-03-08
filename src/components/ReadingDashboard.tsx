@@ -214,8 +214,8 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange }: ReadingDa
               <AreaChart data={stats.weeklyData}>
                 <defs>
                   <linearGradient id="colorMinutes" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(158 65% 36%)" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="hsl(158 65% 36%)" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="hsl(222 72% 52%)" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="hsl(222 72% 52%)" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <XAxis 
