@@ -498,9 +498,9 @@
   background-clip: text;
 }
 
-/* Sapphire shimmer text */
+/* Shimmer text — theme-aware */
 .gradient-text-gold {
-  background: linear-gradient(90deg, hsl(222 72% 52%), hsl(250 65% 68%), hsl(222 72% 52%));
+  background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--highlight)), hsl(var(--primary)));
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
