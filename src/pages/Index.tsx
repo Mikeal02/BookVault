@@ -285,6 +285,7 @@ const Index = () => {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
+              <Suspense fallback={<LazyFallback />}>
               {currentView === 'dashboard' && (
                 <ReadingDashboard
                   books={bookshelf}
@@ -380,6 +381,7 @@ const Index = () => {
               {currentView === 'wrapped' && (
                 <ReadingWrapped books={bookshelf} currentUser={currentUser} />
               )}
+              </Suspense>
             </motion.div>
           </AnimatePresence>
           </ErrorBoundary>
