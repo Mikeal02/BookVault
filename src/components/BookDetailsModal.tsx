@@ -132,6 +132,9 @@ export const BookDetailsModal = ({
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
 
+  // Use enriched data for display, original book for callbacks
+  const displayBook = enrichedBook;
+
   return (
     <div 
       className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 animate-fade-in p-0 sm:p-4"
