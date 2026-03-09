@@ -109,7 +109,7 @@ export const BookCard = ({ book, onSelect, onAddToBookshelf, onRemoveFromBookshe
         style={tiltStyle}
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
-        className="glass-card rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 hover:shadow-[var(--shadow-card-hover)]"
+        className="glass-card rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] group-hover:border-primary/10"
       >
         {/* Top accent shimmer */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/0 via-primary/40 to-secondary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 z-10" />
