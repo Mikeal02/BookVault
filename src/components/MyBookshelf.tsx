@@ -390,26 +390,26 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
 
       {/* Results Summary and View Controls */}
       <div className="flex flex-wrap justify-between items-center gap-3">
-        <div className="text-sm text-muted-foreground">
-          {filteredBooks.length} of {books.length} books
-          {filterStatus !== 'all' && ` (${filterStatus.replace('-', ' ')})`}
+        <div className="text-xs text-muted-foreground/60 font-medium">
+          <span className="font-bold text-foreground">{filteredBooks.length}</span> of {books.length} books
+          {filterStatus !== 'all' && <span className="ml-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px]">{filterStatus.replace('-', ' ')}</span>}
         </div>
         <div className="flex gap-2 items-center">
           {/* View Mode Toggle — elite with animation */}
-          <div className="flex bg-muted/40 rounded-xl p-0.5 gap-0.5">
+          <div className="flex bg-muted/30 rounded-xl p-0.5 gap-0.5 border border-border/30">
             {viewModes.map(({ mode, icon: Icon, label }) => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
                 className={`relative p-2 rounded-lg transition-all duration-200 ${
-                  viewMode === mode ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                  viewMode === mode ? 'text-primary' : 'text-muted-foreground/60 hover:text-foreground'
                 }`}
                 title={label}
               >
                 {viewMode === mode && (
                   <motion.div
                     layoutId="view-mode-active"
-                    className="absolute inset-0 bg-card shadow-sm rounded-lg border border-border/50"
+                    className="absolute inset-0 bg-card shadow-md rounded-lg border border-primary/15"
                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                   />
                 )}
@@ -420,17 +420,17 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
 
           <button
             onClick={() => setShowExport(true)}
-            className="flex items-center gap-2 px-3 py-2 glass-card border border-border rounded-xl hover:bg-muted/50 transition-all text-sm font-medium text-foreground"
+            className="flex items-center gap-1.5 px-3 py-2 glass-card border border-border/40 rounded-xl hover:bg-muted/40 hover:border-primary/20 transition-all text-xs font-medium text-muted-foreground hover:text-foreground"
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Export</span>
           </button>
           <button
             onClick={() => setShowAIChat(true)}
-            className="flex items-center gap-2 px-3 py-2 gradient-secondary text-white rounded-xl transition-all text-sm font-medium shadow-lg hover:opacity-90"
+            className="flex items-center gap-1.5 px-3 py-2 gradient-secondary text-white rounded-xl transition-all text-xs font-semibold shadow-lg hover:opacity-90 hover:shadow-xl"
           >
-            <Bot className="w-4 h-4" />
-            <span className="hidden sm:inline">AI</span>
+            <Bot className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">AI Chat</span>
           </button>
         </div>
       </div>
