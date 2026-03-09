@@ -436,7 +436,7 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
           {filteredBooks.length > 0 ? (
             <>
               {viewMode === 'grid' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 xl:gap-6">
                   {filteredBooks.map((book) => (
                     <div key={book.id} className="group">
                       <BookCard

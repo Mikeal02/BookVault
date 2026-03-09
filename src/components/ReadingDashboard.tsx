@@ -346,6 +346,8 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
           <div className="aurora-blob-2" />
           <div className="aurora-blob-3" />
         </div>
+        {/* Sparkle particles */}
+        <SparkleParticles />
         
         <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
           <div className="text-center lg:text-left">
