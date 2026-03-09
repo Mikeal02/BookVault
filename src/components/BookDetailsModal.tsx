@@ -250,17 +250,17 @@ export const BookDetailsModal = ({
                   {/* Quick Info Overlay */}
                   <div className="absolute bottom-2 left-2 right-2 bg-card/90 backdrop-blur-sm rounded-lg p-2 sm:p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="text-xs sm:text-sm space-y-1">
-                      {book.pageCount && (
+                      {displayBook.pageCount && (
                         <div className="flex items-center text-muted-foreground">
                           <span className="mr-1">📄</span>
-                          {book.pageCount} pages
+                          {displayBook.pageCount} pages
                         </div>
                       )}
-                      {book.averageRating && (
+                      {displayBook.averageRating && (
                         <div className="flex items-center">
                           <Star className="w-3 h-3 text-warning fill-current mr-1" />
                           <span className="text-muted-foreground">
-                            {book.averageRating}/5
+                            {displayBook.averageRating}/5
                           </span>
                         </div>
                       )}
@@ -274,29 +274,29 @@ export const BookDetailsModal = ({
                 {activeTab === 'overview' && (
                   <div className="space-y-4 sm:space-y-6">
                     {/* Personal Notes (if in bookshelf) */}
-                    {isInBookshelf && (book.myThoughts || book.notes) && (
+                    {isInBookshelf && (displayBook.myThoughts || displayBook.notes) && (
                       <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl p-4 sm:p-5 border border-primary/10">
                         <h4 className="font-semibold text-foreground mb-3 flex items-center text-sm sm:text-base">
                           <span className="mr-2">💭</span>
                           My Personal Notes
                         </h4>
-                        {book.myThoughts && (
+                        {displayBook.myThoughts && (
                           <div className="mb-3">
                             <span className="text-xs sm:text-sm font-medium text-primary block mb-1">My Thoughts:</span>
-                            <p className="text-xs sm:text-sm text-foreground/80 whitespace-pre-wrap bg-card/50 rounded p-3">{book.myThoughts}</p>
+                            <p className="text-xs sm:text-sm text-foreground/80 whitespace-pre-wrap bg-card/50 rounded p-3">{displayBook.myThoughts}</p>
                           </div>
                         )}
-                        {book.notes && (
+                        {displayBook.notes && (
                           <div>
                             <span className="text-xs sm:text-sm font-medium text-primary block mb-1">Notes:</span>
-                            <p className="text-xs sm:text-sm text-foreground/80 whitespace-pre-wrap bg-card/50 rounded p-3">{book.notes}</p>
+                            <p className="text-xs sm:text-sm text-foreground/80 whitespace-pre-wrap bg-card/50 rounded p-3">{displayBook.notes}</p>
                           </div>
                         )}
                       </div>
                     )}
 
                     {/* Book Description */}
-                    {book.description && (
+                    {displayBook.description && (
                       <div className="bg-card/50 rounded-xl p-4 sm:p-5 border border-border">
                         <h4 className="font-semibold text-foreground mb-3 flex items-center text-sm sm:text-base">
                           <span className="mr-2">📚</span>
@@ -304,66 +304,66 @@ export const BookDetailsModal = ({
                         </h4>
                         <div 
                           className="text-muted-foreground leading-relaxed prose prose-sm max-w-none text-xs sm:text-sm"
-                          dangerouslySetInnerHTML={{ __html: book.description }}
+                          dangerouslySetInnerHTML={{ __html: displayBook.description }}
                         />
                       </div>
                     )}
 
                     {/* Series Info */}
-                    {book.seriesName && (
+                    {displayBook.seriesName && (
                       <div className="bg-accent/5 rounded-xl p-4 sm:p-5 border border-accent/10">
                         <h4 className="font-semibold text-foreground mb-2 flex items-center text-sm sm:text-base">
                           <Layers className="w-4 h-4 mr-2 text-accent" />
                           Part of a Series
                         </h4>
                         <p className="text-sm text-muted-foreground">
-                          <span className="font-semibold text-foreground">{book.seriesName}</span>
-                          {book.seriesPosition && <span> — Book #{book.seriesPosition}</span>}
+                          <span className="font-semibold text-foreground">{displayBook.seriesName}</span>
+                          {displayBook.seriesPosition && <span> — Book #{displayBook.seriesPosition}</span>}
                         </p>
                       </div>
                     )}
 
                     {/* Availability & Format */}
-                    {(book.isEbook || book.hasEpub || book.hasPdf || book.freeReading || book.retailPrice || book.saleability) && (
+                    {(displayBook.isEbook || displayBook.hasEpub || displayBook.hasPdf || displayBook.freeReading || displayBook.retailPrice || displayBook.saleability) && (
                       <div className="bg-primary/5 rounded-xl p-4 sm:p-5 border border-primary/10">
                         <h4 className="font-semibold text-foreground mb-3 flex items-center text-sm sm:text-base">
                           <Tablet className="w-4 h-4 mr-2 text-primary" />
                           Availability & Formats
                         </h4>
                         <div className="flex flex-wrap gap-2 mb-3">
-                          {book.isEbook && (
+                          {displayBook.isEbook && (
                             <span className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium flex items-center gap-1.5">
                               <Tablet className="w-3 h-3" /> eBook Available
                             </span>
                           )}
-                          {book.hasEpub && (
+                          {displayBook.hasEpub && (
                             <span className="px-3 py-1.5 rounded-lg bg-muted text-muted-foreground text-xs font-medium">ePub</span>
                           )}
-                          {book.hasPdf && (
+                          {displayBook.hasPdf && (
                             <span className="px-3 py-1.5 rounded-lg bg-muted text-muted-foreground text-xs font-medium">PDF</span>
                           )}
-                          {book.freeReading && (
+                          {displayBook.freeReading && (
                             <span className="px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium flex items-center gap-1.5">
                               <BookMarked className="w-3 h-3" /> Free to Borrow
                             </span>
                           )}
-                          {book.saleability === 'FREE' && (
+                          {displayBook.saleability === 'FREE' && (
                             <span className="px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-medium">Free</span>
                           )}
-                          {book.saleability === 'FOR_PREORDER' && (
+                          {displayBook.saleability === 'FOR_PREORDER' && (
                             <span className="px-3 py-1.5 rounded-lg bg-warning/10 text-warning text-xs font-medium">Pre-order</span>
                           )}
                         </div>
-                        {(book.retailPrice || book.listPrice) && (
+                        {(displayBook.retailPrice || displayBook.listPrice) && (
                           <div className="flex items-center gap-3 text-sm">
-                            {book.retailPrice && (
+                            {displayBook.retailPrice && (
                               <span className="font-semibold text-foreground">
-                                {book.retailPrice.currencyCode === 'USD' ? '$' : book.retailPrice.currencyCode + ' '}{book.retailPrice.amount.toFixed(2)}
+                                {displayBook.retailPrice.currencyCode === 'USD' ? '$' : displayBook.retailPrice.currencyCode + ' '}{displayBook.retailPrice.amount.toFixed(2)}
                               </span>
                             )}
-                            {book.listPrice && book.retailPrice && book.listPrice.amount > book.retailPrice.amount && (
+                            {displayBook.listPrice && displayBook.retailPrice && displayBook.listPrice.amount > displayBook.retailPrice.amount && (
                               <span className="text-muted-foreground line-through text-xs">
-                                ${book.listPrice.amount.toFixed(2)}
+                                ${displayBook.listPrice.amount.toFixed(2)}
                               </span>
                             )}
                           </div>
@@ -372,24 +372,24 @@ export const BookDetailsModal = ({
                     )}
 
                     {/* Content Preview */}
-                    {(book.textSnippet || book.firstSentence) && (
+                    {(displayBook.textSnippet || displayBook.firstSentence) && (
                       <div className="bg-muted/30 rounded-xl p-4 sm:p-5 border border-border">
                         <h4 className="font-semibold text-foreground mb-3 flex items-center text-sm sm:text-base">
                           <span className="mr-2">📝</span>
                           Preview
                         </h4>
-                        {book.firstSentence && (
+                        {displayBook.firstSentence && (
                           <div className="mb-3">
                             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Opening Line</span>
                             <p className="text-sm text-foreground italic mt-1 border-l-2 border-primary/30 pl-3">
-                              "{book.firstSentence}"
+                              "{displayBook.firstSentence}"
                             </p>
                           </div>
                         )}
-                        {book.textSnippet && (
+                        {displayBook.textSnippet && (
                           <div>
                             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">Excerpt</span>
-                            <p className="text-sm text-muted-foreground mt-1">{book.textSnippet}</p>
+                            <p className="text-sm text-muted-foreground mt-1">{displayBook.textSnippet}</p>
                           </div>
                         )}
                       </div>
@@ -402,87 +402,87 @@ export const BookDetailsModal = ({
                         Book Details
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
-                        {book.publishedDate && (
+                        {displayBook.publishedDate && (
                           <div className="flex items-center p-2 bg-card rounded gap-2">
                             <span className="font-medium text-muted-foreground w-20">Published</span>
-                            <span className="text-foreground">{formatDate(book.publishedDate)}</span>
+                            <span className="text-foreground">{formatDate(displayBook.publishedDate)}</span>
                           </div>
                         )}
-                        {book.publisher && (
+                        {displayBook.publisher && (
                           <div className="flex items-center p-2 bg-card rounded gap-2">
                             <span className="font-medium text-muted-foreground w-20">Publisher</span>
-                            <span className="text-foreground truncate">{book.publisher}</span>
+                            <span className="text-foreground truncate">{displayBook.publisher}</span>
                           </div>
                         )}
-                        {book.pageCount && (
+                        {displayBook.pageCount && (
                           <div className="flex items-center p-2 bg-card rounded gap-2">
                             <span className="font-medium text-muted-foreground w-20">Pages</span>
-                            <span className="text-foreground">{book.pageCount}</span>
+                            <span className="text-foreground">{displayBook.pageCount}</span>
                           </div>
                         )}
-                        {book.language && (
+                        {displayBook.language && (
                           <div className="flex items-center p-2 bg-card rounded gap-2">
                             <span className="font-medium text-muted-foreground w-20">Language</span>
-                            <span className="text-foreground capitalize">{book.language}</span>
+                            <span className="text-foreground capitalize">{displayBook.language}</span>
                           </div>
                         )}
-                        {book.isbn13 && (
+                        {displayBook.isbn13 && (
                           <div className="flex items-center p-2 bg-card rounded gap-2">
                             <span className="font-medium text-muted-foreground w-20">ISBN-13</span>
-                            <span className="text-foreground font-mono text-xs">{book.isbn13}</span>
+                            <span className="text-foreground font-mono text-xs">{displayBook.isbn13}</span>
                           </div>
                         )}
-                        {book.editionCount && book.editionCount > 1 && (
+                        {displayBook.editionCount && displayBook.editionCount > 1 && (
                           <div className="flex items-center p-2 bg-card rounded gap-2">
                             <span className="font-medium text-muted-foreground w-20">Editions</span>
-                            <span className="text-foreground">{book.editionCount} editions</span>
+                            <span className="text-foreground">{displayBook.editionCount} editions</span>
                           </div>
                         )}
-                        {book.readingDifficulty && (
+                        {displayBook.readingDifficulty && (
                           <div className="flex items-center p-2 bg-card rounded gap-2">
                             <Brain className="w-3.5 h-3.5 text-muted-foreground" />
                             <span className="font-medium text-muted-foreground w-16">Level</span>
                             <span className={`text-foreground capitalize px-2 py-0.5 rounded text-xs font-medium ${
-                              book.readingDifficulty === 'easy' ? 'bg-success/10 text-success' :
-                              book.readingDifficulty === 'moderate' ? 'bg-primary/10 text-primary' :
+                              displayBook.readingDifficulty === 'easy' ? 'bg-success/10 text-success' :
+                              displayBook.readingDifficulty === 'moderate' ? 'bg-primary/10 text-primary' :
                               'bg-secondary/10 text-secondary'
                             }`}>
-                              {book.readingDifficulty === 'easy' ? 'Quick Read' : book.readingDifficulty === 'moderate' ? 'Standard' : 'Deep Read'}
+                              {displayBook.readingDifficulty === 'easy' ? 'Quick Read' : displayBook.readingDifficulty === 'moderate' ? 'Standard' : 'Deep Read'}
                             </span>
                           </div>
                         )}
-                        {book.maturityRating && (
+                        {displayBook.maturityRating && (
                           <div className="flex items-center p-2 bg-card rounded gap-2">
                             <span className="font-medium text-muted-foreground w-20">Maturity</span>
-                            <span className="text-foreground">{book.maturityRating === 'MATURE' ? '🔞 Mature' : '✅ All Ages'}</span>
+                            <span className="text-foreground">{displayBook.maturityRating === 'MATURE' ? '🔞 Mature' : '✅ All Ages'}</span>
                           </div>
                         )}
                       </div>
                     </div>
 
                     {/* Subject People & Places */}
-                    {(book.subjectPeople?.length || book.subjectPlaces?.length) && (
+                    {(displayBook.subjectPeople?.length || displayBook.subjectPlaces?.length) && (
                       <div className="bg-secondary/5 rounded-xl p-4 sm:p-5 border border-secondary/10">
                         <h4 className="font-semibold text-foreground mb-3 text-sm sm:text-base">Featured In</h4>
-                        {book.subjectPeople && book.subjectPeople.length > 0 && (
+                        {displayBook.subjectPeople && displayBook.subjectPeople.length > 0 && (
                           <div className="mb-3">
                             <div className="flex items-center gap-1.5 mb-2 text-xs text-muted-foreground">
                               <Users className="w-3.5 h-3.5" /> Characters & People
                             </div>
                             <div className="flex flex-wrap gap-1.5">
-                              {book.subjectPeople.map((person, i) => (
+                              {displayBook.subjectPeople.map((person, i) => (
                                 <span key={i} className="px-2.5 py-1 bg-secondary/10 text-secondary rounded-md text-xs font-medium">{person}</span>
                               ))}
                             </div>
                           </div>
                         )}
-                        {book.subjectPlaces && book.subjectPlaces.length > 0 && (
+                        {displayBook.subjectPlaces && displayBook.subjectPlaces.length > 0 && (
                           <div>
                             <div className="flex items-center gap-1.5 mb-2 text-xs text-muted-foreground">
                               <MapPin className="w-3.5 h-3.5" /> Places & Settings
                             </div>
                             <div className="flex flex-wrap gap-1.5">
-                              {book.subjectPlaces.map((place, i) => (
+                              {displayBook.subjectPlaces.map((place, i) => (
                                 <span key={i} className="px-2.5 py-1 bg-accent/10 text-accent rounded-md text-xs font-medium">{place}</span>
                               ))}
                             </div>
@@ -492,7 +492,7 @@ export const BookDetailsModal = ({
                     )}
 
                     {/* Rating */}
-                    {book.averageRating && (
+                    {displayBook.averageRating && (
                       <div className="bg-warning/10 rounded-xl p-4 sm:p-5 border border-warning/20">
                         <h4 className="font-semibold text-foreground mb-3 flex items-center text-sm sm:text-base">
                           <span className="mr-2">⭐</span>
@@ -500,27 +500,27 @@ export const BookDetailsModal = ({
                         </h4>
                         <div className="flex items-center space-x-3 flex-wrap gap-2">
                           <div className="flex space-x-1">
-                            {renderStars(book.averageRating)}
+                            {renderStars(displayBook.averageRating)}
                           </div>
                           <span className="text-base sm:text-lg font-bold text-warning">
-                            {book.averageRating}/5
+                            {displayBook.averageRating}/5
                           </span>
                           <span className="text-xs sm:text-sm text-muted-foreground">
-                            ({book.ratingsCount || 0} reviews)
+                            ({displayBook.ratingsCount || 0} reviews)
                           </span>
                         </div>
                       </div>
                     )}
 
                     {/* Categories */}
-                    {book.categories && book.categories.length > 0 && (
+                    {displayBook.categories && displayBook.categories.length > 0 && (
                       <div className="bg-primary/5 rounded-xl p-4 sm:p-5 border border-primary/10">
                         <h4 className="font-semibold text-foreground mb-3 flex items-center text-sm sm:text-base">
                           <span className="mr-2">🏷️</span>
                           Categories
                         </h4>
                         <div className="flex flex-wrap gap-2">
-                          {book.categories.map((category, index) => (
+                          {displayBook.categories.map((category, index) => (
                             <span
                               key={index}
                               className="px-3 py-1.5 sm:py-2 bg-primary/10 text-primary rounded-full text-xs sm:text-sm font-medium hover:bg-primary/20 transition-colors"
