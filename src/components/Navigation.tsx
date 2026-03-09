@@ -41,6 +41,7 @@ const navGroups: NavGroup[] = [
       { id: 'scanner', label: 'ISBN Scan', icon: ScanBarcode, description: 'Scan barcode' },
       { id: 'recommendations', label: 'For You', icon: Sparkles, description: 'Personalized picks' },
       { id: 'comparison', label: 'Compare', icon: GitCompareArrows, description: 'Compare books' },
+      { id: 'import', label: 'Import', icon: Upload, description: 'Import from CSV' },
     ],
   },
   {
