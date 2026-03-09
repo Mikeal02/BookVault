@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart,
   Music, Menu, Trophy, GitCompareArrows, FolderOpen, FileText, Share2,
-  ChevronRight, X, PanelLeftClose, PanelLeft, LogOut, ScanBarcode, Gift
+  ChevronRight, X, PanelLeftClose, PanelLeft, LogOut, ScanBarcode, Gift,
+  Timer, Upload, Brain
 } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { ThemePalettePicker } from './ThemePalettePicker';
@@ -14,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface NavigationProps {
-  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped';
+  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach';
   onViewChange: (view: NavigationProps['currentView']) => void;
   bookshelfCount: number;
   onLogout?: () => void;
@@ -40,6 +41,7 @@ const navGroups: NavGroup[] = [
       { id: 'scanner', label: 'ISBN Scan', icon: ScanBarcode, description: 'Scan barcode' },
       { id: 'recommendations', label: 'For You', icon: Sparkles, description: 'Personalized picks' },
       { id: 'comparison', label: 'Compare', icon: GitCompareArrows, description: 'Compare books' },
+      { id: 'import', label: 'Import', icon: Upload, description: 'Import from CSV' },
     ],
   },
   {
@@ -55,6 +57,8 @@ const navGroups: NavGroup[] = [
     label: 'Activity',
     items: [
       { id: 'stats', label: 'Analytics', icon: BarChart3, description: 'Reading insights' },
+      { id: 'timer', label: 'Live Timer', icon: Timer, description: 'Track sessions live' },
+      { id: 'coach', label: 'AI Coach', icon: Brain, description: 'Personalized coaching' },
       { id: 'wrapped', label: 'Wrapped', icon: Gift, description: 'Year in review' },
       { id: 'challenges', label: 'Challenges', icon: Trophy, description: 'Earn XP & badges' },
       { id: 'mood', label: 'Mood', icon: Heart, description: 'Mood journal' },

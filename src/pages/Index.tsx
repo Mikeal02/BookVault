@@ -9,6 +9,7 @@ import { BookManagementModal } from '@/components/BookManagementModal';
 import { ReadingDashboard } from '@/components/ReadingDashboard';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { CommandPalette } from '@/components/CommandPalette';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useBookshelf } from '@/hooks/useBookshelf';
 import { Book } from '@/types/book';
@@ -35,6 +36,9 @@ const SocialSharing = lazy(() => import('@/components/SocialSharing').then(m => 
 const AIBookInsights = lazy(() => import('@/components/AIBookInsights').then(m => ({ default: m.AIBookInsights })));
 const ISBNScanner = lazy(() => import('@/components/ISBNScanner').then(m => ({ default: m.ISBNScanner })));
 const ReadingWrapped = lazy(() => import('@/components/ReadingWrapped').then(m => ({ default: m.ReadingWrapped })));
+const GoodreadsImport = lazy(() => import('@/components/GoodreadsImport').then(m => ({ default: m.GoodreadsImport })));
+const LiveReadingTimer = lazy(() => import('@/components/LiveReadingTimer').then(m => ({ default: m.LiveReadingTimer })));
+const AIReadingCoach = lazy(() => import('@/components/AIReadingCoach').then(m => ({ default: m.AIReadingCoach })));
 
 const LazyFallback = () => (
   <div className="flex items-center justify-center py-24">
@@ -50,7 +54,8 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach'>('dashboard');
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [managingBook, setManagingBook] = useState<Book | null>(null);
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
@@ -68,9 +73,21 @@ const Index = () => {
       description: `Navigate to ${view}`,
     })).concat([
       { key: '/', handler: () => setCurrentView('search'), description: 'Focus search' },
-      { key: 'Escape', handler: () => { setSelectedBook(null); setManagingBook(null); setReadingSessionBook(null); setInsightsBook(null); }, description: 'Close modals' },
+      { key: 'Escape', handler: () => { setSelectedBook(null); setManagingBook(null); setReadingSessionBook(null); setInsightsBook(null); setCommandPaletteOpen(false); }, description: 'Close modals' },
     ])
   );
+
+  // ⌘K / Ctrl+K for command palette
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(o => !o);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   // Read sidebar collapsed state for layout offset
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
@@ -381,6 +398,28 @@ const Index = () => {
               {currentView === 'wrapped' && (
                 <ReadingWrapped books={bookshelf} currentUser={currentUser} />
               )}
+
+              {currentView === 'import' && (
+                <GoodreadsImport
+                  onImportBooks={async (books) => {
+                    for (const book of books) {
+                      await addToBookshelf(book);
+                    }
+                  }}
+                  existingBookIds={new Set(bookshelf.map(b => b.id))}
+                />
+              )}
+
+              {currentView === 'timer' && (
+                <LiveReadingTimer
+                  books={bookshelf}
+                  onSessionComplete={handleReadingSessionComplete}
+                />
+              )}
+
+              {currentView === 'coach' && (
+                <AIReadingCoach books={bookshelf} userId={user?.id} />
+              )}
               </Suspense>
             </motion.div>
           </AnimatePresence>
@@ -458,6 +497,15 @@ const Index = () => {
           onClose={() => setInsightsBook(null)}
         />
       )}
+
+      {/* Command Palette */}
+      <CommandPalette
+        open={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        onNavigate={setCurrentView}
+        onBookSelect={handleBookSelect}
+        books={bookshelf}
+      />
     </div>
   );
 };
