@@ -533,7 +533,7 @@ export const BookDetailsModal = ({
                     )}
 
                     {/* Reading Progress (if in bookshelf) */}
-                    {isInBookshelf && book.readingProgress !== undefined && (
+                    {isInBookshelf && displayBook.readingProgress !== undefined && (
                       <div className="bg-gradient-to-r from-success/10 to-primary/10 rounded-xl p-4 sm:p-5 border border-success/20">
                         <h4 className="font-semibold text-foreground mb-3 flex items-center text-sm sm:text-base">
                           <span className="mr-2">📊</span>
@@ -545,18 +545,18 @@ export const BookDetailsModal = ({
                               <div className="w-full bg-muted rounded-full h-3">
                                 <div 
                                   className="gradient-primary h-3 rounded-full transition-all duration-500"
-                                  style={{ width: `${book.readingProgress}%` }}
+                                  style={{ width: `${displayBook.readingProgress}%` }}
                                 />
                               </div>
                             </div>
                             <span className="text-base sm:text-lg font-bold text-success">
-                              {Math.round(book.readingProgress)}%
+                              {Math.round(displayBook.readingProgress)}%
                             </span>
                           </div>
-                          {book.timeSpentReading && book.timeSpentReading > 0 && (
+                          {displayBook.timeSpentReading && displayBook.timeSpentReading > 0 && (
                             <div className="flex items-center text-xs sm:text-sm text-success bg-card/50 rounded p-2">
                               <Clock className="w-4 h-4 mr-2" />
-                              Total reading time: {Math.floor(book.timeSpentReading / 60)}h {book.timeSpentReading % 60}m
+                              Total reading time: {Math.floor(displayBook.timeSpentReading / 60)}h {displayBook.timeSpentReading % 60}m
                             </div>
                           )}
                         </div>
