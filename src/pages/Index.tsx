@@ -18,7 +18,6 @@ import { User, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Loader2 } from 'lucide-react';
-import { Loader2 } from 'lucide-react';
 
 // Lazy load heavy components for better initial load
 const EnhancedBookSearch = lazy(() => import('@/components/EnhancedBookSearch').then(m => ({ default: m.EnhancedBookSearch })));
