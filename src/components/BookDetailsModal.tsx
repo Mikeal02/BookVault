@@ -636,6 +636,80 @@ export const BookDetailsModal = ({
                 )}
               </div>
             </div>
+
+            {/* You Might Also Like */}
+            {(similarBooks.length > 0 || loadingSimilar) && (
+              <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+                <div className="bg-gradient-to-br from-primary/5 via-card to-secondary/5 rounded-2xl p-4 sm:p-5 border border-primary/10 relative overflow-hidden">
+                  <div className="absolute -top-16 -right-16 w-32 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute -bottom-16 -left-16 w-32 h-32 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
+                  
+                  <div className="flex items-center justify-between mb-4 relative z-10">
+                    <h4 className="font-display text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                      You Might Also Like
+                    </h4>
+                    {loadingSimilar && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+                  </div>
+
+                  <div className="relative z-10">
+                    <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-thin" style={{ scrollbarWidth: 'thin' }}>
+                      {loadingSimilar && similarBooks.length === 0 && (
+                        Array.from({ length: 5 }).map((_, i) => (
+                          <div key={i} className="flex-shrink-0 w-[120px] snap-start">
+                            <div className="aspect-[2/3] rounded-xl skeleton-gold mb-2" />
+                            <div className="h-3 w-3/4 rounded skeleton-gold mb-1" />
+                            <div className="h-2.5 w-1/2 rounded skeleton-gold" />
+                          </div>
+                        ))
+                      )}
+                      {similarBooks.map((similar, idx) => (
+                        <motion.div
+                          key={similar.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.05, duration: 0.3 }}
+                          className="flex-shrink-0 w-[120px] snap-start group/similar cursor-pointer"
+                          onClick={() => {
+                            onAddToBookshelf(similar);
+                          }}
+                        >
+                          <div className="relative aspect-[2/3] rounded-xl overflow-hidden ring-1 ring-border/40 group-hover/similar:ring-primary/30 transition-all duration-300 shadow-sm group-hover/similar:shadow-lg mb-2">
+                            {similar.imageLinks?.thumbnail ? (
+                              <img
+                                src={similar.imageLinks.thumbnail}
+                                alt={similar.title}
+                                className="w-full h-full object-cover transition-transform duration-300 group-hover/similar:scale-105"
+                                loading="lazy"
+                              />
+                            ) : (
+                              <BookCoverPlaceholder title={similar.title} author={similar.authors?.[0]} className="w-full h-full" />
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 to-transparent opacity-0 group-hover/similar:opacity-100 transition-opacity duration-200 flex items-end justify-center pb-2">
+                              <span className="px-2 py-1 bg-background/95 backdrop-blur-sm rounded-full text-[10px] font-semibold text-primary flex items-center gap-1 shadow-md">
+                                <Plus className="w-2.5 h-2.5" /> Add
+                              </span>
+                            </div>
+                            {similar.averageRating && similar.averageRating >= 4 && (
+                              <div className="absolute top-1 right-1 px-1.5 py-0.5 bg-background/90 backdrop-blur-sm rounded-full flex items-center gap-0.5">
+                                <Star className="w-2 h-2 text-primary fill-primary" />
+                                <span className="text-[9px] font-bold">{similar.averageRating.toFixed(1)}</span>
+                              </div>
+                            )}
+                          </div>
+                          <h5 className="text-[11px] font-semibold text-foreground line-clamp-2 leading-tight group-hover/similar:text-primary transition-colors">
+                            {similar.title}
+                          </h5>
+                          <p className="text-[10px] text-muted-foreground line-clamp-1 mt-0.5">
+                            {similar.authors?.[0] || 'Unknown'}
+                          </p>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
         </div>
 
         {/* Footer Actions */}
