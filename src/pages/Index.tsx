@@ -246,15 +246,28 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="absolute inset-0 gradient-mesh" />
+      <div className="min-h-screen bg-background flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-0 mesh-gradient-animate" />
+        <div className="aurora-container">
+          <div className="aurora-blob-1" />
+          <div className="aurora-blob-2" />
+        </div>
         <div className="relative text-center">
-          <div className="w-16 h-16 mx-auto mb-5 rounded-xl gradient-primary flex items-center justify-center animate-pulse-soft p-3">
-            <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
+          {/* Animated concentric rings */}
+          <div className="relative w-32 h-32 mx-auto mb-8">
+            <div className="absolute inset-0 rounded-full border-2 border-primary/10 animate-spin-slow" />
+            <div className="absolute inset-2 rounded-full border border-secondary/15 animate-spin-slow" style={{ animationDirection: 'reverse', animationDuration: '16s' }} />
+            <div className="absolute inset-4 rounded-full border border-primary/8 animate-spin-slow" style={{ animationDuration: '24s' }} />
+            <div className="absolute inset-6 flex items-center justify-center">
+              <div className="w-full h-full rounded-2xl gradient-primary flex items-center justify-center p-4 shadow-xl animate-pulse-soft logo-glow">
+                <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain drop-shadow-lg" />
+              </div>
+            </div>
           </div>
-          <p className="text-lg font-display font-medium text-foreground">Loading BookVault...</p>
-          <div className="mt-3 w-24 h-0.5 mx-auto rounded-full overflow-hidden bg-muted">
-            <div className="h-full bg-primary animate-shimmer w-1/2" />
+          <h1 className="text-2xl font-display font-bold gradient-text-mixed mb-2">BookVault</h1>
+          <p className="text-sm text-muted-foreground/70 font-medium tracking-wide">Your reading sanctuary</p>
+          <div className="mt-5 w-32 h-1 mx-auto rounded-full overflow-hidden bg-muted/50">
+            <div className="h-full gradient-primary rounded-full loading-bar" />
           </div>
         </div>
       </div>

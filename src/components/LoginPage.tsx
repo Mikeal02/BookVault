@@ -119,14 +119,18 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
               className="flex justify-center mb-6"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.2, ease: "backOut" }}
+              transition={{ duration: 0.6, delay: 0.2, ease: "backOut" }}
             >
-              <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center shadow-lg p-3 animate-glow-pulse">
-                <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
+              <div className="relative">
+                {/* Glow ring */}
+                <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-primary/20 via-secondary/10 to-primary/20 blur-xl animate-pulse-soft" />
+                <div className="relative w-20 h-20 rounded-2xl gradient-primary flex items-center justify-center shadow-2xl p-4 logo-glow">
+                  <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain drop-shadow-lg" />
+                </div>
               </div>
             </motion.div>
             <motion.h1
-              className="text-4xl sm:text-5xl font-display font-bold mb-3 gradient-text-mixed"
+              className="text-4xl sm:text-5xl font-display font-bold mb-2 gradient-text-mixed glow-text"
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
@@ -134,7 +138,7 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
               BookVault
             </motion.h1>
             <motion.p
-              className="text-muted-foreground text-sm"
+              className="text-muted-foreground/70 text-sm tracking-wide"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.4 }}
