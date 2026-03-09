@@ -312,6 +312,66 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
       {/* Quick Stats Grid with Parallax */}
       <ParallaxStatsGrid stats={stats} />
 
+      {/* Currently Reading Spotlight */}
+      {stats.readingBooks > 0 && (() => {
+        const currentBooks = books.filter(b => b.readingStatus === 'reading').slice(0, 2);
+        return (
+          <motion.div
+            className="glass-card rounded-2xl p-6"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25, duration: 0.5 }}
+          >
+            <h3 className="text-xl font-bold mb-5 flex items-center gap-2">
+              <Flame className="w-5 h-5 text-warning" />
+              Currently Reading
+            </h3>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {currentBooks.map((book, i) => (
+                <motion.div
+                  key={book.id}
+                  className="flex gap-4 p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-all cursor-pointer group"
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.1 }}
+                  onClick={() => onViewChange('shelf')}
+                >
+                  <div className="w-16 h-24 rounded-xl overflow-hidden flex-shrink-0 shadow-lg group-hover:shadow-xl transition-shadow ring-1 ring-border/30">
+                    {book.imageLinks?.thumbnail ? (
+                      <img src={book.imageLinks.thumbnail} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full gradient-primary flex items-center justify-center">
+                        <BookOpen className="w-6 h-6 text-primary-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0 flex flex-col justify-between">
+                    <div>
+                      <p className="font-bold text-sm line-clamp-1">{book.title}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{book.authors?.join(', ')}</p>
+                    </div>
+                    <div className="mt-2">
+                      <div className="flex items-center justify-between text-[11px] text-muted-foreground mb-1.5">
+                        <span>{book.currentPage || 0} / {book.pageCount || '?'} pages</span>
+                        <span className="font-bold text-primary">{Math.round(book.readingProgress || 0)}%</span>
+                      </div>
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full gradient-primary rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(book.readingProgress || 0, 100)}%` }}
+                          transition={{ duration: 1.2, ease: 'easeOut', delay: 0.5 }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        );
+      })()}
+
       {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Weekly Progress Chart */}
