@@ -73,7 +73,8 @@ const Index = () => {
       description: `Navigate to ${view}`,
     })).concat([
       { key: '/', handler: () => setCurrentView('search'), description: 'Focus search' },
-      { key: 'Escape', handler: () => { setSelectedBook(null); setManagingBook(null); setReadingSessionBook(null); setInsightsBook(null); }, description: 'Close modals' },
+      { key: 'Escape', handler: () => { setSelectedBook(null); setManagingBook(null); setReadingSessionBook(null); setInsightsBook(null); setCommandPaletteOpen(false); }, description: 'Close modals' },
+      { key: 'k', meta: true, handler: () => setCommandPaletteOpen(o => !o), description: 'Command palette' },
     ])
   );
 
