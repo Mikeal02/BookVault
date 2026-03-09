@@ -332,10 +332,10 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 lg:space-y-8">
       {/* Welcome Header */}
       <motion.div
-        className="relative overflow-hidden rounded-3xl glass-card p-8"
+        className="relative overflow-hidden rounded-3xl glass-card p-6 sm:p-8 lg:p-10"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -348,21 +348,31 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
         </div>
         {/* Sparkle particles */}
         <SparkleParticles />
+        {/* Noise texture for depth */}
+        <div className="absolute inset-0 dot-grid opacity-[0.03] pointer-events-none" />
         
         <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
           <div className="text-center lg:text-left">
-            <h1 className="text-4xl lg:text-5xl font-bold mb-3">
+            <motion.p
+              className="text-xs sm:text-sm font-medium text-muted-foreground/50 uppercase tracking-widest mb-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            </motion.p>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3">
               <span className="gradient-text">Welcome back,</span>{' '}
               <span className="gradient-text-coral">{currentUser}</span>
             </h1>
-            <p className="text-muted-foreground text-lg max-w-xl">
+            <p className="text-muted-foreground text-base sm:text-lg max-w-xl">
               You're on a roll! Keep reading to reach your yearly goal.
             </p>
           </div>
           
           {stats.streak > 0 && (
             <motion.div
-              className="flex items-center gap-5 glass p-5 rounded-2xl border border-secondary/20"
+              className="flex items-center gap-5 glass p-5 rounded-2xl border border-secondary/20 shadow-lg"
               initial={{ opacity: 0, x: 20, scale: 0.9 }}
               animate={{ opacity: 1, x: 0, scale: 1 }}
               transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}

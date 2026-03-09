@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Book, User, BookOpen, Mail, Lock, Eye, EyeOff, Sparkles, Library } from 'lucide-react';
+import { Book, User, BookOpen, Mail, Lock, Eye, EyeOff, Sparkles, Library, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { toast } from 'sonner';

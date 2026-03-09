@@ -333,28 +333,39 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-1">
+        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md">
+          <BookOpen className="w-5 h-5 text-primary-foreground" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-display font-bold gradient-text">My Library</h2>
+          <p className="text-xs text-muted-foreground/60">{books.length} books in your collection</p>
+        </div>
+      </div>
+
       {/* Search and Filter Controls */}
-      <div className="glass-card rounded-2xl p-4 sm:p-6">
-        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+      <div className="glass-card rounded-2xl p-4 sm:p-5">
+        <div className="flex flex-col lg:flex-row gap-3 items-center justify-between">
           <div className="relative flex-1 max-w-md w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground/50 w-4 h-4" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by title, author, or tags..."
-              className="w-full pl-10 pr-4 py-3 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 shadow-sm text-foreground placeholder-muted-foreground"
+              className="w-full pl-10 pr-4 py-2.5 bg-muted/30 border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all duration-200 shadow-sm text-foreground placeholder-muted-foreground/40 text-sm"
             />
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-muted-foreground" />
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <Filter className="w-3.5 h-3.5 text-muted-foreground/50" />
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value as any)}
-                className="px-3 py-2.5 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm text-foreground"
+                className="px-3 py-2 bg-muted/30 border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all text-xs font-medium text-foreground"
               >
                 <option value="all">All Books</option>
                 <option value="not-read">To Read</option>
@@ -366,7 +377,7 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2.5 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm text-foreground"
+              className="px-3 py-2 bg-muted/30 border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all text-xs font-medium text-foreground"
             >
               <option value="title">Sort by Title</option>
               <option value="author">Sort by Author</option>
