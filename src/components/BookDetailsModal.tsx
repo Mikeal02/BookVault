@@ -621,9 +621,9 @@ export const BookDetailsModal = ({
         <div className="p-4 sm:p-6 border-t border-border/60 bg-gradient-to-r from-primary/3 via-muted/20 to-secondary/3 flex-shrink-0">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 sm:gap-4">
             <div className="flex items-center space-x-3">
-              {book.previewLink && (
+              {displayBook.previewLink && (
                 <a
-                  href={book.previewLink}
+                  href={displayBook.previewLink}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-primary hover:text-primary/80 transition-colors duration-200 bg-primary/10 rounded-lg hover:bg-primary/20"
