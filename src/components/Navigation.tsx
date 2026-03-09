@@ -75,24 +75,17 @@ const navGroups: NavGroup[] = [
 ];
 
 const allItems = navGroups.flatMap(g => g.items);
-
 const SIDEBAR_COLLAPSED_KEY = 'bookvault_sidebar_collapsed';
 
-// Generate initials for avatar
 const getInitials = (name?: string, email?: string): string => {
-  if (name && name !== 'Reader') {
-    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-  }
+  if (name && name !== 'Reader') return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
   if (email) return email[0].toUpperCase();
   return 'U';
 };
 
-// Generate a deterministic hue from a string
 const getAvatarHue = (str: string): number => {
   let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
   return Math.abs(hash) % 360;
 };
 
@@ -100,15 +93,11 @@ const UserAvatar = ({ name, email, size = 'md', onClick }: { name?: string; emai
   const initials = getInitials(name, email);
   const hue = getAvatarHue(name || email || 'user');
   const sizeClass = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-9 h-9 text-sm';
-
   return (
     <button
       onClick={onClick}
       className={`${sizeClass} rounded-xl font-bold flex items-center justify-center flex-shrink-0 transition-all duration-200 hover:scale-105 hover:shadow-md ring-2 ring-primary/20`}
-      style={{
-        background: `linear-gradient(135deg, hsl(${hue} 65% 55%), hsl(${(hue + 40) % 360} 60% 50%))`,
-        color: 'white',
-      }}
+      style={{ background: `linear-gradient(135deg, hsl(${hue} 65% 55%), hsl(${(hue + 40) % 360} 60% 50%))`, color: 'white' }}
       title={name || email || 'Profile'}
     >
       {initials}
@@ -116,23 +105,80 @@ const UserAvatar = ({ name, email, size = 'md', onClick }: { name?: string; emai
   );
 };
 
+// ── Desktop nav item ──
+const DesktopNavItem = ({
+  item, isActive, collapsed, bookshelfCount, onClick,
+}: { item: NavItem; isActive: boolean; collapsed: boolean; bookshelfCount: number; onClick: () => void }) => {
+  const Icon = item.icon;
+  return (
+    <div className="relative group">
+      <button
+        onClick={onClick}
+        className={`relative w-full flex items-center ${collapsed ? 'justify-center' : ''} gap-3 ${collapsed ? 'px-0 py-2.5' : 'px-3 py-2.5'} rounded-xl text-[13px] font-medium transition-all duration-200 ${
+          isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+        }`}
+      >
+        {/* Active background */}
+        {isActive && (
+          <motion.div
+            layoutId="sidebar-active"
+            className="absolute inset-0 bg-primary/8 border border-primary/15 rounded-xl"
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+          />
+        )}
+        {/* Active left bar */}
+        {isActive && (
+          <motion.div
+            layoutId="sidebar-bar"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-primary rounded-r-full shadow-[0_0_10px_hsl(var(--primary)/0.5)]"
+            transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+          />
+        )}
+        {/* Icon with subtle hover scale */}
+        <div className={`relative z-10 flex items-center justify-center w-[18px] h-[18px] flex-shrink-0 transition-all duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
+          <Icon className={`w-[18px] h-[18px] ${isActive ? 'text-primary' : 'group-hover:text-primary/70'}`} />
+        </div>
+        {!collapsed && (
+          <span className="relative z-10 flex-1 text-left truncate">{item.label}</span>
+        )}
+        {!collapsed && item.id === 'shelf' && bookshelfCount > 0 && (
+          <motion.span
+            key={bookshelfCount}
+            initial={{ scale: 1.3, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className={`relative z-10 text-[10px] font-bold px-1.5 py-0.5 rounded-full tabular-nums ${
+              isActive ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
+            }`}
+          >
+            {bookshelfCount}
+          </motion.span>
+        )}
+      </button>
+      {/* Collapsed tooltip */}
+      {collapsed && (
+        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2.5 px-3 py-2 bg-foreground text-background text-xs font-medium rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 shadow-xl">
+          <p className="font-semibold">{item.label}</p>
+          <p className="text-[10px] opacity-60 mt-0.5">{item.description}</p>
+          {item.id === 'shelf' && bookshelfCount > 0 && (
+            <p className="text-[10px] text-primary font-bold mt-0.5">{bookshelfCount} books</p>
+          )}
+          <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-foreground" />
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout, currentUser, userEmail }: NavigationProps) => {
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
-    }
+    if (typeof window !== 'undefined') return localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true';
     return false;
   });
 
-  useEffect(() => {
-    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
-  }, [collapsed]);
-
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [currentView]);
+  useEffect(() => { localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed)); }, [collapsed]);
+  useEffect(() => { setMobileOpen(false); }, [currentView]);
 
   const handleNavClick = (id: ViewId) => {
     onViewChange(id);
@@ -143,9 +189,9 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
   const CurrentIcon = allItems.find(i => i.id === currentView)?.icon || Home;
 
   const greeting = (() => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
     return 'Good evening';
   })();
 
@@ -155,13 +201,13 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
   if (isMobile) {
     return (
       <>
-        <div className="fixed top-0 left-0 right-0 z-50 glass-frosted border-b border-border/50">
+        <div className="fixed top-0 left-0 right-0 z-50 glass-frosted border-b border-border/50 shadow-sm">
           <div className="flex items-center h-14 px-3 gap-2">
             <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl" onClick={() => setMobileOpen(true)}>
               <Menu className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center flex-shrink-0 p-1">
+              <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center flex-shrink-0 p-1 logo-glow">
                 <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
               </div>
               <div className="flex items-center gap-1.5 min-w-0">
@@ -193,13 +239,22 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                 animate={{ x: 0 }}
                 exit={{ x: '-100%' }}
                 transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-                className="fixed top-0 left-0 bottom-0 z-[70] w-[280px] bg-card border-r border-border flex flex-col"
+                className="fixed top-0 left-0 bottom-0 z-[70] w-[280px] flex flex-col overflow-hidden"
+                style={{ background: 'hsl(var(--card))', borderRight: '1px solid hsl(var(--border))' }}
               >
-                {/* Drawer header with user */}
-                <div className="px-4 pt-4 pb-3 border-b border-border/50">
+                {/* Top gradient accent */}
+                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary" />
+
+                {/* Aurora in drawer */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-30">
+                  <div className="aurora-blob-1" />
+                  <div className="aurora-blob-2" />
+                </div>
+
+                <div className="relative z-10 px-4 pt-5 pb-3 border-b border-border/50">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center p-1.5">
+                      <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center p-1.5 logo-glow">
                         <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
                       </div>
                       <span className="font-display text-base font-bold gradient-text">BookVault</span>
@@ -208,7 +263,6 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                       <X className="w-4 h-4" />
                     </Button>
                   </div>
-                  {/* User section */}
                   <button
                     onClick={() => handleNavClick('profile')}
                     className="w-full flex items-center gap-3 p-2.5 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors"
@@ -222,11 +276,11 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                   </button>
                 </div>
 
-                <ScrollArea className="flex-1">
+                <ScrollArea className="flex-1 relative z-10">
                   <div className="p-3 space-y-1">
                     {navGroups.map((group) => (
                       <div key={group.label} className="mb-2">
-                        <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/50">
+                        <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/40">
                           {group.label}
                         </div>
                         {group.items.map((item) => {
@@ -237,17 +291,13 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                               key={item.id}
                               onClick={() => handleNavClick(item.id)}
                               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150 ${
-                                isActive
-                                  ? 'bg-primary/10 text-primary shadow-sm shadow-primary/5'
-                                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+                                isActive ? 'bg-primary/10 text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                               }`}
                             >
                               <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-primary' : ''}`} />
                               <span className="flex-1 text-left">{item.label}</span>
                               {item.id === 'shelf' && bookshelfCount > 0 && (
-                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                                  isActive ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
-                                }`}>
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isActive ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'}`}>
                                   {bookshelfCount}
                                 </span>
                               )}
@@ -260,7 +310,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                   </div>
                 </ScrollArea>
 
-                <div className="p-3 border-t border-border/50 space-y-2">
+                <div className="relative z-10 p-3 border-t border-border/50 space-y-2">
                   <DatabaseSyncButton />
                   {onLogout && (
                     <button
@@ -284,28 +334,45 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
   return (
     <motion.nav
       animate={{ width: collapsed ? 68 : 248 }}
-      transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      className="fixed top-0 left-0 bottom-0 z-40 flex flex-col bg-card/90 backdrop-blur-2xl border-r border-border/40 shadow-xl"
+      transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+      className="fixed top-0 left-0 bottom-0 z-40 flex flex-col overflow-hidden"
+      style={{
+        background: 'hsl(var(--card) / 0.92)',
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
+        borderRight: '1px solid hsl(var(--border) / 0.5)',
+        boxShadow: '4px 0 32px rgba(0,0,0,0.06), 1px 0 0 hsl(var(--border))',
+      }}
     >
-      {/* Top gradient accent line */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary opacity-50" />
+      {/* Animated top accent gradient */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary opacity-60" />
+      
+      {/* Subtle aurora inside sidebar */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-[0.12]">
+        <div className="aurora-blob-1" style={{ width: '200%', height: '200%', top: '-50%', left: '-50%' }} />
+      </div>
 
       {/* Logo + collapse toggle */}
-      <div className="flex items-center h-16 px-3 border-b border-border/30 gap-2 flex-shrink-0">
-        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center p-1.5 flex-shrink-0 shadow-md logo-glow">
+      <div className="relative z-10 flex items-center h-16 px-3 border-b border-border/30 gap-2 flex-shrink-0">
+        <motion.div
+          animate={{ width: collapsed ? 36 : 40, height: collapsed ? 36 : 40 }}
+          className="rounded-xl gradient-primary flex items-center justify-center flex-shrink-0 logo-glow overflow-hidden"
+          style={{ padding: collapsed ? '6px' : '8px' }}
+        >
           <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
-        </div>
+        </motion.div>
         <AnimatePresence>
           {!collapsed && (
-            <motion.span
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: 'auto' }}
-              exit={{ opacity: 0, width: 0 }}
-              transition={{ duration: 0.15 }}
-              className="font-display text-base font-bold gradient-text whitespace-nowrap overflow-hidden"
+            <motion.div
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -8 }}
+              transition={{ duration: 0.18 }}
+              className="flex flex-col min-w-0 overflow-hidden"
             >
-              BookVault
-            </motion.span>
+              <span className="font-display text-base font-bold gradient-text whitespace-nowrap leading-tight">BookVault</span>
+              <span className="text-[9px] text-muted-foreground/50 font-medium tracking-widest uppercase whitespace-nowrap">Reading Tracker</span>
+            </motion.div>
           )}
         </AnimatePresence>
         <Button
@@ -318,12 +385,12 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
         </Button>
       </div>
 
-      {/* User profile card */}
-      <div className={`border-b border-border/30 ${collapsed ? 'px-2 py-3' : 'px-3 py-3'} flex-shrink-0`}>
+      {/* User profile */}
+      <div className={`relative z-10 border-b border-border/30 ${collapsed ? 'px-2 py-3' : 'px-3 py-3'} flex-shrink-0`}>
         {collapsed ? (
           <div className="flex justify-center relative group">
             <UserAvatar name={currentUser} email={userEmail} size="sm" onClick={() => handleNavClick('profile')} />
-            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-2 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2.5 px-3 py-2 bg-foreground text-background text-xs font-medium rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 shadow-xl">
               <p className="text-[10px] opacity-70">{greeting}</p>
               <p className="font-semibold">{displayName}</p>
               <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-foreground" />
@@ -339,80 +406,45 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
               <p className="text-[10px] text-muted-foreground/60 leading-tight">{greeting}</p>
               <p className="text-[13px] font-semibold text-foreground truncate leading-tight mt-0.5">{displayName}</p>
             </div>
-            <ChevronRight className="w-3 h-3 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+            <ChevronRight className="w-3 h-3 text-muted-foreground/40 group-hover:text-muted-foreground group-hover:translate-x-0.5 transition-all" />
           </button>
         )}
       </div>
 
       {/* Nav items */}
-      <ScrollArea className="flex-1 py-2">
-        <div className={collapsed ? 'px-2 space-y-1' : 'px-3 space-y-1'}>
-          {navGroups.map((group) => (
-            <div key={group.label} className="mb-2">
+      <ScrollArea className="flex-1 py-2 relative z-10">
+        <div className={collapsed ? 'px-2 space-y-1' : 'px-3 space-y-0.5'}>
+          {navGroups.map((group, gi) => (
+            <motion.div
+              key={group.label}
+              className="mb-1"
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: gi * 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
               {!collapsed && (
-                <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/40 select-none">
+                <div className="px-3 pt-3 pb-1 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/35 select-none">
                   {group.label}
                 </div>
               )}
-              {collapsed && <div className="h-px bg-border/30 mx-1 my-2" />}
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = currentView === item.id;
-                return (
-                  <div key={item.id} className="relative group">
-                    <button
-                      onClick={() => handleNavClick(item.id)}
-                      className={`relative w-full flex items-center ${collapsed ? 'justify-center' : ''} gap-3 ${collapsed ? 'px-0 py-2.5' : 'px-3 py-2.5'} rounded-xl text-[13px] font-medium transition-all duration-200 ${
-                        isActive
-                          ? 'text-primary'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
-                      }`}
-                    >
-                      {isActive && (
-                        <motion.div
-                          layoutId="sidebar-active"
-                          className="absolute inset-0 bg-primary/8 border border-primary/15 rounded-xl shadow-sm"
-                          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        />
-                      )}
-                      {isActive && (
-                        <motion.div
-                          layoutId="sidebar-bar"
-                          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-primary rounded-r-full shadow-[0_0_8px_hsl(var(--primary)/0.4)]"
-                          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                        />
-                      )}
-                      <Icon className={`relative z-10 w-[18px] h-[18px] flex-shrink-0 transition-all duration-200 ${isActive ? 'text-primary scale-110' : 'group-hover:scale-110 group-hover:text-primary/70'}`} />
-                      {!collapsed && (
-                        <span className="relative z-10 flex-1 text-left truncate">{item.label}</span>
-                      )}
-                      {!collapsed && item.id === 'shelf' && bookshelfCount > 0 && (
-                        <span className={`relative z-10 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                          isActive ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
-                        }`}>
-                          {bookshelfCount}
-                        </span>
-                      )}
-                    </button>
-                    {collapsed && (
-                      <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 shadow-lg">
-                        {item.label}
-                        {item.id === 'shelf' && bookshelfCount > 0 && (
-                          <span className="ml-1.5 text-[10px] opacity-70">({bookshelfCount})</span>
-                        )}
-                        <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-foreground" />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+              {collapsed && <div className="h-px bg-border/20 mx-1 my-1.5" />}
+              {group.items.map(item => (
+                <DesktopNavItem
+                  key={item.id}
+                  item={item}
+                  isActive={currentView === item.id}
+                  collapsed={collapsed}
+                  bookshelfCount={bookshelfCount}
+                  onClick={() => handleNavClick(item.id)}
+                />
+              ))}
+            </motion.div>
           ))}
         </div>
       </ScrollArea>
 
       {/* Bottom section */}
-      <div className={`border-t border-border/40 ${collapsed ? 'p-2' : 'p-3'} space-y-2 flex-shrink-0`}>
+      <div className={`relative z-10 border-t border-border/40 ${collapsed ? 'p-2' : 'p-3'} space-y-2 flex-shrink-0`}>
         {!collapsed && <DatabaseSyncButton />}
         <div className={`flex ${collapsed ? 'flex-col items-center' : 'items-center'} gap-1`}>
           <ThemePalettePicker />
@@ -431,11 +463,11 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
           <div className="relative group">
             <button
               onClick={onLogout}
-              className="w-full flex justify-center py-2 rounded-xl text-muted-foreground hover:text-destructive transition-colors"
+              className="w-full flex justify-center py-2 rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/5 transition-colors"
             >
               <LogOut className="w-4 h-4" />
             </button>
-            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-foreground text-background text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 shadow-lg">
+            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-3 py-1.5 bg-foreground text-background text-xs font-medium rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 shadow-xl">
               Sign out
               <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-foreground" />
             </div>

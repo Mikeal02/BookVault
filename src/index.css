@@ -921,3 +921,235 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+/* ═══════════════════════════════════════════════
+   SCROLL REVEAL SYSTEM
+   ═══════════════════════════════════════════════ */
+
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(32px) scale(0.98);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes reveal-left {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+    filter: blur(1px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes reveal-right {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+    filter: blur(1px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes reveal-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Base reveal classes — invisible by default */
+.reveal {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.reveal.is-visible {
+  animation: reveal-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.reveal-left {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+.reveal-left.is-visible {
+  animation: reveal-left 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.reveal-right {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+.reveal-right.is-visible {
+  animation: reveal-right 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.reveal-scale {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+.reveal-scale.is-visible {
+  animation: reveal-scale 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Stagger delay utilities for reveal children */
+.reveal-delay-1  { animation-delay: 0.05s; }
+.reveal-delay-2  { animation-delay: 0.10s; }
+.reveal-delay-3  { animation-delay: 0.15s; }
+.reveal-delay-4  { animation-delay: 0.20s; }
+.reveal-delay-5  { animation-delay: 0.25s; }
+.reveal-delay-6  { animation-delay: 0.30s; }
+.reveal-delay-7  { animation-delay: 0.35s; }
+.reveal-delay-8  { animation-delay: 0.40s; }
+
+/* ═══════════════════════════════════════════════
+   ELITE V3 — ADVANCED POLISH
+   ═══════════════════════════════════════════════ */
+
+/* Magnetic hover card — subtle field effect */
+.magnetic-card {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+
+/* Premium section dividers */
+.section-rule {
+  border: none;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--border)) 20%,
+    hsl(var(--primary) / 0.2) 50%,
+    hsl(var(--border)) 80%,
+    transparent 100%
+  );
+  margin: 0;
+}
+
+/* Floating label pill */
+.section-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: hsl(var(--primary) / 0.08);
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.15);
+}
+
+/* Text shimmer — gold/primary oscillation */
+@keyframes text-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--secondary)) 25%,
+    hsl(var(--highlight)) 50%,
+    hsl(var(--secondary)) 75%,
+    hsl(var(--primary)) 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: text-shimmer 5s linear infinite;
+}
+
+/* Glow ring — for active elements */
+@keyframes glow-ring {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0), 0 0 0 4px hsl(var(--primary) / 0.08); }
+  50% { box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15), 0 0 20px hsl(var(--primary) / 0.1); }
+}
+.glow-ring-pulse {
+  animation: glow-ring 3s ease-in-out infinite;
+}
+
+/* Smooth chip hover */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.chip:hover {
+  border-color: hsl(var(--primary) / 0.3);
+  background: hsl(var(--primary) / 0.06);
+  color: hsl(var(--primary));
+}
+
+/* Surface card — flat card with precise spacing */
+.surface-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: calc(var(--radius) * 1.2);
+  box-shadow:
+    0 1px 0 hsl(var(--primary) / 0.04) inset,
+    var(--shadow-card);
+}
+
+.surface-card:hover {
+  border-color: hsl(var(--primary) / 0.12);
+  box-shadow:
+    0 1px 0 hsl(var(--primary) / 0.06) inset,
+    var(--shadow-card-hover);
+}
+
+/* Icon container presets */
+.icon-wrap-primary {
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-wrap-secondary {
+  background: hsl(var(--secondary) / 0.1);
+  color: hsl(var(--secondary));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-wrap-success {
+  background: hsl(var(--success) / 0.1);
+  color: hsl(var(--success));
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
