@@ -1,4 +1,4 @@
-import { useMemo, useRef, useEffect, useState } from 'react';
+import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useAnimatedCounter } from '@/hooks/useAnimatedCounter';
 import { FlipClockStreak } from './FlipClockStreak';
@@ -12,6 +12,68 @@ import {
   Flame, Zap, Star, Trophy, ChevronRight, Sparkles, BarChart3
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+
+// ── Sparkle Particles Component ──
+const SparkleParticles = () => {
+  const particles = useMemo(() => 
+    Array.from({ length: 18 }, (_, i) => ({
+      id: i,
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+      size: Math.random() * 4 + 2,
+      delay: Math.random() * 5,
+      duration: Math.random() * 3 + 3,
+      opacity: Math.random() * 0.5 + 0.2,
+    })),
+  []);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-[1]">
+      {particles.map(p => (
+        <motion.div
+          key={p.id}
+          className="absolute rounded-full bg-primary/60"
+          style={{ left: p.left, top: p.top, width: p.size, height: p.size }}
+          animate={{
+            opacity: [0, p.opacity, 0],
+            scale: [0.5, 1.2, 0.5],
+            y: [0, -12, 0],
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        />
+      ))}
+      {/* A few larger golden sparkles */}
+      {[0, 1, 2, 3, 4].map(i => (
+        <motion.div
+          key={`star-${i}`}
+          className="absolute text-highlight/50"
+          style={{
+            left: `${15 + i * 18}%`,
+            top: `${20 + (i % 3) * 25}%`,
+          }}
+          animate={{
+            opacity: [0, 0.7, 0],
+            scale: [0.3, 1, 0.3],
+            rotate: [0, 180],
+          }}
+          transition={{
+            duration: 4 + i * 0.5,
+            delay: i * 1.2,
+            repeat: Infinity,
+            ease: 'easeInOut',
+          }}
+        >
+          <Sparkles className="w-4 h-4" />
+        </motion.div>
+      ))}
+    </div>
+  );
+};
 
 interface ReadingDashboardProps {
   books: Book[];
