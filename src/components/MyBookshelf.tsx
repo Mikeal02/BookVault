@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Search, BookOpen, Filter, Settings, FileText, Bot, LayoutGrid, List, LayoutList, Layers, Calendar, Image } from 'lucide-react';
+import { Search, BookOpen, Filter, Settings, FileText, Bot, LayoutGrid, List, LayoutList, Layers, Calendar, Image, SlidersHorizontal } from 'lucide-react';
 import { Book } from '@/types/book';
 import { BookCard } from './BookCard';
 import { BookManagementModal } from './BookManagementModal';
@@ -9,6 +9,7 @@ import { AIBookChat } from './AIBookChat';
 import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 import { EmptyState } from './EmptyState';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 interface MyBookshelfProps {
   books: Book[];
@@ -29,7 +30,7 @@ const viewModes = [
   { mode: 'wall' as ViewMode, icon: Image, label: 'Wall' },
 ];
 
-// ── Spine View — 3D bookshelf with realistic spines ──
+// ── Spine View ──
 const SpineView = ({ books, onSelect, onManage }: { books: Book[]; onSelect: (b: Book) => void; onManage: (b: Book) => void }) => {
   const spineColors = [
     'from-[hsl(222,72%,52%)] to-[hsl(250,65%,42%)]',
@@ -43,12 +44,8 @@ const SpineView = ({ books, onSelect, onManage }: { books: Book[]; onSelect: (b:
 
   return (
     <div className="relative">
-      {/* Bookshelf with 3D perspective */}
       <div className="relative rounded-2xl overflow-hidden" style={{ perspective: '1000px' }}>
-        {/* Wall texture */}
         <div className="absolute inset-0 bg-gradient-to-b from-muted/20 to-muted/40 rounded-2xl" />
-        
-        {/* Shelf rows */}
         {[0, 1].map(row => {
           const rowBooks = books.slice(row * Math.ceil(books.length / 2), (row + 1) * Math.ceil(books.length / 2));
           if (rowBooks.length === 0) return null;
@@ -75,44 +72,27 @@ const SpineView = ({ books, onSelect, onManage }: { books: Book[]; onSelect: (b:
                         className="relative"
                         style={{ transformStyle: 'preserve-3d' }}
                       >
-                        {/* Spine face */}
                         <div
                           className={`relative bg-gradient-to-b ${spineColors[i % spineColors.length]} rounded-[2px] shadow-lg group-hover:shadow-xl transition-shadow`}
                           style={{ width: `${width}px`, height: `${height}px` }}
                         >
-                          {/* Embossed text */}
                           <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
                             <span
                               className="text-[9px] font-bold text-white/90 drop-shadow-sm whitespace-nowrap"
-                              style={{
-                                writingMode: 'vertical-rl',
-                                textOrientation: 'mixed',
-                                transform: 'rotate(180deg)',
-                                maxHeight: `${height - 20}px`,
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                              }}
+                              style={{ writingMode: 'vertical-rl', textOrientation: 'mixed', transform: 'rotate(180deg)', maxHeight: `${height - 20}px`, overflow: 'hidden', textOverflow: 'ellipsis' }}
                             >
                               {book.title}
                             </span>
                           </div>
-                          {/* Spine ridges */}
                           <div className="absolute top-2 left-0 right-0 h-px bg-white/15" />
                           <div className="absolute bottom-2 left-0 right-0 h-px bg-white/15" />
-                          {/* 3D right edge — simulates depth */}
                           <div className="absolute top-0 right-0 w-[4px] h-full bg-black/20 rounded-r-[2px]" />
                           <div className="absolute top-0 left-0 right-0 h-[2px] bg-white/25 rounded-t-[2px]" />
                           <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-black/10" />
                         </div>
-                        {/* Front cover peek (on hover) */}
                         <div
                           className="absolute top-0 h-full bg-card/90 border border-border/40 rounded-r-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 overflow-hidden"
-                          style={{
-                            left: `${width}px`,
-                            width: `${Math.max(60, width * 2)}px`,
-                            transformOrigin: 'left center',
-                            transform: 'rotateY(-5deg)',
-                          }}
+                          style={{ left: `${width}px`, width: `${Math.max(60, width * 2)}px`, transformOrigin: 'left center', transform: 'rotateY(-5deg)' }}
                         >
                           {book.imageLinks?.thumbnail ? (
                             <img src={book.imageLinks.thumbnail} alt="" className="w-full h-full object-cover" />
@@ -123,7 +103,6 @@ const SpineView = ({ books, onSelect, onManage }: { books: Book[]; onSelect: (b:
                           )}
                         </div>
                       </motion.div>
-                      {/* Tooltip */}
                       <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-foreground text-background text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none whitespace-nowrap z-50 shadow-lg">
                         <p className="font-semibold">{book.title}</p>
                         <p className="opacity-70 text-[10px]">{book.authors?.[0]}</p>
@@ -134,7 +113,6 @@ const SpineView = ({ books, onSelect, onManage }: { books: Book[]; onSelect: (b:
                   );
                 })}
               </div>
-              {/* Wooden shelf plank */}
               <div className="relative h-4 mx-2">
                 <div className="absolute inset-0 bg-gradient-to-b from-amber-800/40 via-amber-900/30 to-amber-950/20 dark:from-amber-800/20 dark:via-amber-900/15 dark:to-amber-950/10 rounded-b-lg shadow-[0_4px_12px_rgba(0,0,0,0.15)]" />
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-amber-700/20 to-transparent" />
@@ -147,9 +125,8 @@ const SpineView = ({ books, onSelect, onManage }: { books: Book[]; onSelect: (b:
   );
 };
 
-// ── Timeline View — horizontal scrolling timeline with connection lines ──
+// ── Timeline View ──
 const TimelineView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) => void }) => {
-  // Group books by month
   const grouped = books.reduce((acc, book) => {
     const date = book.dateAdded || book.dateFinished || book.dateStarted;
     const key = date ? new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' }) : 'Unknown Date';
@@ -166,17 +143,14 @@ const TimelineView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) 
 
   return (
     <div className="relative pl-10">
-      {/* Vertical timeline line with gradient */}
       <div className="absolute left-4 top-0 bottom-0 w-[2px]">
         <div className="absolute inset-0 bg-gradient-to-b from-primary via-secondary/50 to-transparent rounded-full" />
-        {/* Animated pulse traveling down */}
         <motion.div
           className="absolute left-0 w-[2px] h-8 bg-gradient-to-b from-primary to-transparent rounded-full"
           animate={{ top: ['0%', '100%'] }}
           transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
         />
       </div>
-
       {entries.map(([month, monthBooks], gi) => (
         <motion.div
           key={month}
@@ -185,7 +159,6 @@ const TimelineView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) 
           transition={{ delay: gi * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="mb-10 relative"
         >
-          {/* Timeline dot with ring */}
           <div className="absolute -left-[26px] top-1 flex items-center justify-center">
             <motion.div
               initial={{ scale: 0 }}
@@ -194,7 +167,6 @@ const TimelineView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) 
               className="w-4 h-4 rounded-full bg-primary shadow-[0_0_12px_hsl(var(--primary)/0.4)] ring-4 ring-background"
             />
           </div>
-
           <div className="glass-card rounded-xl p-4 ml-2">
             <h3 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2">
               <span className="gradient-text">{month}</span>
@@ -216,7 +188,6 @@ const TimelineView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) 
                     ) : (
                       <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-full h-full" />
                     )}
-                    {/* Status indicator */}
                     {book.readingStatus === 'finished' && (
                       <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-success/90 flex items-center justify-center">
                         <span className="text-[9px] text-white font-bold">✓</span>
@@ -240,7 +211,7 @@ const TimelineView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) 
   );
 };
 
-// ── Cover Wall View (Masonry) — with hover reveal and staggered entrance ──
+// ── Cover Wall View ──
 const CoverWallView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) => void }) => {
   return (
     <div className="columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-2.5 space-y-2.5">
@@ -256,36 +227,20 @@ const CoverWallView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book)
         >
           <div className="relative">
             {book.imageLinks?.thumbnail ? (
-              <img
-                src={book.imageLinks.thumbnail}
-                alt={book.title}
-                className="w-full object-cover rounded-xl transition-transform duration-700 group-hover:scale-110"
-                loading="lazy"
-              />
+              <img src={book.imageLinks.thumbnail} alt={book.title} className="w-full object-cover rounded-xl transition-transform duration-700 group-hover:scale-110" loading="lazy" />
             ) : (
               <div className="aspect-[2/3]">
                 <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-full h-full rounded-xl" />
               </div>
             )}
-            {/* Gradient overlay on hover */}
             <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 rounded-xl flex items-end p-3">
-              <motion.div
-                initial={{ y: 8, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                className="w-full"
-              >
+              <motion.div initial={{ y: 8, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} className="w-full">
                 <p className="text-xs font-bold text-background line-clamp-2 leading-tight">{book.title}</p>
                 <p className="text-[10px] text-background/70 mt-0.5">{book.authors?.[0]}</p>
                 <div className="flex items-center gap-1.5 mt-1.5">
-                  {book.readingStatus === 'finished' && (
-                    <span className="px-1.5 py-0.5 rounded-full bg-success/90 text-[9px] font-bold text-white">✓ Done</span>
-                  )}
-                  {book.readingStatus === 'reading' && (
-                    <span className="px-1.5 py-0.5 rounded-full bg-primary/90 text-[9px] font-bold text-white">{Math.round(book.readingProgress || 0)}%</span>
-                  )}
-                  {book.personalRating && book.personalRating > 0 && (
-                    <span className="text-[10px] text-warning">{'★'.repeat(book.personalRating)}</span>
-                  )}
+                  {book.readingStatus === 'finished' && <span className="px-1.5 py-0.5 rounded-full bg-success/90 text-[9px] font-bold text-white">✓ Done</span>}
+                  {book.readingStatus === 'reading' && <span className="px-1.5 py-0.5 rounded-full bg-primary/90 text-[9px] font-bold text-white">{Math.round(book.readingProgress || 0)}%</span>}
+                  {book.personalRating && book.personalRating > 0 && <span className="text-[10px] text-warning">{'★'.repeat(book.personalRating)}</span>}
                 </div>
               </motion.div>
             </div>
@@ -296,6 +251,101 @@ const CoverWallView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book)
   );
 };
 
+// ── List View ──
+const ListView = ({ books, onSelect, onManage }: { books: Book[]; onSelect: (b: Book) => void; onManage: (b: Book) => void }) => (
+  <div className="space-y-2">
+    {books.map((book, i) => (
+      <motion.div
+        key={book.id}
+        initial={{ opacity: 0, x: -16 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: i * 0.03, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+        onClick={() => onSelect(book)}
+        className="flex items-center gap-4 p-3.5 rounded-xl glass-card hover:border-primary/15 cursor-pointer group transition-all duration-200"
+      >
+        <div className="w-12 h-16 rounded-lg overflow-hidden flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow ring-1 ring-border/40">
+          {book.imageLinks?.thumbnail ? (
+            <img src={book.imageLinks.thumbnail} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          ) : (
+            <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-full h-full text-[8px]" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm line-clamp-1 group-hover:text-primary transition-colors">{book.title}</p>
+          <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{book.authors?.join(', ')}</p>
+          {book.readingStatus === 'reading' && book.readingProgress !== undefined && (
+            <div className="flex items-center gap-2 mt-1.5">
+              <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
+                <div className="h-full gradient-primary rounded-full" style={{ width: `${book.readingProgress}%` }} />
+              </div>
+              <span className="text-[10px] font-bold text-primary">{Math.round(book.readingProgress)}%</span>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {book.personalRating ? (
+            <span className="text-xs text-warning font-bold">{'★'.repeat(book.personalRating)}</span>
+          ) : null}
+          <span className={`text-[10px] font-semibold px-2 py-1 rounded-full ${
+            book.readingStatus === 'finished' ? 'bg-success/10 text-success' :
+            book.readingStatus === 'reading' ? 'bg-primary/10 text-primary' :
+            'bg-muted text-muted-foreground'
+          }`}>
+            {book.readingStatus === 'finished' ? '✓ Done' : book.readingStatus === 'reading' ? 'Reading' : 'To Read'}
+          </span>
+        </div>
+      </motion.div>
+    ))}
+  </div>
+);
+
+// ── Compact Table View ──
+const CompactView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) => void }) => (
+  <div className="glass-card rounded-2xl overflow-hidden">
+    <table className="w-full text-sm">
+      <thead>
+        <tr className="border-b border-border/50">
+          <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">Book</th>
+          <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground hidden sm:table-cell">Author</th>
+          <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground">Status</th>
+          <th className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-foreground hidden md:table-cell">Rating</th>
+        </tr>
+      </thead>
+      <tbody>
+        {books.map((book, i) => (
+          <motion.tr
+            key={book.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: i * 0.02 }}
+            onClick={() => onSelect(book)}
+            className="border-b border-border/30 hover:bg-muted/30 cursor-pointer transition-colors group"
+          >
+            <td className="px-4 py-3">
+              <p className="font-medium line-clamp-1 group-hover:text-primary transition-colors">{book.title}</p>
+            </td>
+            <td className="px-4 py-3 text-muted-foreground hidden sm:table-cell">
+              <p className="line-clamp-1 text-xs">{book.authors?.[0]}</p>
+            </td>
+            <td className="px-4 py-3">
+              <span className={`text-[10px] font-semibold px-2 py-1 rounded-full ${
+                book.readingStatus === 'finished' ? 'bg-success/10 text-success' :
+                book.readingStatus === 'reading' ? 'bg-primary/10 text-primary' :
+                'bg-muted text-muted-foreground'
+              }`}>
+                {book.readingStatus === 'finished' ? 'Done' : book.readingStatus === 'reading' ? 'Reading' : 'TBR'}
+              </span>
+            </td>
+            <td className="px-4 py-3 hidden md:table-cell">
+              {book.personalRating ? <span className="text-warning text-xs">{'★'.repeat(book.personalRating)}</span> : <span className="text-muted-foreground/40">—</span>}
+            </td>
+          </motion.tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
 export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpdateBook, onManageBook }: MyBookshelfProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'title' | 'author' | 'rating' | 'dateAdded'>('title');
@@ -303,6 +353,7 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
   const [showExport, setShowExport] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const { ref: headerRef, isVisible: headerVisible } = useScrollReveal({ threshold: 0.05 });
 
   const filteredBooks = books
     .filter(book => {
@@ -332,271 +383,200 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
     );
   }
 
+  const statusCounts = {
+    all: books.length,
+    'not-read': books.filter(b => b.readingStatus === 'not-read').length,
+    reading: books.filter(b => b.readingStatus === 'reading').length,
+    finished: books.filter(b => b.readingStatus === 'finished').length,
+  };
+
   return (
     <div className="space-y-5">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-1">
-        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md">
-          <BookOpen className="w-5 h-5 text-primary-foreground" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-display font-bold gradient-text">My Library</h2>
-          <p className="text-xs text-muted-foreground/60">{books.length} books in your collection</p>
-        </div>
-      </div>
-
-      {/* Search and Filter Controls */}
-      <div className="glass-card rounded-2xl p-4 sm:p-5">
-        <div className="flex flex-col lg:flex-row gap-3 items-center justify-between">
-          <div className="relative flex-1 max-w-md w-full">
-            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground/50 w-4 h-4" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by title, author, or tags..."
-              className="w-full pl-10 pr-4 py-2.5 bg-muted/30 border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all duration-200 shadow-sm text-foreground placeholder-muted-foreground/40 text-sm"
-            />
+      {/* Header — scroll revealed */}
+      <motion.div
+        ref={headerRef}
+        initial={{ opacity: 0, y: 18 }}
+        animate={headerVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-md logo-glow flex-shrink-0">
+            <BookOpen className="w-5 h-5 text-primary-foreground" />
           </div>
-
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1.5">
-              <Filter className="w-3.5 h-3.5 text-muted-foreground/50" />
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as any)}
-                className="px-3 py-2 bg-muted/30 border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all text-xs font-medium text-foreground"
-              >
-                <option value="all">All Books</option>
-                <option value="not-read">To Read</option>
-                <option value="reading">Reading</option>
-                <option value="finished">Finished</option>
-              </select>
-            </div>
-
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2 bg-muted/30 border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all text-xs font-medium text-foreground"
-            >
-              <option value="title">Sort by Title</option>
-              <option value="author">Sort by Author</option>
-              <option value="rating">Sort by My Rating</option>
-              <option value="dateAdded">Sort by Date Added</option>
-            </select>
+          <div>
+            <h2 className="text-2xl font-display font-bold gradient-text">My Library</h2>
+            <p className="text-xs text-muted-foreground/60 font-medium">
+              <span className="text-primary font-bold">{books.length}</span> books · <span className="text-success font-bold">{statusCounts.finished}</span> finished · <span className="text-warning font-bold">{statusCounts.reading}</span> reading
+            </p>
           </div>
         </div>
-      </div>
 
-      {/* Results Summary and View Controls */}
-      <div className="flex flex-wrap justify-between items-center gap-3">
-        <div className="text-xs text-muted-foreground/60 font-medium">
-          <span className="font-bold text-foreground">{filteredBooks.length}</span> of {books.length} books
-          {filterStatus !== 'all' && <span className="ml-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px]">{filterStatus.replace('-', ' ')}</span>}
-        </div>
-        <div className="flex gap-2 items-center">
-          {/* View Mode Toggle — elite with animation */}
-          <div className="flex bg-muted/30 rounded-xl p-0.5 gap-0.5 border border-border/30">
-            {viewModes.map(({ mode, icon: Icon, label }) => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                className={`relative p-2 rounded-lg transition-all duration-200 ${
-                  viewMode === mode ? 'text-primary' : 'text-muted-foreground/60 hover:text-foreground'
-                }`}
-                title={label}
-              >
-                {viewMode === mode && (
-                  <motion.div
-                    layoutId="view-mode-active"
-                    className="absolute inset-0 bg-card shadow-md rounded-lg border border-primary/15"
-                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                  />
-                )}
-                <Icon className="w-4 h-4 relative z-10" />
-              </button>
-            ))}
-          </div>
-
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setShowExport(true)}
-            className="flex items-center gap-1.5 px-3 py-2 glass-card border border-border/40 rounded-xl hover:bg-muted/40 hover:border-primary/20 transition-all text-xs font-medium text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all chip"
           >
             <FileText className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Export</span>
           </button>
           <button
             onClick={() => setShowAIChat(true)}
-            className="flex items-center gap-1.5 px-3 py-2 gradient-secondary text-white rounded-xl transition-all text-xs font-semibold shadow-lg hover:opacity-90 hover:shadow-xl"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/8 transition-all chip"
           >
             <Bot className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">AI Chat</span>
           </button>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Books Display with animated view transitions */}
+      {/* Search, filter, view controls — all in one refined panel */}
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+        className="glass-card surface-card rounded-2xl p-4"
+      >
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* Search */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+            <input
+              type="text"
+              placeholder="Search by title, author, or tag…"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-muted/50 border border-border/60 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
+            />
+          </div>
+
+          {/* Sort */}
+          <div className="relative">
+            <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50 pointer-events-none" />
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as any)}
+              className="pl-8 pr-8 py-2.5 rounded-xl bg-muted/50 border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer"
+            >
+              <option value="title">Title A–Z</option>
+              <option value="author">Author</option>
+              <option value="rating">Rating</option>
+              <option value="dateAdded">Date Added</option>
+            </select>
+          </div>
+
+          {/* View mode toggle */}
+          <div className="flex items-center gap-0.5 p-1 bg-muted/50 border border-border/60 rounded-xl">
+            {viewModes.map(({ mode, icon: Icon, label }) => (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                title={label}
+                className={`relative p-2 rounded-lg transition-all duration-200 ${
+                  viewMode === mode
+                    ? 'text-primary'
+                    : 'text-muted-foreground/50 hover:text-foreground'
+                }`}
+              >
+                {viewMode === mode && (
+                  <motion.div
+                    layoutId="shelf-view-active"
+                    className="absolute inset-0 bg-primary/10 border border-primary/20 rounded-lg"
+                    transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+                  />
+                )}
+                <Icon className="relative z-10 w-4 h-4" />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Status filter pills */}
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
+          {(['all', 'reading', 'finished', 'not-read'] as const).map(status => (
+            <button
+              key={status}
+              onClick={() => setFilterStatus(status)}
+              className={`relative px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                filterStatus === status
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {filterStatus === status && (
+                <motion.div
+                  layoutId="status-filter-bg"
+                  className="absolute inset-0 bg-primary/10 border border-primary/20 rounded-xl"
+                  transition={{ type: 'spring', damping: 28, stiffness: 300 }}
+                />
+              )}
+              <span className="relative z-10 capitalize">
+                {status === 'not-read' ? 'To Read' : status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                {' '}
+                <span className={`${filterStatus === status ? 'text-primary/70' : 'text-muted-foreground/50'}`}>
+                  {statusCounts[status]}
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Results count */}
+      {filteredBooks.length !== books.length && (
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-xs text-muted-foreground/60 px-1"
+        >
+          Showing <span className="font-bold text-primary">{filteredBooks.length}</span> of {books.length} books
+        </motion.p>
+      )}
+
+      {/* Book grid / view */}
       <AnimatePresence mode="wait">
         <motion.div
           key={viewMode}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
         >
-          {filteredBooks.length > 0 ? (
-            <>
-              {viewMode === 'grid' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 xl:gap-6">
-                  {filteredBooks.map((book) => (
-                    <div key={book.id} className="group">
-                      <BookCard
-                        book={book}
-                        onSelect={() => onBookSelect(book)}
-                        onRemoveFromBookshelf={() => onRemoveFromBookshelf(book.id)}
-                        isInBookshelf={true}
-                        showAddButton={false}
-                      />
-                      <button
-                        onClick={() => onManageBook(book)}
-                        className="w-full mt-2 py-2 px-4 gradient-primary text-white rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 shadow-lg hover:opacity-90"
-                      >
-                        <Settings className="w-4 h-4 mr-2" />
-                        Manage
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {viewMode === 'list' && (
-                <div className="space-y-2">
-                  {filteredBooks.map((book, i) => (
-                    <motion.div
-                      key={book.id}
-                      initial={{ opacity: 0, x: -12 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.03 }}
-                      className="glass-card rounded-xl p-4 flex items-center gap-4 hover:shadow-[var(--shadow-card-hover)] cursor-pointer group transition-all"
-                      onClick={() => onBookSelect(book)}
-                    >
-                      <img
-                        src={book.imageLinks?.thumbnail || '/placeholder.svg'}
-                        alt={book.title}
-                        className="w-14 h-20 object-cover rounded-lg shadow-md flex-shrink-0 transition-transform group-hover:scale-105"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-foreground line-clamp-1">{book.title}</h4>
-                        <p className="text-sm text-muted-foreground line-clamp-1">{book.authors?.join(', ')}</p>
-                        <div className="flex items-center gap-3 mt-2">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${
-                            book.readingStatus === 'finished' ? 'bg-success/20 text-success' :
-                            book.readingStatus === 'reading' ? 'bg-primary/20 text-primary' :
-                            'bg-muted text-muted-foreground'
-                          }`}>
-                            {book.readingStatus === 'not-read' ? 'To Read' : book.readingStatus === 'reading' ? 'Reading' : 'Finished'}
-                          </span>
-                          {book.personalRating && book.personalRating > 0 && (
-                            <span className="text-xs text-warning">{'★'.repeat(book.personalRating)}</span>
-                          )}
-                          {book.pageCount && (
-                            <span className="text-xs text-muted-foreground">{book.pageCount} pages</span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); onManageBook(book); }}
-                          className="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                        >
-                          <Settings className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-
-              {viewMode === 'compact' && (
-                <div className="glass-card rounded-2xl overflow-hidden">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/30">
-                        <th className="text-left text-xs font-medium text-muted-foreground p-3">Title</th>
-                        <th className="text-left text-xs font-medium text-muted-foreground p-3 hidden sm:table-cell">Author</th>
-                        <th className="text-left text-xs font-medium text-muted-foreground p-3 hidden md:table-cell">Status</th>
-                        <th className="text-left text-xs font-medium text-muted-foreground p-3 hidden lg:table-cell">Rating</th>
-                        <th className="text-left text-xs font-medium text-muted-foreground p-3 hidden lg:table-cell">Pages</th>
-                        <th className="text-right text-xs font-medium text-muted-foreground p-3">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredBooks.map((book) => (
-                        <tr
-                          key={book.id}
-                          className="border-b border-border/50 hover:bg-muted/20 cursor-pointer transition-colors"
-                          onClick={() => onBookSelect(book)}
-                        >
-                          <td className="p-3">
-                            <div className="flex items-center gap-2">
-                              <img src={book.imageLinks?.thumbnail || '/placeholder.svg'} alt="" className="w-8 h-12 object-cover rounded flex-shrink-0" />
-                              <span className="font-medium text-sm line-clamp-1">{book.title}</span>
-                            </div>
-                          </td>
-                          <td className="p-3 text-sm text-muted-foreground hidden sm:table-cell line-clamp-1">{book.authors?.[0] || 'Unknown'}</td>
-                          <td className="p-3 hidden md:table-cell">
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${
-                              book.readingStatus === 'finished' ? 'bg-success/20 text-success' :
-                              book.readingStatus === 'reading' ? 'bg-primary/20 text-primary' :
-                              'bg-muted text-muted-foreground'
-                            }`}>
-                              {book.readingStatus === 'not-read' ? 'To Read' : book.readingStatus === 'reading' ? 'Reading' : 'Done'}
-                            </span>
-                          </td>
-                          <td className="p-3 text-sm hidden lg:table-cell">
-                            {book.personalRating && book.personalRating > 0 ? <span className="text-warning">{'★'.repeat(book.personalRating)}</span> : <span className="text-muted-foreground">—</span>}
-                          </td>
-                          <td className="p-3 text-sm text-muted-foreground hidden lg:table-cell">{book.pageCount || '—'}</td>
-                          <td className="p-3 text-right">
-                            <button
-                              onClick={(e) => { e.stopPropagation(); onManageBook(book); }}
-                              className="p-1.5 rounded-lg hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
-                            >
-                              <Settings className="w-4 h-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {viewMode === 'spine' && (
-                <SpineView books={filteredBooks} onSelect={onBookSelect} onManage={onManageBook} />
-              )}
-
-              {viewMode === 'timeline' && (
-                <TimelineView books={filteredBooks} onSelect={onBookSelect} />
-              )}
-
-              {viewMode === 'wall' && (
-                <CoverWallView books={filteredBooks} onSelect={onBookSelect} />
-              )}
-            </>
-          ) : (
-            <EmptyState
-              type="search"
-              title="No books found"
-              description={`No books matching "${searchQuery}"${filterStatus !== 'all' ? ` in ${filterStatus.replace('-', ' ')} status` : ''}`}
-            />
+          {viewMode === 'grid' && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {filteredBooks.map((book, i) => (
+                <motion.div
+                  key={book.id}
+                  initial={{ opacity: 0, y: 16, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: Math.min(i * 0.04, 0.5), duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <BookCard
+                    book={book}
+                    onSelect={() => onBookSelect(book)}
+                    onRemoveFromBookshelf={() => onRemoveFromBookshelf(book.id)}
+                    isInBookshelf={true}
+                    showAddButton={false}
+                  />
+                </motion.div>
+              ))}
+            </div>
           )}
+          {viewMode === 'list' && <ListView books={filteredBooks} onSelect={onBookSelect} onManage={onManageBook} />}
+          {viewMode === 'compact' && <CompactView books={filteredBooks} onSelect={onBookSelect} />}
+          {viewMode === 'spine' && <SpineView books={filteredBooks} onSelect={onBookSelect} onManage={onManageBook} />}
+          {viewMode === 'timeline' && <TimelineView books={filteredBooks} onSelect={onBookSelect} />}
+          {viewMode === 'wall' && <CoverWallView books={filteredBooks} onSelect={onBookSelect} />}
         </motion.div>
       </AnimatePresence>
 
       {/* Modals */}
-      {showExport && <NotesExport books={books} onClose={() => setShowExport(false)} />}
-      {showAIChat && <AIBookChat books={books} onClose={() => setShowAIChat(false)} />}
+      {showExport && (
+        <NotesExport books={books} onClose={() => setShowExport(false)} />
+      )}
+      {showAIChat && (
+        <AIBookChat books={books} onClose={() => setShowAIChat(false)} />
+      )}
     </div>
   );
 };
