@@ -161,7 +161,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
               <Menu className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="w-7 h-7 rounded-lg gradient-primary flex items-center justify-center flex-shrink-0 p-1">
+            <div className="w-9 h-9 rounded-lg gradient-primary flex items-center justify-center flex-shrink-0 p-1">
                 <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
               </div>
               <div className="flex items-center gap-1.5 min-w-0">
