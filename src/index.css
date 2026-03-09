@@ -850,3 +850,74 @@
 .scroll-snap-x > * {
   scroll-snap-align: start;
 }
+
+/* ═══════════════════════════════════════════════
+   ELITE V2 — Loading & Logo effects
+   ═══════════════════════════════════════════════ */
+
+/* Logo ambient glow */
+.logo-glow {
+  box-shadow:
+    0 0 20px hsl(var(--primary) / 0.25),
+    0 0 60px hsl(var(--primary) / 0.10),
+    0 8px 32px rgba(0,0,0,0.15);
+}
+
+.dark .logo-glow {
+  box-shadow:
+    0 0 24px hsl(var(--primary) / 0.30),
+    0 0 80px hsl(var(--primary) / 0.12),
+    0 8px 32px rgba(0,0,0,0.4);
+}
+
+/* Loading bar animation */
+@keyframes loading-sweep {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
+  100% { transform: translateX(100%); }
+}
+
+.loading-bar {
+  animation: loading-sweep 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Premium text glow for dark mode hero text */
+.dark .hero-glow {
+  text-shadow: 0 0 30px hsl(var(--primary) / 0.35), 0 0 80px hsl(var(--primary) / 0.12);
+}
+
+/* Elevated glass card with border shimmer */
+.glass-card-premium {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card-premium::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 10%, hsl(var(--primary) / 0.25) 50%, transparent 90%);
+}
+
+.glass-card-premium:hover {
+  box-shadow: var(--shadow-card-hover);
+  border-color: hsl(var(--primary) / 0.12);
+}
+
+/* Radial spotlight — place behind hero elements */
+.spotlight {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.06) 0%, transparent 70%);
+  pointer-events: none;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
