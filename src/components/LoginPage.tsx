@@ -147,7 +147,7 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.35 }}
           >
-            <div className="bg-card rounded-2xl p-6 sm:p-8">
+            <div className="frosted-panel rounded-2xl p-6 sm:p-8">
               {/* Google */}
               <Button
                 type="button"
