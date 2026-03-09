@@ -48,6 +48,26 @@ export const BookDetailsModal = ({
   isInBookshelf
 }: BookDetailsModalProps) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'purchase'>('overview');
+  const [enrichedBook, setEnrichedBook] = useState<Book>(book);
+  const [isEnriching, setIsEnriching] = useState(false);
+
+  // Auto-enrich book with richer metadata on mount
+  useEffect(() => {
+    let cancelled = false;
+    const doEnrich = async () => {
+      setIsEnriching(true);
+      try {
+        const enriched = await enrichBook(book);
+        if (!cancelled) setEnrichedBook(enriched);
+      } catch {
+        // Silently fail - we still have original book data
+      } finally {
+        if (!cancelled) setIsEnriching(false);
+      }
+    };
+    doEnrich();
+    return () => { cancelled = true; };
+  }, [book.id]);
 
   const renderStars = (rating: number) => {
     return [...Array(5)].map((_, i) => (
