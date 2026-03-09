@@ -51,6 +51,8 @@ export const BookDetailsModal = ({
   const [activeTab, setActiveTab] = useState<'overview' | 'purchase'>('overview');
   const [enrichedBook, setEnrichedBook] = useState<Book>(book);
   const [isEnriching, setIsEnriching] = useState(false);
+  const [similarBooks, setSimilarBooks] = useState<Book[]>([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(false);
 
   // Auto-enrich book with richer metadata on mount
   useEffect(() => {
