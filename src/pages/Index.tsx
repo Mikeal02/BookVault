@@ -88,7 +88,6 @@ const Index = () => {
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, []);
-  );
 
   // Read sidebar collapsed state for layout offset
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
