@@ -200,7 +200,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-xl gradient-primary flex items-center justify-center p-1.5">
-                        <img src="/favicon.ico" alt="BookVault" className="w-full h-full object-contain" />
+                        <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
                       </div>
                       <span className="font-display text-base font-bold gradient-text">BookVault</span>
                     </div>
