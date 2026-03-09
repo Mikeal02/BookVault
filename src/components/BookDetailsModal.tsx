@@ -159,10 +159,11 @@ export const BookDetailsModal = ({
           <div className="flex justify-between items-start">
             <div className="flex-1 min-w-0">
               <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-1 sm:mb-2 pr-8 line-clamp-2">
-                {book.title}
+                {displayBook.title}
+                {isEnriching && <Loader2 className="inline-block w-4 h-4 ml-2 animate-spin text-muted-foreground" />}
               </h2>
               <p className="text-base sm:text-lg text-muted-foreground mb-3 sm:mb-4">
-                By {book.authors?.join(', ') || 'Unknown Author'}
+                By {displayBook.authors?.join(', ') || 'Unknown Author'}
               </p>
               
               {/* Personal Info for Bookshelf Books */}
