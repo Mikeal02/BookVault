@@ -283,15 +283,16 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
   // ─── DESKTOP ───
   return (
     <motion.nav
-      animate={{ width: collapsed ? 64 : 240 }}
+      animate={{ width: collapsed ? 68 : 248 }}
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      className="fixed top-0 left-0 bottom-0 z-40 flex flex-col bg-card/80 backdrop-blur-xl border-r border-border/50"
+      className="fixed top-0 left-0 bottom-0 z-40 flex flex-col bg-card/90 backdrop-blur-2xl border-r border-border/40 shadow-xl"
     >
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary opacity-60" />
+      {/* Top gradient accent line */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary opacity-50" />
 
       {/* Logo + collapse toggle */}
-      <div className="flex items-center h-14 px-3 border-b border-border/40 gap-2 flex-shrink-0">
-        <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center p-1.5 flex-shrink-0 shadow-sm">
+      <div className="flex items-center h-16 px-3 border-b border-border/30 gap-2 flex-shrink-0">
+        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center p-1.5 flex-shrink-0 shadow-md logo-glow">
           <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
         </div>
         <AnimatePresence>
@@ -361,7 +362,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                   <div key={item.id} className="relative group">
                     <button
                       onClick={() => handleNavClick(item.id)}
-                      className={`relative w-full flex items-center ${collapsed ? 'justify-center' : ''} gap-3 ${collapsed ? 'px-0 py-2.5' : 'px-3 py-2'} rounded-xl text-[13px] font-medium transition-all duration-150 ${
+                      className={`relative w-full flex items-center ${collapsed ? 'justify-center' : ''} gap-3 ${collapsed ? 'px-0 py-2.5' : 'px-3 py-2.5'} rounded-xl text-[13px] font-medium transition-all duration-200 ${
                         isActive
                           ? 'text-primary'
                           : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
@@ -370,18 +371,18 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                       {isActive && (
                         <motion.div
                           layoutId="sidebar-active"
-                          className="absolute inset-0 bg-primary/8 border border-primary/15 rounded-xl"
+                          className="absolute inset-0 bg-primary/8 border border-primary/15 rounded-xl shadow-sm"
                           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                         />
                       )}
                       {isActive && (
                         <motion.div
                           layoutId="sidebar-bar"
-                          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full"
+                          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-primary rounded-r-full shadow-[0_0_8px_hsl(var(--primary)/0.4)]"
                           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                         />
                       )}
-                      <Icon className={`relative z-10 w-4 h-4 flex-shrink-0 transition-transform duration-150 ${isActive ? 'text-primary scale-110' : 'group-hover:scale-105'}`} />
+                      <Icon className={`relative z-10 w-[18px] h-[18px] flex-shrink-0 transition-all duration-200 ${isActive ? 'text-primary scale-110' : 'group-hover:scale-110 group-hover:text-primary/70'}`} />
                       {!collapsed && (
                         <span className="relative z-10 flex-1 text-left truncate">{item.label}</span>
                       )}

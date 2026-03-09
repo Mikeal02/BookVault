@@ -333,28 +333,39 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-1">
+        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md">
+          <BookOpen className="w-5 h-5 text-primary-foreground" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-display font-bold gradient-text">My Library</h2>
+          <p className="text-xs text-muted-foreground/60">{books.length} books in your collection</p>
+        </div>
+      </div>
+
       {/* Search and Filter Controls */}
-      <div className="glass-card rounded-2xl p-4 sm:p-6">
-        <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+      <div className="glass-card rounded-2xl p-4 sm:p-5">
+        <div className="flex flex-col lg:flex-row gap-3 items-center justify-between">
           <div className="relative flex-1 max-w-md w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-muted-foreground/50 w-4 h-4" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by title, author, or tags..."
-              className="w-full pl-10 pr-4 py-3 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 shadow-sm text-foreground placeholder-muted-foreground"
+              className="w-full pl-10 pr-4 py-2.5 bg-muted/30 border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all duration-200 shadow-sm text-foreground placeholder-muted-foreground/40 text-sm"
             />
           </div>
 
-          <div className="flex items-center gap-3 flex-wrap">
-            <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-muted-foreground" />
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5">
+              <Filter className="w-3.5 h-3.5 text-muted-foreground/50" />
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value as any)}
-                className="px-3 py-2.5 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm text-foreground"
+                className="px-3 py-2 bg-muted/30 border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all text-xs font-medium text-foreground"
               >
                 <option value="all">All Books</option>
                 <option value="not-read">To Read</option>
@@ -366,7 +377,7 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-3 py-2.5 bg-muted/50 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all text-sm text-foreground"
+              className="px-3 py-2 bg-muted/30 border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all text-xs font-medium text-foreground"
             >
               <option value="title">Sort by Title</option>
               <option value="author">Sort by Author</option>
@@ -379,26 +390,26 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
 
       {/* Results Summary and View Controls */}
       <div className="flex flex-wrap justify-between items-center gap-3">
-        <div className="text-sm text-muted-foreground">
-          {filteredBooks.length} of {books.length} books
-          {filterStatus !== 'all' && ` (${filterStatus.replace('-', ' ')})`}
+        <div className="text-xs text-muted-foreground/60 font-medium">
+          <span className="font-bold text-foreground">{filteredBooks.length}</span> of {books.length} books
+          {filterStatus !== 'all' && <span className="ml-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px]">{filterStatus.replace('-', ' ')}</span>}
         </div>
         <div className="flex gap-2 items-center">
           {/* View Mode Toggle — elite with animation */}
-          <div className="flex bg-muted/40 rounded-xl p-0.5 gap-0.5">
+          <div className="flex bg-muted/30 rounded-xl p-0.5 gap-0.5 border border-border/30">
             {viewModes.map(({ mode, icon: Icon, label }) => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
                 className={`relative p-2 rounded-lg transition-all duration-200 ${
-                  viewMode === mode ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                  viewMode === mode ? 'text-primary' : 'text-muted-foreground/60 hover:text-foreground'
                 }`}
                 title={label}
               >
                 {viewMode === mode && (
                   <motion.div
                     layoutId="view-mode-active"
-                    className="absolute inset-0 bg-card shadow-sm rounded-lg border border-border/50"
+                    className="absolute inset-0 bg-card shadow-md rounded-lg border border-primary/15"
                     transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                   />
                 )}
@@ -409,17 +420,17 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
 
           <button
             onClick={() => setShowExport(true)}
-            className="flex items-center gap-2 px-3 py-2 glass-card border border-border rounded-xl hover:bg-muted/50 transition-all text-sm font-medium text-foreground"
+            className="flex items-center gap-1.5 px-3 py-2 glass-card border border-border/40 rounded-xl hover:bg-muted/40 hover:border-primary/20 transition-all text-xs font-medium text-muted-foreground hover:text-foreground"
           >
-            <FileText className="w-4 h-4" />
+            <FileText className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Export</span>
           </button>
           <button
             onClick={() => setShowAIChat(true)}
-            className="flex items-center gap-2 px-3 py-2 gradient-secondary text-white rounded-xl transition-all text-sm font-medium shadow-lg hover:opacity-90"
+            className="flex items-center gap-1.5 px-3 py-2 gradient-secondary text-white rounded-xl transition-all text-xs font-semibold shadow-lg hover:opacity-90 hover:shadow-xl"
           >
-            <Bot className="w-4 h-4" />
-            <span className="hidden sm:inline">AI</span>
+            <Bot className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">AI Chat</span>
           </button>
         </div>
       </div>
