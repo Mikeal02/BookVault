@@ -283,11 +283,12 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
   // ─── DESKTOP ───
   return (
     <motion.nav
-      animate={{ width: collapsed ? 64 : 240 }}
+      animate={{ width: collapsed ? 68 : 248 }}
       transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-      className="fixed top-0 left-0 bottom-0 z-40 flex flex-col bg-card/80 backdrop-blur-xl border-r border-border/50"
+      className="fixed top-0 left-0 bottom-0 z-40 flex flex-col bg-card/90 backdrop-blur-2xl border-r border-border/40 shadow-xl"
     >
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary opacity-60" />
+      {/* Top gradient accent line */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary opacity-50" />
 
       {/* Logo + collapse toggle */}
       <div className="flex items-center h-14 px-3 border-b border-border/40 gap-2 flex-shrink-0">
