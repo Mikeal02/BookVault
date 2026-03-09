@@ -109,10 +109,15 @@ export const BookCard = ({ book, onSelect, onAddToBookshelf, onRemoveFromBookshe
         style={tiltStyle}
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
-        className="glass-card rounded-2xl overflow-hidden cursor-pointer transition-shadow duration-300 hover:shadow-[var(--shadow-card-hover)]"
+        className="glass-card rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] group-hover:border-primary/10"
       >
-        {/* Top accent */}
+        {/* Top accent shimmer */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/0 via-primary/40 to-secondary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 z-10" />
+        
+        {/* Card shine sweep */}
+        <div className="absolute inset-0 pointer-events-none z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-2xl">
+          <div className="absolute -inset-full bg-gradient-to-tr from-transparent via-white/[0.07] to-transparent rotate-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
+        </div>
 
         <div onClick={onSelect} className="p-3.5">
           {/* Cover with 3D depth */}
