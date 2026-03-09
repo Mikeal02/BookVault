@@ -398,6 +398,28 @@ const Index = () => {
               {currentView === 'wrapped' && (
                 <ReadingWrapped books={bookshelf} currentUser={currentUser} />
               )}
+
+              {currentView === 'import' && (
+                <GoodreadsImport
+                  onImportBooks={async (books) => {
+                    for (const book of books) {
+                      await addToBookshelf(book);
+                    }
+                  }}
+                  existingBookIds={new Set(bookshelf.map(b => b.id))}
+                />
+              )}
+
+              {currentView === 'timer' && (
+                <LiveReadingTimer
+                  books={bookshelf}
+                  onSessionComplete={handleReadingSessionComplete}
+                />
+              )}
+
+              {currentView === 'coach' && (
+                <AIReadingCoach books={bookshelf} userId={user?.id} />
+              )}
               </Suspense>
             </motion.div>
           </AnimatePresence>
