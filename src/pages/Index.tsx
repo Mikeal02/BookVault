@@ -9,6 +9,7 @@ import { BookManagementModal } from '@/components/BookManagementModal';
 import { ReadingDashboard } from '@/components/ReadingDashboard';
 import { FloatingActionButton } from '@/components/FloatingActionButton';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { CommandPalette } from '@/components/CommandPalette';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useBookshelf } from '@/hooks/useBookshelf';
 import { Book } from '@/types/book';
@@ -16,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Loader2 } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
 
 // Lazy load heavy components for better initial load
