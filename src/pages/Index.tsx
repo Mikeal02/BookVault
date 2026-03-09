@@ -74,8 +74,20 @@ const Index = () => {
     })).concat([
       { key: '/', handler: () => setCurrentView('search'), description: 'Focus search' },
       { key: 'Escape', handler: () => { setSelectedBook(null); setManagingBook(null); setReadingSessionBook(null); setInsightsBook(null); setCommandPaletteOpen(false); }, description: 'Close modals' },
-      { key: 'k', meta: true, handler: () => setCommandPaletteOpen(o => !o), description: 'Command palette' },
     ])
+  );
+
+  // ⌘K / Ctrl+K for command palette
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(o => !o);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
   );
 
   // Read sidebar collapsed state for layout offset
