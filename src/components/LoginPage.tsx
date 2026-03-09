@@ -74,11 +74,14 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-background">
-      {/* Animated background */}
-      <div className="absolute inset-0 gradient-mesh" />
-      <div className="blob-1 -top-40 -right-40 opacity-30" />
-      <div className="blob-2 -bottom-40 -left-40 opacity-20" />
-      <div className="blob-3 top-1/3 left-1/4 opacity-20" />
+      {/* Premium animated mesh background */}
+      <div className="absolute inset-0 mesh-gradient-animate" />
+      <div className="absolute inset-0 dot-grid opacity-30" />
+      <div className="aurora-container">
+        <div className="aurora-blob-1" />
+        <div className="aurora-blob-2" />
+        <div className="aurora-blob-3" />
+      </div>
       
       {/* Floating book decorations */}
       <motion.div
@@ -147,7 +150,7 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.35 }}
           >
-            <div className="bg-card rounded-2xl p-6 sm:p-8">
+            <div className="frosted-panel rounded-2xl p-6 sm:p-8">
               {/* Google */}
               <Button
                 type="button"

@@ -740,3 +740,113 @@
   background: linear-gradient(90deg, transparent, hsl(222 72% 52% / 0.08), transparent);
   animation: shimmer 2s infinite;
 }
+
+/* ═══════════════════════════════════════════════
+   ELITE PREMIUM EFFECTS
+   ═══════════════════════════════════════════════ */
+
+/* Noise texture overlay for depth */
+.noise-overlay {
+  position: relative;
+}
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+/* Premium card with inner shine line */
+.elite-card {
+  position: relative;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.elite-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 10%, hsl(var(--primary) / 0.3) 30%, hsl(var(--secondary) / 0.3) 70%, transparent 90%);
+}
+.elite-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  border-color: hsl(var(--primary) / 0.15);
+}
+
+/* Animated gradient mesh background — hero sections */
+@keyframes mesh-drift {
+  0%, 100% { background-position: 0% 50%, 50% 50%, 100% 50%; }
+  25% { background-position: 50% 0%, 0% 100%, 50% 50%; }
+  50% { background-position: 100% 50%, 50% 0%, 0% 50%; }
+  75% { background-position: 50% 100%, 100% 50%, 50% 0%; }
+}
+
+.mesh-gradient-animate {
+  background:
+    radial-gradient(at 20% 30%, hsl(var(--primary) / 0.12) 0px, transparent 50%),
+    radial-gradient(at 80% 20%, hsl(var(--secondary) / 0.1) 0px, transparent 50%),
+    radial-gradient(at 50% 80%, hsl(var(--accent) / 0.08) 0px, transparent 50%);
+  background-size: 200% 200%, 200% 200%, 200% 200%;
+  animation: mesh-drift 20s ease-in-out infinite;
+}
+
+/* Frosted panel — heavier than glass-frosted */
+.frosted-panel {
+  background: hsl(var(--card) / 0.65);
+  backdrop-filter: blur(60px) saturate(1.8);
+  -webkit-backdrop-filter: blur(60px) saturate(1.8);
+  border: 1px solid hsl(var(--border) / 0.4);
+  box-shadow: 0 8px 32px hsl(var(--primary) / 0.06), inset 0 1px 0 hsl(var(--primary) / 0.06);
+}
+
+.dark .frosted-panel {
+  background: hsl(var(--card) / 0.4);
+  border: 1px solid hsl(var(--border) / 0.25);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 hsl(var(--primary) / 0.04);
+}
+
+/* Scroll shadow indicators */
+.scroll-shadow-x {
+  mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 24px, black calc(100% - 24px), transparent);
+}
+
+/* Micro-interaction: button press depth */
+.press-depth:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Decorative dot grid */
+.dot-grid {
+  background-image: radial-gradient(hsl(var(--primary) / 0.06) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Glowing text */
+.glow-text {
+  text-shadow: 0 0 20px hsl(var(--primary) / 0.3), 0 0 40px hsl(var(--primary) / 0.1);
+}
+
+.dark .glow-text {
+  text-shadow: 0 0 20px hsl(var(--primary) / 0.4), 0 0 60px hsl(var(--primary) / 0.15);
+}
+
+/* Horizontal scroll snap */
+.scroll-snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-snap-x > * {
+  scroll-snap-align: start;
+}
