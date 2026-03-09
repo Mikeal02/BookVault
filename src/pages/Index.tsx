@@ -35,6 +35,9 @@ const SocialSharing = lazy(() => import('@/components/SocialSharing').then(m => 
 const AIBookInsights = lazy(() => import('@/components/AIBookInsights').then(m => ({ default: m.AIBookInsights })));
 const ISBNScanner = lazy(() => import('@/components/ISBNScanner').then(m => ({ default: m.ISBNScanner })));
 const ReadingWrapped = lazy(() => import('@/components/ReadingWrapped').then(m => ({ default: m.ReadingWrapped })));
+const GoodreadsImport = lazy(() => import('@/components/GoodreadsImport').then(m => ({ default: m.GoodreadsImport })));
+const LiveReadingTimer = lazy(() => import('@/components/LiveReadingTimer').then(m => ({ default: m.LiveReadingTimer })));
+const AIReadingCoach = lazy(() => import('@/components/AIReadingCoach').then(m => ({ default: m.AIReadingCoach })));
 
 const LazyFallback = () => (
   <div className="flex items-center justify-center py-24">
