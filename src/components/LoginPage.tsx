@@ -122,7 +122,7 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
               transition={{ duration: 0.5, delay: 0.2, ease: "backOut" }}
             >
               <div className="w-16 h-16 rounded-2xl gradient-primary flex items-center justify-center shadow-lg p-3 animate-glow-pulse">
-                <img src="/favicon.ico" alt="BookVault" className="w-full h-full object-contain" />
+                <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
               </div>
             </motion.div>
             <motion.h1
