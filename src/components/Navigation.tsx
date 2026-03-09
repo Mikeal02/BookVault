@@ -291,8 +291,8 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
       <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary opacity-50" />
 
       {/* Logo + collapse toggle */}
-      <div className="flex items-center h-14 px-3 border-b border-border/40 gap-2 flex-shrink-0">
-        <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center p-1.5 flex-shrink-0 shadow-sm">
+      <div className="flex items-center h-16 px-3 border-b border-border/30 gap-2 flex-shrink-0">
+        <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center p-1.5 flex-shrink-0 shadow-md logo-glow">
           <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
         </div>
         <AnimatePresence>
