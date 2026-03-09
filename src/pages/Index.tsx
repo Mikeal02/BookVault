@@ -497,6 +497,15 @@ const Index = () => {
           onClose={() => setInsightsBook(null)}
         />
       )}
+
+      {/* Command Palette */}
+      <CommandPalette
+        open={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+        onNavigate={setCurrentView}
+        onBookSelect={handleBookSelect}
+        books={bookshelf}
+      />
     </div>
   );
 };
