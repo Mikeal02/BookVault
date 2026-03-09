@@ -164,7 +164,7 @@ export const BookDetailsModal = ({
       }}
     >
       <div 
-        className="bg-card rounded-t-3xl sm:rounded-2xl w-full sm:max-w-5xl flex flex-col shadow-2xl animate-scale-in border border-border/80 relative overflow-hidden"
+        className="frosted-panel rounded-t-3xl sm:rounded-2xl w-full sm:max-w-5xl flex flex-col shadow-2xl animate-scale-in relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         style={{ 
           overscrollBehavior: 'contain',
