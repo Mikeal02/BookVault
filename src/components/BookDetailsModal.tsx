@@ -72,6 +72,24 @@ export const BookDetailsModal = ({
     return () => { cancelled = true; };
   }, [book.id]);
 
+  // Fetch similar books
+  useEffect(() => {
+    let cancelled = false;
+    const fetchSimilar = async () => {
+      setLoadingSimilar(true);
+      try {
+        const results = await findSimilarBooks(book, 10);
+        if (!cancelled) setSimilarBooks(results);
+      } catch {
+        // Silently fail
+      } finally {
+        if (!cancelled) setLoadingSimilar(false);
+      }
+    };
+    fetchSimilar();
+    return () => { cancelled = true; };
+  }, [book.id]);
+
   const renderStars = (rating: number) => {
     return [...Array(5)].map((_, i) => (
       <Star
