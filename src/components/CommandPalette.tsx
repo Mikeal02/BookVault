@@ -44,7 +44,7 @@ export const CommandPalette = ({ open, onClose, onNavigate, onBookSelect, books 
   const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<NodeJS.Timeout>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Reset on open
   useEffect(() => {

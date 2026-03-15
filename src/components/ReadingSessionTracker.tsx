@@ -84,7 +84,7 @@ export const ReadingSessionTracker = ({ book, onSessionComplete, onClose }: Read
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isActive) {
       interval = setInterval(() => {
         setTime(t => t + 1);
