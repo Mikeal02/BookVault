@@ -355,9 +355,9 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
       {/* Logo + collapse toggle */}
       <div className="relative z-10 flex items-center h-16 px-3 border-b border-border/30 gap-2 flex-shrink-0">
         <motion.div
-          animate={{ width: collapsed ? 36 : 40, height: collapsed ? 36 : 40 }}
+          animate={{ width: collapsed ? 40 : 44, height: collapsed ? 40 : 44 }}
           className="rounded-xl gradient-primary flex items-center justify-center flex-shrink-0 logo-glow overflow-hidden"
-          style={{ padding: collapsed ? '6px' : '8px' }}
+          style={{ padding: collapsed ? '7px' : '9px' }}
         >
           <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
         </motion.div>
