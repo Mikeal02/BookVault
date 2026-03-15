@@ -137,10 +137,10 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
             >
               <div className="relative">
                 {/* Outer glow */}
-                <div className="absolute -inset-5 rounded-3xl bg-gradient-to-br from-primary/15 via-secondary/8 to-primary/15 blur-2xl animate-pulse-soft" />
+                <div className="absolute -inset-6 rounded-3xl bg-gradient-to-br from-primary/15 via-secondary/8 to-primary/15 blur-2xl animate-pulse-soft" />
                 {/* Inner glow ring */}
-                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/30 to-secondary/20 blur-md" />
-                <div className="relative w-20 h-20 rounded-2xl gradient-primary flex items-center justify-center shadow-2xl p-4 logo-glow">
+                <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-primary/30 to-secondary/20 blur-md" />
+                <div className="relative w-28 h-28 rounded-2xl gradient-primary flex items-center justify-center shadow-2xl p-5 logo-glow">
                   <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain drop-shadow-lg" />
                 </div>
               </div>

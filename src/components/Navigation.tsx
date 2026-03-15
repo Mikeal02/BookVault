@@ -207,7 +207,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
               <Menu className="w-5 h-5" />
             </Button>
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center flex-shrink-0 p-1 logo-glow">
+              <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center flex-shrink-0 p-1.5 logo-glow">
                 <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
               </div>
               <div className="flex items-center gap-1.5 min-w-0">
@@ -254,7 +254,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
                 <div className="relative z-10 px-4 pt-5 pb-3 border-b border-border/50">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center p-1.5 logo-glow">
+                      <div className="w-12 h-12 rounded-xl gradient-primary flex items-center justify-center p-2 logo-glow">
                         <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
                       </div>
                       <span className="font-display text-base font-bold gradient-text">BookVault</span>
@@ -355,9 +355,9 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
       {/* Logo + collapse toggle */}
       <div className="relative z-10 flex items-center h-16 px-3 border-b border-border/30 gap-2 flex-shrink-0">
         <motion.div
-          animate={{ width: collapsed ? 36 : 40, height: collapsed ? 36 : 40 }}
+          animate={{ width: collapsed ? 40 : 44, height: collapsed ? 40 : 44 }}
           className="rounded-xl gradient-primary flex items-center justify-center flex-shrink-0 logo-glow overflow-hidden"
-          style={{ padding: collapsed ? '6px' : '8px' }}
+          style={{ padding: collapsed ? '7px' : '9px' }}
         >
           <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
         </motion.div>
