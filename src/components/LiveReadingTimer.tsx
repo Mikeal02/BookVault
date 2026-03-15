@@ -28,7 +28,7 @@ export const LiveReadingTimer = ({ books, onSessionComplete }: LiveReadingTimerP
   const [pagesRead, setPagesRead] = useState(0);
   const [notes, setNotes] = useState('');
   const [showComplete, setShowComplete] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout>();
+  const intervalRef = useRef<ReturnType<typeof setInterval>>();
   const lastActivityRef = useRef(Date.now());
   const AUTO_PAUSE_MS = 5 * 60 * 1000; // 5 min inactivity
 
