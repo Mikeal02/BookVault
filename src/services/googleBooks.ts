@@ -47,6 +47,8 @@ const fetchWithRetry = async (url: string, maxRetries = 2): Promise<Response> =>
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeout);
       if (response.ok) return response;
+      if (response.status === 429) throw new Error('429 Rate limit exceeded');
+      if (response.status >= 500) throw new Error(`${response.status} Server error`);
       if (response.status >= 400 && response.status < 500) return response;
       lastError = new Error(`HTTP ${response.status}`);
     } catch (err: any) {
