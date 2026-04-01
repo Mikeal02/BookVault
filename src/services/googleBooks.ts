@@ -47,6 +47,8 @@ const fetchWithRetry = async (url: string, maxRetries = 2): Promise<Response> =>
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeout);
       if (response.ok) return response;
+      if (response.status === 429) throw new Error('429 Rate limit exceeded');
+      if (response.status >= 500) throw new Error(`${response.status} Server error`);
       if (response.status >= 400 && response.status < 500) return response;
       lastError = new Error(`HTTP ${response.status}`);
     } catch (err: any) {
@@ -481,47 +483,49 @@ export const enrichBook = async (book: Book): Promise<Book> => {
 
 // === Fetch book by ISBN (for barcode scanning / direct lookup) ===
 export const fetchBookByISBN = async (isbn: string): Promise<Book | null> => {
-  try {
-    const [olResponse, gbResponse] = await Promise.allSettled([
-      fetchWithRetry(`${OPEN_LIBRARY_SEARCH_URL}?isbn=${isbn}&limit=1&fields=key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count,ratings_average,isbn,subtitle,edition_count,has_fulltext`),
-      fetchWithRetry(`${GOOGLE_BOOKS_API_URL}?q=isbn:${isbn}&maxResults=1`),
-    ]);
+  const results = await Promise.allSettled([
+    fetchWithRetry(`${OPEN_LIBRARY_SEARCH_URL}?isbn=${isbn}&limit=1&fields=key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count,ratings_average,isbn,subtitle,edition_count,has_fulltext`),
+    fetchWithRetry(`${GOOGLE_BOOKS_API_URL}?q=isbn:${isbn}&maxResults=1`),
+  ]);
 
-    let book: Book | null = null;
+  const [olResult, gbResult] = results;
+  let book: Book | null = null;
 
-    if (gbResponse.status === 'fulfilled' && gbResponse.value.ok) {
-      const data = await gbResponse.value.json();
-      if (data.items?.[0]) {
-        book = transformGoogleBookToBook(data.items[0]);
-      }
+  if (gbResult.status === 'fulfilled' && gbResult.value.ok) {
+    const data = await gbResult.value.json();
+    if (data.items?.[0]) {
+      book = transformGoogleBookToBook(data.items[0]);
     }
-
-    if (olResponse.status === 'fulfilled' && olResponse.value.ok) {
-      const data = await olResponse.value.json();
-      if (data.docs?.[0]) {
-        const olBook = transformOpenLibraryBook(data.docs[0]);
-        if (book) {
-          book = {
-            ...book,
-            description: book.description || olBook.description,
-            imageLinks: book.imageLinks || olBook.imageLinks,
-            subjects: olBook.subjects?.length ? olBook.subjects : book.subjects,
-            subjectPlaces: olBook.subjectPlaces || book.subjectPlaces,
-            subjectPeople: olBook.subjectPeople || book.subjectPeople,
-            editionCount: olBook.editionCount || book.editionCount,
-            freeReading: olBook.freeReading || book.freeReading,
-            firstSentence: olBook.firstSentence || book.firstSentence,
-          };
-        } else {
-          book = olBook;
-        }
-      }
-    }
-
-    return book;
-  } catch {
-    return null;
   }
+
+  if (olResult.status === 'fulfilled' && olResult.value.ok) {
+    const data = await olResult.value.json();
+    if (data.docs?.[0]) {
+      const olBook = transformOpenLibraryBook(data.docs[0]);
+      if (book) {
+        book = {
+          ...book,
+          description: book.description || olBook.description,
+          imageLinks: book.imageLinks || olBook.imageLinks,
+          subjects: olBook.subjects?.length ? olBook.subjects : book.subjects,
+          subjectPlaces: olBook.subjectPlaces || book.subjectPlaces,
+          subjectPeople: olBook.subjectPeople || book.subjectPeople,
+          editionCount: olBook.editionCount || book.editionCount,
+          freeReading: olBook.freeReading || book.freeReading,
+          firstSentence: olBook.firstSentence || book.firstSentence,
+        };
+      } else {
+        book = olBook;
+      }
+    }
+  }
+
+  // If both failed, propagate the error
+  if (!book && olResult.status === 'rejected' && gbResult.status === 'rejected') {
+    throw gbResult.reason || olResult.reason;
+  }
+
+  return book;
 };
 
 export interface SearchFilters {
