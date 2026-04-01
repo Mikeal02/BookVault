@@ -31,7 +31,7 @@ const inputClasses = "w-full pl-11 pr-4 py-3.5 bg-muted/10 border border-border/
 
 const stagger = {
   container: { animate: { transition: { staggerChildren: 0.08, delayChildren: 0.4 } } },
-  item: { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] } } },
+  item: { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } } },
 };
 
 export const LoginPage = ({ onLogin }: LoginPageProps) => {
