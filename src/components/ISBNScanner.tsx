@@ -360,7 +360,7 @@ export const ISBNScanner = ({ onBookFound, onAddToBookshelf, isInBookshelf }: IS
           >
             <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-3" />
             <p className="text-foreground font-semibold">Something went wrong</p>
-            <p className="text-sm text-muted-foreground mt-1">Please try again in a moment.</p>
+            <p className="text-sm text-muted-foreground mt-1">{errorMessage || 'Please try again in a moment.'}</p>
             <button
               onClick={resetScanner}
               className="mt-4 px-6 py-2 text-sm font-medium text-primary hover:underline"
