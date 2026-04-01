@@ -1,7 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Book, User, BookOpen, Mail, Lock, Eye, EyeOff, Sparkles, Library, Star, ArrowRight } from 'lucide-react';
+import { Book, User, BookOpen, Mail, Lock, Eye, EyeOff, Sparkles, Library, Star, ArrowRight, Quote, TrendingUp, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { toast } from 'sonner';
@@ -12,14 +12,27 @@ interface LoginPageProps {
 }
 
 const floatingElements = [
-  { icon: BookOpen, className: 'top-[10%] left-[5%]', size: 'w-24 h-24', delay: 0, duration: 9, color: 'text-primary' },
-  { icon: Book, className: 'top-[20%] right-[8%]', size: 'w-16 h-16', delay: 1.5, duration: 11, color: 'text-secondary' },
-  { icon: Library, className: 'bottom-[15%] right-[10%]', size: 'w-32 h-32', delay: 2, duration: 13, color: 'text-secondary' },
-  { icon: Sparkles, className: 'top-[55%] left-[3%]', size: 'w-14 h-14', delay: 1, duration: 8, color: 'text-primary' },
-  { icon: Star, className: 'bottom-[10%] left-[18%]', size: 'w-10 h-10', delay: 3, duration: 10, color: 'text-highlight' },
+  { icon: BookOpen, className: 'top-[8%] left-[4%]', size: 'w-20 h-20', delay: 0, duration: 12, yRange: 12 },
+  { icon: Book, className: 'top-[18%] right-[6%]', size: 'w-14 h-14', delay: 2, duration: 14, yRange: 10 },
+  { icon: Library, className: 'bottom-[12%] right-[8%]', size: 'w-28 h-28', delay: 3, duration: 16, yRange: 14 },
+  { icon: Sparkles, className: 'top-[50%] left-[2%]', size: 'w-12 h-12', delay: 1, duration: 10, yRange: 8 },
+  { icon: Star, className: 'bottom-[8%] left-[15%]', size: 'w-10 h-10', delay: 4, duration: 11, yRange: 6 },
+  { icon: Quote, className: 'top-[70%] right-[3%]', size: 'w-8 h-8', delay: 5, duration: 13, yRange: 10 },
 ];
 
-const inputClasses = "w-full pl-11 pr-4 py-3.5 bg-muted/10 border border-border/50 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary/50 focus:bg-muted/20 transition-all duration-300 text-foreground placeholder-muted-foreground/40 text-sm outline-none";
+const quotes = [
+  { text: "A reader lives a thousand lives before he dies.", author: "George R.R. Martin" },
+  { text: "Books are a uniquely portable magic.", author: "Stephen King" },
+  { text: "Reading is to the mind what exercise is to the body.", author: "Joseph Addison" },
+  { text: "There is no friend as loyal as a book.", author: "Ernest Hemingway" },
+];
+
+const inputClasses = "w-full pl-11 pr-4 py-3.5 bg-muted/10 border border-border/40 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary/50 focus:bg-muted/15 transition-all duration-300 text-foreground placeholder-muted-foreground/35 text-sm outline-none";
+
+const stagger = {
+  container: { animate: { transition: { staggerChildren: 0.08, delayChildren: 0.4 } } },
+  item: { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } } },
+};
 
 export const LoginPage = ({ onLogin }: LoginPageProps) => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -29,6 +42,15 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [quoteIndex, setQuoteIndex] = useState(0);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setQuoteIndex(i => (i + 1) % quotes.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
@@ -90,54 +112,58 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-background">
-      {/* Animated background layers */}
+      {/* Layered animated backgrounds */}
       <div className="absolute inset-0 mesh-gradient-animate" />
-      <div className="absolute inset-0 dot-grid opacity-15" />
+      <div className="absolute inset-0 dot-grid opacity-10" />
       <div className="aurora-container">
         <div className="aurora-blob-1" />
         <div className="aurora-blob-2" />
         <div className="aurora-blob-3" />
       </div>
 
-      {/* Floating book decorations */}
-      {floatingElements.map(({ icon: Icon, className, size, delay, duration, color }, i) => (
+      {/* Radial spotlight effect */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,hsl(var(--background)/0.6)_70%)]" />
+
+      {/* Floating elements with parallax-like depth */}
+      {floatingElements.map(({ icon: Icon, className, size, delay, duration, yRange }, i) => (
         <motion.div
           key={i}
-          className={`absolute ${className} opacity-[0.04]`}
-          animate={{ y: [-8, 8, -8], rotate: [-3, 3, -3] }}
+          className={`absolute ${className} opacity-[0.035]`}
+          animate={{
+            y: [-yRange, yRange, -yRange],
+            rotate: [-4, 4, -4],
+            scale: [1, 1.05, 1],
+          }}
           transition={{ duration, repeat: Infinity, ease: 'easeInOut', delay }}
         >
-          <Icon className={`${size} ${color}`} />
+          <Icon className={`${size} text-primary`} />
         </motion.div>
       ))}
 
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
-        <motion.div
-          className="w-full max-w-[440px]"
-          initial={{ opacity: 0, y: 32 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        >
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-4 sm:p-6">
+        <div className="w-full max-w-[460px]">
           {/* Brand header */}
           <motion.div
-            className="text-center mb-10"
-            initial={{ opacity: 0, y: 16 }}
+            className="text-center mb-8"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
             <motion.div
-              className="flex justify-center mb-6"
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.15, ease: 'backOut' }}
+              className="flex justify-center mb-5"
+              initial={{ scale: 0.4, opacity: 0, rotate: -10 }}
+              animate={{ scale: 1, opacity: 1, rotate: 0 }}
+              transition={{ duration: 0.9, delay: 0.1, ease: 'backOut' }}
             >
-              <div className="relative group">
-                <div className="absolute -inset-8 rounded-3xl bg-gradient-to-br from-primary/15 via-secondary/8 to-primary/15 blur-2xl animate-pulse-soft" />
-                <div className="absolute -inset-3 rounded-2xl bg-gradient-to-br from-primary/25 to-secondary/15 blur-lg transition-all duration-500 group-hover:blur-xl group-hover:from-primary/35" />
+              <div className="relative group cursor-pointer">
+                {/* Multi-layer glow */}
+                <div className="absolute -inset-10 rounded-full bg-gradient-to-br from-primary/12 via-secondary/6 to-primary/12 blur-3xl animate-pulse-soft" />
+                <div className="absolute -inset-4 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/12 blur-xl transition-all duration-700 group-hover:blur-2xl group-hover:from-primary/30 group-hover:to-secondary/20" />
                 <motion.div
-                  className="relative w-28 h-28 rounded-2xl gradient-primary flex items-center justify-center shadow-2xl p-5 logo-glow"
-                  whileHover={{ scale: 1.05, rotate: 2 }}
-                  transition={{ type: 'spring', stiffness: 300 }}
+                  className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl gradient-primary flex items-center justify-center shadow-2xl p-4 sm:p-5 logo-glow ring-1 ring-white/10"
+                  whileHover={{ scale: 1.08, rotate: 3 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                 >
                   <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain drop-shadow-lg" />
                 </motion.div>
@@ -145,10 +171,10 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
             </motion.div>
 
             <motion.h1
-              className="text-4xl sm:text-5xl font-display font-bold mb-2 gradient-text-mixed glow-text"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              className="text-4xl sm:text-5xl font-display font-bold mb-1.5 gradient-text-mixed glow-text"
+              initial={{ opacity: 0, y: 10, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              transition={{ duration: 0.6, delay: 0.25 }}
             >
               BookVault
             </motion.h1>
@@ -156,10 +182,10 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
             <AnimatePresence mode="wait">
               <motion.p
                 key={isSignUp ? 'signup' : 'signin'}
-                className="text-muted-foreground/60 text-sm tracking-wide font-medium"
-                initial={{ opacity: 0, y: 4 }}
+                className="text-muted-foreground/55 text-sm tracking-wide font-medium"
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
+                exit={{ opacity: 0, y: -6 }}
                 transition={{ duration: 0.3 }}
               >
                 {isSignUp ? 'Create your reading sanctuary' : 'Welcome back, reader'}
@@ -167,29 +193,28 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
             </AnimatePresence>
           </motion.div>
 
-          {/* Main card */}
+          {/* Main card with layered glassmorphism */}
           <motion.div
-            className="gradient-border rounded-2xl overflow-hidden"
-            initial={{ opacity: 0, y: 24, scale: 0.97 }}
+            className="relative"
+            initial={{ opacity: 0, y: 28, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="frosted-panel rounded-2xl p-7 sm:p-8">
+            {/* Ambient card glow */}
+            <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-primary/15 via-border/30 to-secondary/10 blur-[0.5px]" />
+
+            <div className="relative frosted-panel rounded-2xl p-6 sm:p-8 border border-border/30 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.15)]">
               {/* Google sign-in */}
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.45 }}
-              >
+              <motion.div variants={stagger.item} initial="initial" animate="animate">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={handleGoogleSignIn}
                   disabled={isGoogleLoading}
-                  className="w-full py-3.5 mb-6 flex items-center justify-center gap-2.5 border-border/60 hover:bg-muted/40 hover:border-primary/30 hover:shadow-lg transition-all duration-300 text-sm h-auto rounded-xl group"
+                  className="w-full py-3.5 mb-5 flex items-center justify-center gap-2.5 border-border/50 hover:bg-muted/30 hover:border-primary/25 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 text-sm h-auto rounded-xl group active:scale-[0.98]"
                 >
                   {isGoogleLoading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-foreground" />
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-foreground/20 border-t-foreground" />
                   ) : (
                     <svg className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -203,101 +228,115 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
               </motion.div>
 
               {/* Divider */}
-              <div className="relative mb-6">
+              <div className="relative mb-5">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full luxury-divider" />
+                  <div className="w-full h-px bg-gradient-to-r from-transparent via-border/60 to-transparent" />
                 </div>
-                <div className="relative flex justify-center text-[11px]">
-                  <span className="px-4 bg-card text-muted-foreground/50 uppercase tracking-wider font-medium">or continue with email</span>
+                <div className="relative flex justify-center text-[10px]">
+                  <span className="px-3 bg-card text-muted-foreground/40 uppercase tracking-[0.2em] font-medium">or with email</span>
                 </div>
               </div>
 
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Form with staggered fields */}
+              <motion.form
+                onSubmit={handleSubmit}
+                className="space-y-3.5"
+                variants={stagger.container}
+                initial="initial"
+                animate="animate"
+              >
                 <AnimatePresence mode="wait">
                   {isSignUp && (
                     <motion.div
                       key="username-field"
-                      initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                      animate={{ opacity: 1, height: 'auto', marginBottom: 16 }}
-                      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
                       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                      className="overflow-hidden"
                     >
-                      <label htmlFor="username" className="block text-[10px] font-semibold text-muted-foreground/60 mb-2 uppercase tracking-widest">
-                        Your Name
-                      </label>
-                      <div className="relative group">
-                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 w-4 h-4 group-focus-within:text-primary transition-colors duration-300" />
-                        <input type="text" id="username" value={username} onChange={(e) => setUsername(e.target.value)}
-                          className={inputClasses}
-                          placeholder="Enter your name" autoComplete="name" />
+                      <div className="pb-3.5">
+                        <label htmlFor="username" className="block text-[10px] font-semibold text-muted-foreground/50 mb-1.5 uppercase tracking-[0.15em]">
+                          Your Name
+                        </label>
+                        <div className={`relative group rounded-xl transition-shadow duration-300 ${focusedField === 'username' ? 'shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]' : ''}`}>
+                          <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/35 w-4 h-4 group-focus-within:text-primary transition-colors duration-300" />
+                          <input type="text" id="username" value={username} onChange={(e) => setUsername(e.target.value)}
+                            onFocus={() => setFocusedField('username')} onBlur={() => setFocusedField(null)}
+                            className={inputClasses}
+                            placeholder="Enter your name" autoComplete="name" />
+                        </div>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                <div>
-                  <label htmlFor="email" className="block text-[10px] font-semibold text-muted-foreground/60 mb-2 uppercase tracking-widest">
+                <motion.div variants={stagger.item}>
+                  <label htmlFor="email" className="block text-[10px] font-semibold text-muted-foreground/50 mb-1.5 uppercase tracking-[0.15em]">
                     Email Address
                   </label>
-                  <div className="relative group">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 w-4 h-4 group-focus-within:text-primary transition-colors duration-300" />
+                  <div className={`relative group rounded-xl transition-shadow duration-300 ${focusedField === 'email' ? 'shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]' : ''}`}>
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/35 w-4 h-4 group-focus-within:text-primary transition-colors duration-300" />
                     <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                      onFocus={() => setFocusedField('email')} onBlur={() => setFocusedField(null)}
                       className={inputClasses}
                       placeholder="you@example.com" required autoComplete="email" />
                   </div>
-                </div>
+                </motion.div>
 
-                <div>
-                  <label htmlFor="password" className="block text-[10px] font-semibold text-muted-foreground/60 mb-2 uppercase tracking-widest">
+                <motion.div variants={stagger.item}>
+                  <label htmlFor="password" className="block text-[10px] font-semibold text-muted-foreground/50 mb-1.5 uppercase tracking-[0.15em]">
                     Password
                   </label>
-                  <div className="relative group">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 w-4 h-4 group-focus-within:text-primary transition-colors duration-300" />
+                  <div className={`relative group rounded-xl transition-shadow duration-300 ${focusedField === 'password' ? 'shadow-[0_0_0_3px_hsl(var(--primary)/0.08)]' : ''}`}>
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/35 w-4 h-4 group-focus-within:text-primary transition-colors duration-300" />
                     <input type={showPassword ? 'text' : 'password'} id="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                      onFocus={() => setFocusedField('password')} onBlur={() => setFocusedField(null)}
                       className={`${inputClasses} !pr-11`}
-                      placeholder={isSignUp ? 'Create a password (min 6 chars)' : 'Enter your password'}
+                      placeholder={isSignUp ? 'Min 6 characters' : 'Enter your password'}
                       required autoComplete={isSignUp ? 'new-password' : 'current-password'} minLength={6} />
                     <button type="button" onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors duration-200">
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/35 hover:text-foreground/70 transition-colors duration-200 p-0.5">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                </div>
+                </motion.div>
 
-                <motion.button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full py-3.5 px-6 rounded-xl font-semibold text-sm gradient-primary text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg hover:shadow-xl press-depth flex items-center justify-center gap-2 mt-6"
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {isLoading ? (
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
-                      {isSignUp ? 'Creating Account...' : 'Signing in...'}
-                    </div>
-                  ) : (
-                    <>
-                      {isSignUp ? 'Create Account' : 'Sign In'}
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </motion.button>
-              </form>
+                <motion.div variants={stagger.item} className="pt-2">
+                  <motion.button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full py-3.5 px-6 rounded-xl font-semibold text-sm gradient-primary text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-primary/15 hover:shadow-xl hover:shadow-primary/20 press-depth flex items-center justify-center gap-2 group"
+                    whileHover={{ scale: 1.015 }}
+                    whileTap={{ scale: 0.975 }}
+                  >
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-current/20 border-t-current" />
+                        {isSignUp ? 'Creating Account...' : 'Signing in...'}
+                      </div>
+                    ) : (
+                      <>
+                        {isSignUp ? 'Create Account' : 'Sign In'}
+                        <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                      </>
+                    )}
+                  </motion.button>
+                </motion.div>
+              </motion.form>
 
-              {/* Toggle sign-in/sign-up */}
+              {/* Toggle */}
               <motion.div
-                className="mt-7 text-center"
+                className="mt-6 text-center"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.55 }}
+                transition={{ delay: 0.6 }}
               >
-                <p className="text-muted-foreground/50 text-sm">
+                <p className="text-muted-foreground/45 text-sm">
                   {isSignUp ? 'Already have an account?' : "Don't have an account?"}
                   <button
                     onClick={toggleMode}
-                    className="ml-2 text-primary hover:text-primary/80 font-bold transition-colors animated-underline"
+                    className="ml-1.5 text-primary hover:text-primary/80 font-bold transition-colors duration-200 animated-underline"
                   >
                     {isSignUp ? 'Sign In' : 'Sign Up'}
                   </button>
@@ -306,32 +345,57 @@ export const LoginPage = ({ onLogin }: LoginPageProps) => {
             </div>
           </motion.div>
 
-          {/* Feature badges */}
+          {/* Rotating quote */}
           <motion.div
-            className="mt-10 flex items-center justify-center gap-3 flex-wrap"
+            className="mt-8 text-center max-w-sm mx-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.7 }}
+            transition={{ delay: 0.8 }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={quoteIndex}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.5 }}
+                className="space-y-1"
+              >
+                <p className="text-[12px] text-muted-foreground/30 italic leading-relaxed">
+                  "{quotes[quoteIndex].text}"
+                </p>
+                <p className="text-[10px] text-muted-foreground/20 font-medium tracking-wide">
+                  — {quotes[quoteIndex].author}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Trust badges */}
+          <motion.div
+            className="mt-6 flex items-center justify-center gap-4 flex-wrap"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.9 }}
           >
             {[
-              { icon: Book, label: 'Search Books' },
-              { icon: BookOpen, label: 'Track Progress' },
-              { icon: Sparkles, label: 'AI Insights' },
+              { icon: Shield, label: 'Secure' },
+              { icon: TrendingUp, label: 'Track Progress' },
+              { icon: Sparkles, label: 'AI Powered' },
             ].map((feat, i) => (
               <motion.span
                 key={feat.label}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/20 border border-border/20 text-[11px] text-muted-foreground/45 font-medium backdrop-blur-sm"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 + i * 0.1, duration: 0.4 }}
-                whileHover={{ scale: 1.05, borderColor: 'hsl(var(--primary) / 0.3)' }}
+                className="flex items-center gap-1.5 text-[10px] text-muted-foreground/30 font-medium tracking-wide uppercase"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 + i * 0.1 }}
               >
                 <feat.icon className="w-3 h-3" />
                 {feat.label}
               </motion.span>
             ))}
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );
