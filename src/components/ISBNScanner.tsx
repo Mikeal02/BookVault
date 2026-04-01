@@ -88,6 +88,8 @@ export const ISBNScanner = ({ onBookFound, onAddToBookshelf, isInBookshelf }: IS
     }
   }, [mode, startCamera, stopCamera]);
 
+  const [errorMessage, setErrorMessage] = useState<string>('');
+
   const handleISBNLookup = async (isbn: string) => {
     const cleaned = isbn.replace(/[-\s]/g, '');
     if (cleaned.length !== 10 && cleaned.length !== 13) {
@@ -97,6 +99,7 @@ export const ISBNScanner = ({ onBookFound, onAddToBookshelf, isInBookshelf }: IS
 
     setScanState('scanning');
     setFoundBook(null);
+    setErrorMessage('');
 
     try {
       const book = await fetchBookByISBN(cleaned);
@@ -107,7 +110,15 @@ export const ISBNScanner = ({ onBookFound, onAddToBookshelf, isInBookshelf }: IS
       } else {
         setScanState('not-found');
       }
-    } catch {
+    } catch (err: any) {
+      const msg = err?.message || '';
+      if (msg.includes('429') || msg.toLowerCase().includes('quota') || msg.toLowerCase().includes('rate limit')) {
+        setErrorMessage('API rate limit reached. Please try again in a few minutes.');
+      } else if (msg.includes('500') || msg.includes('503')) {
+        setErrorMessage('Book lookup service is temporarily unavailable. Please try again shortly.');
+      } else {
+        setErrorMessage('Could not look up this ISBN. Please check your connection and try again.');
+      }
       setScanState('error');
     }
   };
