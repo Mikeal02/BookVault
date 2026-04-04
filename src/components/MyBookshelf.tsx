@@ -355,7 +355,7 @@ const CompactView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) =
   </div>
 );
 
-export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpdateBook, onManageBook }: MyBookshelfProps) => {
+export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpdateBook, onManageBook, vaults, activeVaultId, onVaultSelect, onVaultCreate, onVaultUpdate, onVaultDelete, onAssignBookToVault }: MyBookshelfProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'title' | 'author' | 'rating' | 'dateAdded'>('title');
   const [filterStatus, setFilterStatus] = useState<'all' | 'not-read' | 'reading' | 'finished'>('all');
@@ -364,7 +364,12 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const { ref: headerRef, isVisible: headerVisible } = useScrollReveal({ threshold: 0.05 });
 
-  const filteredBooks = books
+  // Filter by vault first
+  const vaultBooks = activeVaultId
+    ? books.filter(b => b.vaultId === activeVaultId)
+    : books;
+
+  const filteredBooks = vaultBooks
     .filter(book => {
       const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         book.authors.some(author => author.toLowerCase().includes(searchQuery.toLowerCase())) ||
