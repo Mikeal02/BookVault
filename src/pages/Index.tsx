@@ -351,6 +351,13 @@ const Index = () => {
                   onRemoveFromBookshelf={removeFromBookshelf}
                   onUpdateBook={updateBookInShelf}
                   onManageBook={handleManageBook}
+                  vaults={vaults}
+                  activeVaultId={activeVaultId}
+                  onVaultSelect={setActiveVaultId}
+                  onVaultCreate={createVault}
+                  onVaultUpdate={updateVault}
+                  onVaultDelete={deleteVault}
+                  onAssignBookToVault={assignBookToVault}
                 />
               )}
               
