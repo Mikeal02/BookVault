@@ -12,15 +12,6 @@ import { VaultSwitcher } from './VaultSwitcher';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { Vault } from '@/hooks/useVaults';
-import { Book } from '@/types/book';
-import { BookCard } from './BookCard';
-import { BookManagementModal } from './BookManagementModal';
-import { NotesExport } from './NotesExport';
-import { AIBookChat } from './AIBookChat';
-import { BookCoverPlaceholder } from './BookCoverPlaceholder';
-import { EmptyState } from './EmptyState';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 interface MyBookshelfProps {
   books: Book[];
