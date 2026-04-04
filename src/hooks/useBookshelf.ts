@@ -46,6 +46,7 @@ export const useBookshelf = (userId: string | undefined) => {
       dateAdded: ub.date_added || undefined,
       dateStarted: ub.date_started || undefined,
       dateFinished: ub.date_finished || undefined,
+      vaultId: (ub as any).vault_id || undefined,
     }));
 
     setBookshelf(books);

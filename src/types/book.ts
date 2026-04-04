@@ -60,6 +60,7 @@ export interface Book {
   readingProgress?: number; // percentage 0-100
   timeSpentReading?: number; // minutes
   currentPage?: number;
+  vaultId?: string;
 }
 
 export interface GoogleBookResponse {

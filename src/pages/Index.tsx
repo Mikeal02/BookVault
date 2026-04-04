@@ -12,6 +12,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { CommandPalette } from '@/components/CommandPalette';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useBookshelf } from '@/hooks/useBookshelf';
+import { useVaults } from '@/hooks/useVaults';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -61,6 +62,7 @@ const Index = () => {
   const [readingSessionBook, setReadingSessionBook] = useState<Book | null>(null);
   const [insightsBook, setInsightsBook] = useState<Book | null>(null);
   const { bookshelf, setBookshelf, loadBooks, addBook: addToBookshelf, updateBook: updateBookInShelf, removeBook: removeFromBookshelf, isInBookshelf } = useBookshelf(user?.id);
+  const { vaults, activeVaultId, setActiveVaultId, createVault, updateVault, deleteVault, assignBookToVault } = useVaults(user?.id);
   const [readingGoal, setReadingGoal] = useState<number>(12);
   const isMobile = useIsMobile();
 
@@ -349,6 +351,13 @@ const Index = () => {
                   onRemoveFromBookshelf={removeFromBookshelf}
                   onUpdateBook={updateBookInShelf}
                   onManageBook={handleManageBook}
+                  vaults={vaults}
+                  activeVaultId={activeVaultId}
+                  onVaultSelect={setActiveVaultId}
+                  onVaultCreate={createVault}
+                  onVaultUpdate={updateVault}
+                  onVaultDelete={deleteVault}
+                  onAssignBookToVault={assignBookToVault}
                 />
               )}
               

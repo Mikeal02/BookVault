@@ -230,6 +230,7 @@ export type Database = {
           title: string
           updated_at: string | null
           user_id: string
+          vault_id: string | null
         }
         Insert: {
           authors?: string[] | null
@@ -261,6 +262,7 @@ export type Database = {
           title: string
           updated_at?: string | null
           user_id: string
+          vault_id?: string | null
         }
         Update: {
           authors?: string[] | null
@@ -292,8 +294,17 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_id?: string
+          vault_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "user_books_vault_id_fkey"
+            columns: ["vault_id"]
+            isOneToOne: false
+            referencedRelation: "vaults"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -312,6 +323,42 @@ export type Database = {
           created_at?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vaults: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          sort_order: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

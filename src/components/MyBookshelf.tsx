@@ -8,8 +8,10 @@ import { NotesExport } from './NotesExport';
 import { AIBookChat } from './AIBookChat';
 import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 import { EmptyState } from './EmptyState';
+import { VaultSwitcher } from './VaultSwitcher';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { Vault } from '@/hooks/useVaults';
 
 interface MyBookshelfProps {
   books: Book[];
@@ -17,6 +19,13 @@ interface MyBookshelfProps {
   onRemoveFromBookshelf: (bookId: string) => void;
   onUpdateBook: (book: Book) => void;
   onManageBook: (book: Book) => void;
+  vaults?: Vault[];
+  activeVaultId?: string | null;
+  onVaultSelect?: (vaultId: string | null) => void;
+  onVaultCreate?: (name: string, icon: string, color: string, description?: string) => Promise<Vault | null>;
+  onVaultUpdate?: (vaultId: string, updates: Partial<Pick<Vault, 'name' | 'icon' | 'color' | 'description'>>) => Promise<void>;
+  onVaultDelete?: (vaultId: string) => Promise<void>;
+  onAssignBookToVault?: (bookId: string, vaultId: string | null) => Promise<void>;
 }
 
 type ViewMode = 'grid' | 'list' | 'compact' | 'spine' | 'timeline' | 'wall';
@@ -346,7 +355,7 @@ const CompactView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) =
   </div>
 );
 
-export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpdateBook, onManageBook }: MyBookshelfProps) => {
+export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpdateBook, onManageBook, vaults, activeVaultId, onVaultSelect, onVaultCreate, onVaultUpdate, onVaultDelete, onAssignBookToVault }: MyBookshelfProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'title' | 'author' | 'rating' | 'dateAdded'>('title');
   const [filterStatus, setFilterStatus] = useState<'all' | 'not-read' | 'reading' | 'finished'>('all');
@@ -355,7 +364,12 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const { ref: headerRef, isVisible: headerVisible } = useScrollReveal({ threshold: 0.05 });
 
-  const filteredBooks = books
+  // Filter by vault first
+  const vaultBooks = activeVaultId
+    ? books.filter(b => b.vaultId === activeVaultId)
+    : books;
+
+  const filteredBooks = vaultBooks
     .filter(book => {
       const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         book.authors.some(author => author.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -384,10 +398,10 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
   }
 
   const statusCounts = {
-    all: books.length,
-    'not-read': books.filter(b => b.readingStatus === 'not-read').length,
-    reading: books.filter(b => b.readingStatus === 'reading').length,
-    finished: books.filter(b => b.readingStatus === 'finished').length,
+    all: vaultBooks.length,
+    'not-read': vaultBooks.filter(b => b.readingStatus === 'not-read').length,
+    reading: vaultBooks.filter(b => b.readingStatus === 'reading').length,
+    finished: vaultBooks.filter(b => b.readingStatus === 'finished').length,
   };
 
   return (
@@ -398,7 +412,7 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
         initial={{ opacity: 0, y: 18 }}
         animate={headerVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="flex items-center justify-between"
+        className="flex items-center justify-between flex-wrap gap-3"
       >
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-md logo-glow flex-shrink-0">
@@ -407,12 +421,23 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
           <div>
             <h2 className="text-2xl font-display font-bold gradient-text">My Library</h2>
             <p className="text-xs text-muted-foreground/60 font-medium">
-              <span className="text-primary font-bold">{books.length}</span> books · <span className="text-success font-bold">{statusCounts.finished}</span> finished · <span className="text-warning font-bold">{statusCounts.reading}</span> reading
+              <span className="text-primary font-bold">{vaultBooks.length}</span> books · <span className="text-success font-bold">{statusCounts.finished}</span> finished · <span className="text-warning font-bold">{statusCounts.reading}</span> reading
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Vault Switcher */}
+          {vaults && vaults.length > 0 && onVaultSelect && onVaultCreate && onVaultUpdate && onVaultDelete && (
+            <VaultSwitcher
+              vaults={vaults}
+              activeVaultId={activeVaultId ?? null}
+              onSelect={onVaultSelect}
+              onCreate={onVaultCreate}
+              onUpdate={onVaultUpdate}
+              onDelete={onVaultDelete}
+            />
+          )}
           <button
             onClick={() => setShowExport(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all chip"
