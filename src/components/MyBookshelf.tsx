@@ -19,6 +19,13 @@ interface MyBookshelfProps {
   onRemoveFromBookshelf: (bookId: string) => void;
   onUpdateBook: (book: Book) => void;
   onManageBook: (book: Book) => void;
+  vaults?: Vault[];
+  activeVaultId?: string | null;
+  onVaultSelect?: (vaultId: string | null) => void;
+  onVaultCreate?: (name: string, icon: string, color: string, description?: string) => Promise<Vault | null>;
+  onVaultUpdate?: (vaultId: string, updates: Partial<Pick<Vault, 'name' | 'icon' | 'color' | 'description'>>) => Promise<void>;
+  onVaultDelete?: (vaultId: string) => Promise<void>;
+  onAssignBookToVault?: (bookId: string, vaultId: string | null) => Promise<void>;
 }
 
 type ViewMode = 'grid' | 'list' | 'compact' | 'spine' | 'timeline' | 'wall';
