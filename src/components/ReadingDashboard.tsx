@@ -13,6 +13,10 @@ import {
   Flame, Zap, Star, Trophy, ChevronRight, Sparkles, BarChart3
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { AnimatedProgressRing } from './AnimatedProgressRing';
+import { GenreRadarChart } from './GenreRadarChart';
+import { ReadingVelocityGauge } from './ReadingVelocityGauge';
+import { MagneticButton } from './MagneticButton';
 
 // ── Sparkle Particles Component ──
 const SparkleParticles = () => {
