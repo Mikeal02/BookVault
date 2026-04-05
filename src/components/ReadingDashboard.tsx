@@ -713,23 +713,25 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
               { view: 'lists' as const, icon: BookOpen, gradient: 'bg-gradient-to-br from-accent to-primary', title: 'Reading Lists', desc: 'Curated collections' },
               { view: 'annotations' as const, icon: Star, gradient: 'bg-gradient-to-br from-secondary to-secondary/70', title: 'Annotations', desc: 'Notes & highlights' },
             ].map((item, i) => (
-              <motion.button
-                key={item.view}
-                onClick={() => onViewChange(item.view)}
-                className="glass-card surface-card rounded-2xl p-5 text-left hover-lift transition-all group"
-                custom={i}
-                variants={cardVariants}
-                initial="hidden"
-                animate="visible"
-                whileHover={{ y: -4 }}
-              >
-                <div className={`w-10 h-10 rounded-xl ${item.gradient} flex items-center justify-center mb-3 shadow-md group-hover:shadow-lg transition-shadow`}>
-                  <item.icon className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <h4 className="font-bold text-sm group-hover:text-primary transition-colors">{item.title}</h4>
-                <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
-                <ChevronRight className="w-4 h-4 text-muted-foreground mt-2 group-hover:translate-x-1.5 group-hover:text-primary transition-all duration-200" />
-              </motion.button>
+              <MagneticButton key={item.view} strength={0.2}>
+                <motion.button
+                  onClick={() => onViewChange(item.view)}
+                  className="glass-card surface-card rounded-2xl p-5 text-left hover-lift transition-all group w-full"
+                  custom={i}
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover={{ y: -4 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <div className={`w-10 h-10 rounded-xl ${item.gradient} flex items-center justify-center mb-3 shadow-md group-hover:shadow-lg transition-shadow`}>
+                    <item.icon className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <h4 className="font-bold text-sm group-hover:text-primary transition-colors">{item.title}</h4>
+                  <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground mt-2 group-hover:translate-x-1.5 group-hover:text-primary transition-all duration-200" />
+                </motion.button>
+              </MagneticButton>
             ))}
           </div>
         </div>
