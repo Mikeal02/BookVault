@@ -13,6 +13,10 @@ import {
   Flame, Zap, Star, Trophy, ChevronRight, Sparkles, BarChart3
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { AnimatedProgressRing } from './AnimatedProgressRing';
+import { GenreRadarChart } from './GenreRadarChart';
+import { ReadingVelocityGauge } from './ReadingVelocityGauge';
+import { MagneticButton } from './MagneticButton';
 
 // ── Sparkle Particles Component ──
 const SparkleParticles = () => {
@@ -585,82 +589,105 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
         </div>
       </RevealSection>
 
-      {/* Bottom Section */}
+      {/* Data Viz Trio — Goal Ring, Genre Radar, Velocity Gauge */}
       <RevealSection delay={0.05}>
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Annual Goal Progress */}
-          <div className="glass-card surface-card rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold flex items-center gap-2">
-                <div className="w-7 h-7 icon-wrap-primary flex items-center justify-center">
-                  <Calendar className="w-3.5 h-3.5" />
-                </div>
-                {new Date().getFullYear()} Reading Goal
-              </h3>
-              <span className="text-sm font-bold px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/15">
-                {stats.booksThisYear}/{stats.readingGoal} books
-              </span>
-            </div>
-            
-            <div className="relative h-4 bg-muted rounded-full overflow-hidden mb-4">
-              <motion.div 
-                className="absolute inset-y-0 left-0 rounded-full gradient-primary"
-                initial={{ width: 0 }}
-                animate={{ width: `${stats.goalProgress}%` }}
-                transition={{ duration: 1.4, delay: 0.3, ease: "easeOut" }}
-              />
-              {/* Shimmer on bar */}
-              <div className="absolute inset-0 overflow-hidden rounded-full">
-                <div className="absolute inset-y-0 w-16 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Annual Goal Ring */}
+          <div className="glass-card surface-card rounded-2xl p-6 flex flex-col items-center justify-center">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+              <div className="w-7 h-7 icon-wrap-primary flex items-center justify-center">
+                <Calendar className="w-3.5 h-3.5" />
               </div>
-            </div>
-            
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground font-medium">
-                {Math.round(stats.goalProgress)}% complete
-              </span>
-              <span className="text-muted-foreground">
-                {Math.max(0, stats.readingGoal - stats.booksThisYear)} books to go
-              </span>
-            </div>
+              {new Date().getFullYear()} Goal
+            </h3>
+            <AnimatedProgressRing
+              progress={stats.goalProgress}
+              size={150}
+              strokeWidth={10}
+              label={`${stats.booksThisYear} / ${stats.readingGoal}`}
+              sublabel="books read"
+            />
+            <p className="text-sm text-muted-foreground mt-3 font-medium">
+              {Math.max(0, stats.readingGoal - stats.booksThisYear)} books to go
+            </p>
           </div>
 
-          {/* Achievements */}
-          <div className="glass-card surface-card rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold flex items-center gap-2">
-                <div className="w-7 h-7 icon-wrap-primary flex items-center justify-center">
-                  <Award className="w-3.5 h-3.5" />
-                </div>
-                Achievements
-              </h3>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-3">
-              {stats.achievements.map((achievement) => (
-                <motion.div 
-                  key={achievement.id}
-                  className={`p-3 rounded-xl border transition-all duration-300 ${
+          {/* Genre Radar */}
+          <div className="glass-card surface-card rounded-2xl p-6 flex flex-col items-center">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-2">
+              <div className="w-7 h-7 icon-wrap-secondary flex items-center justify-center">
+                <BarChart3 className="w-3.5 h-3.5" />
+              </div>
+              Genre DNA
+            </h3>
+            <GenreRadarChart books={books} size={200} />
+            {books.length > 0 && stats.topGenres.length < 3 && (
+              <p className="text-xs text-muted-foreground mt-2">Add more books to see your genre radar</p>
+            )}
+          </div>
+
+          {/* Reading Velocity */}
+          <div className="glass-card surface-card rounded-2xl p-6 flex flex-col items-center justify-center">
+            <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
+              <div className="w-7 h-7 icon-wrap-primary flex items-center justify-center">
+                <Zap className="w-3.5 h-3.5" />
+              </div>
+              Reading Velocity
+            </h3>
+            <ReadingVelocityGauge
+              pagesPerDay={(() => {
+                const readingBooks = books.filter(b => b.readingStatus === 'reading' || b.readingStatus === 'finished');
+                const totalPages = readingBooks.reduce((s, b) => s + (b.currentPage || 0), 0);
+                const daysActive = readingBooks.length > 0 ? Math.max(7, readingBooks.length * 3) : 1;
+                return totalPages / daysActive;
+              })()}
+            />
+          </div>
+        </div>
+      </RevealSection>
+
+      {/* Achievements */}
+      <RevealSection>
+        <div className="glass-card surface-card rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold flex items-center gap-2">
+              <div className="w-7 h-7 icon-wrap-primary flex items-center justify-center">
+                <Award className="w-3.5 h-3.5" />
+              </div>
+              Achievements
+            </h3>
+            <span className="chip text-[10px]">
+              {stats.achievements.filter(a => a.unlocked).length}/{stats.achievements.length} unlocked
+            </span>
+          </div>
+          
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {stats.achievements.map((achievement, i) => (
+              <MagneticButton key={achievement.id} strength={0.15}>
+                <motion.div
+                  className={`p-4 rounded-xl border transition-all duration-300 cursor-default ${
                     achievement.unlocked 
                       ? 'bg-primary/8 border-primary/20 shadow-sm glow-ring-pulse' 
                       : 'bg-muted/50 border-transparent opacity-40'
                   }`}
-                  whileHover={achievement.unlocked ? { scale: 1.03, y: -2 } : {}}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08 }}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      achievement.unlocked ? 'gradient-primary shadow-sm' : 'bg-muted'
+                  <div className="flex flex-col items-center text-center gap-2">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                      achievement.unlocked ? 'gradient-primary shadow-md' : 'bg-muted'
                     }`}>
-                      <achievement.icon className={`w-5 h-5 ${achievement.unlocked ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
+                      <achievement.icon className={`w-6 h-6 ${achievement.unlocked ? 'text-primary-foreground' : 'text-muted-foreground'}`} />
                     </div>
                     <div>
-                      <p className="font-semibold text-sm">{achievement.name}</p>
-                      <p className="text-xs text-muted-foreground">{achievement.description}</p>
+                      <p className="font-bold text-sm">{achievement.name}</p>
+                      <p className="text-[10px] text-muted-foreground">{achievement.description}</p>
                     </div>
                   </div>
                 </motion.div>
-              ))}
-            </div>
+              </MagneticButton>
+            ))}
           </div>
         </div>
       </RevealSection>
@@ -686,23 +713,25 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
               { view: 'lists' as const, icon: BookOpen, gradient: 'bg-gradient-to-br from-accent to-primary', title: 'Reading Lists', desc: 'Curated collections' },
               { view: 'annotations' as const, icon: Star, gradient: 'bg-gradient-to-br from-secondary to-secondary/70', title: 'Annotations', desc: 'Notes & highlights' },
             ].map((item, i) => (
-              <motion.button
-                key={item.view}
-                onClick={() => onViewChange(item.view)}
-                className="glass-card surface-card rounded-2xl p-5 text-left hover-lift transition-all group"
-                custom={i}
-                variants={cardVariants}
-                initial="hidden"
-                animate="visible"
-                whileHover={{ y: -4 }}
-              >
-                <div className={`w-10 h-10 rounded-xl ${item.gradient} flex items-center justify-center mb-3 shadow-md group-hover:shadow-lg transition-shadow`}>
-                  <item.icon className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <h4 className="font-bold text-sm group-hover:text-primary transition-colors">{item.title}</h4>
-                <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
-                <ChevronRight className="w-4 h-4 text-muted-foreground mt-2 group-hover:translate-x-1.5 group-hover:text-primary transition-all duration-200" />
-              </motion.button>
+              <MagneticButton key={item.view} strength={0.2}>
+                <motion.button
+                  onClick={() => onViewChange(item.view)}
+                  className="glass-card surface-card rounded-2xl p-5 text-left hover-lift transition-all group w-full"
+                  custom={i}
+                  variants={cardVariants}
+                  initial="hidden"
+                  animate="visible"
+                  whileHover={{ y: -4 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <div className={`w-10 h-10 rounded-xl ${item.gradient} flex items-center justify-center mb-3 shadow-md group-hover:shadow-lg transition-shadow`}>
+                    <item.icon className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <h4 className="font-bold text-sm group-hover:text-primary transition-colors">{item.title}</h4>
+                  <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground mt-2 group-hover:translate-x-1.5 group-hover:text-primary transition-all duration-200" />
+                </motion.button>
+              </MagneticButton>
             ))}
           </div>
         </div>
