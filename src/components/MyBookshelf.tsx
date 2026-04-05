@@ -1,11 +1,12 @@
 
 import { useState } from 'react';
-import { Search, BookOpen, Filter, Settings, FileText, Bot, LayoutGrid, List, LayoutList, Layers, Calendar, Image, SlidersHorizontal } from 'lucide-react';
+import { Search, BookOpen, Filter, Settings, FileText, Bot, LayoutGrid, List, LayoutList, Layers, Calendar, Image, SlidersHorizontal, GraduationCap } from 'lucide-react';
 import { Book } from '@/types/book';
 import { BookCard } from './BookCard';
 import { BookManagementModal } from './BookManagementModal';
 import { NotesExport } from './NotesExport';
 import { AIBookChat } from './AIBookChat';
+import { CitationExport } from './CitationExport';
 import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 import { EmptyState } from './EmptyState';
 import { VaultSwitcher } from './VaultSwitcher';
@@ -361,6 +362,7 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
   const [filterStatus, setFilterStatus] = useState<'all' | 'not-read' | 'reading' | 'finished'>('all');
   const [showExport, setShowExport] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
+  const [showCitations, setShowCitations] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const { ref: headerRef, isVisible: headerVisible } = useScrollReveal({ threshold: 0.05 });
 
@@ -444,6 +446,13 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
           >
             <FileText className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Export</span>
+          </button>
+          <button
+            onClick={() => setShowCitations(true)}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all chip"
+          >
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Cite</span>
           </button>
           <button
             onClick={() => setShowAIChat(true)}
@@ -601,6 +610,9 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
       )}
       {showAIChat && (
         <AIBookChat books={books} onClose={() => setShowAIChat(false)} />
+      )}
+      {showCitations && (
+        <CitationExport books={books} onClose={() => setShowCitations(false)} />
       )}
     </div>
   );
