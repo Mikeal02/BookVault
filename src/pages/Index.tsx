@@ -277,7 +277,10 @@ const Index = () => {
   }
 
   if (!user) {
-    return <LoginPage onLogin={handleLogin} />;
+    if (showAuthPage) {
+      return <LoginPage onLogin={handleLogin} onBackToLanding={() => setShowAuthPage(false)} />;
+    }
+    return <LandingPage onGetStarted={() => setShowAuthPage(true)} />;
   }
 
   const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 240;
