@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LoginPage } from '@/components/LoginPage';
+import { LandingPage } from '@/components/LandingPage';
 import { Navigation } from '@/components/Navigation';
 import { BookDetailsModal } from '@/components/BookDetailsModal';
 import { ReadingSessionTracker } from '@/components/ReadingSessionTracker';
@@ -56,6 +57,7 @@ const Index = () => {
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach'>('dashboard');
+  const [showAuthPage, setShowAuthPage] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [managingBook, setManagingBook] = useState<Book | null>(null);
