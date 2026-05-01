@@ -8,6 +8,7 @@ import {
   Timer, Upload, Brain
 } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
+import { AuditLogPanel } from './AuditLogPanel';
 import { ThemePalettePicker } from './ThemePalettePicker';
 import { ThemeToggle } from './ThemeToggle';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -316,6 +317,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
 
                 <div className="relative z-10 p-3 border-t border-border/50 space-y-2">
                   <DatabaseSyncButton />
+                  <AuditLogPanel />
                   {onLogout && (
                     <button
                       onClick={onLogout}
@@ -450,6 +452,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
       {/* Bottom section */}
       <div className={`relative z-10 border-t border-border/40 ${collapsed ? 'p-2' : 'p-3'} space-y-2 flex-shrink-0`}>
         {!collapsed && <DatabaseSyncButton />}
+        {!collapsed && <AuditLogPanel />}
         <div className={`flex ${collapsed ? 'flex-col items-center' : 'items-center'} gap-1`}>
           <ThemePalettePicker />
           <ThemeToggle />

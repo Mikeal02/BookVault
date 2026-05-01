@@ -56,6 +56,39 @@ export type Database = {
         }
         Relationships: []
       }
+      book_audit_log: {
+        Row: {
+          action: string
+          book_id: string
+          book_title: string | null
+          changes: Json | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          book_id: string
+          book_title?: string | null
+          changes?: Json | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          book_id?: string
+          book_title?: string | null
+          changes?: Json | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
