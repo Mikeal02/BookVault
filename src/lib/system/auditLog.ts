@@ -30,18 +30,20 @@ interface LogParams {
  */
 export async function logBookAction(params: LogParams): Promise<void> {
   try {
-    const { error } = await supabase.from('book_audit_log').insert({
-      user_id: params.userId,
-      book_id: params.bookId,
-      book_title: params.bookTitle ?? null,
-      action: params.action,
-      changes: params.changes ?? null,
-      metadata: {
-        ...(params.metadata ?? {}),
-        client_ts: new Date().toISOString(),
-        user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+    const { error } = await supabase.from('book_audit_log').insert([
+      {
+        user_id: params.userId,
+        book_id: params.bookId,
+        book_title: params.bookTitle ?? undefined,
+        action: params.action,
+        changes: (params.changes ?? null) as never,
+        metadata: {
+          ...(params.metadata ?? {}),
+          client_ts: new Date().toISOString(),
+          user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : null,
+        } as never,
       },
-    });
+    ]);
     if (error) log.warn('logBookAction insert failed', error);
   } catch (err) {
     log.warn('logBookAction threw', err);
