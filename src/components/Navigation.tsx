@@ -13,6 +13,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { emitEvent } from '@/lib/system';
 
 interface NavigationProps {
   currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach';
@@ -177,7 +178,10 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
     return false;
   });
 
-  useEffect(() => { localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed)); }, [collapsed]);
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(collapsed));
+    emitEvent('sidebar:toggle', { collapsed });
+  }, [collapsed]);
   useEffect(() => { setMobileOpen(false); }, [currentView]);
 
   const handleNavClick = (id: ViewId) => {

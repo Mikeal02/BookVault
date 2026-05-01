@@ -1,0 +1,15 @@
+{
+  "name": "BookVault — Personal Reading Sanctuary",
+  "short_name": "BookVault",
+  "description": "Track your reading journey with AI-powered insights.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#14b8a6",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/favicon.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/favicon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

@@ -1,7 +1,10 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { createLogger, emitEvent, measure } from '@/lib/system';
+
+const log = createLogger('bookshelf');
 
 /**
  * Custom hook encapsulating all bookshelf CRUD with optimistic updates.
@@ -10,13 +13,12 @@ export const useBookshelf = (userId: string | undefined) => {
   const [bookshelf, setBookshelf] = useState<Book[]>([]);
 
   const loadBooks = useCallback(async (authUserId: string) => {
-    const { data: userBooks, error } = await supabase
-      .from('user_books')
-      .select('*')
-      .eq('user_id', authUserId);
+    const { data: userBooks, error } = await measure('loadBooks', () =>
+      supabase.from('user_books').select('*').eq('user_id', authUserId)
+    );
 
     if (error) {
-      console.error('Error loading books:', error);
+      log.error('loadBooks failed', error);
       return [];
     }
 
@@ -104,21 +106,26 @@ export const useBookshelf = (userId: string | undefined) => {
       if (error.code === '23505') {
         toast.error('This book is already in your library');
       } else {
-        console.error('Error adding book:', error);
+        log.error('addBook failed', error);
         toast.error('Failed to add book');
       }
       return;
     }
 
+    emitEvent('book:added', { bookId: book.id });
     toast.success('Book added to your library!');
   }, [userId]);
 
   const updateBook = useCallback(async (updatedBook: Book) => {
     if (!userId) return;
 
-    // Optimistic update
-    const prevBooks = bookshelf;
-    setBookshelf(prev => prev.map(b => b.id === updatedBook.id ? updatedBook : b));
+    // Capture rollback snapshot inside the setter to avoid stale-closure races
+    // when many updates fire in quick succession.
+    let snapshot: Book[] = [];
+    setBookshelf(prev => {
+      snapshot = prev;
+      return prev.map(b => b.id === updatedBook.id ? updatedBook : b);
+    });
 
     const { error } = await supabase
       .from('user_books')
@@ -139,22 +146,25 @@ export const useBookshelf = (userId: string | undefined) => {
       .eq('book_id', updatedBook.id);
 
     if (error) {
-      // Rollback
-      setBookshelf(prevBooks);
-      console.error('Error updating book:', error);
+      // Rollback to the snapshot taken at mutation time.
+      setBookshelf(snapshot);
+      log.error('updateBook failed', error);
       toast.error('Failed to update book');
       return;
     }
 
+    emitEvent('book:updated', { bookId: updatedBook.id });
     toast.success('Book updated!');
-  }, [userId, bookshelf]);
+  }, [userId]);
 
   const removeBook = useCallback(async (bookId: string) => {
     if (!userId) return;
 
-    // Optimistic update
-    const prevBooks = bookshelf;
-    setBookshelf(prev => prev.filter(b => b.id !== bookId));
+    let snapshot: Book[] = [];
+    setBookshelf(prev => {
+      snapshot = prev;
+      return prev.filter(b => b.id !== bookId);
+    });
 
     const { error } = await supabase
       .from('user_books')
@@ -163,14 +173,15 @@ export const useBookshelf = (userId: string | undefined) => {
       .eq('book_id', bookId);
 
     if (error) {
-      setBookshelf(prevBooks);
-      console.error('Error removing book:', error);
+      setBookshelf(snapshot);
+      log.error('removeBook failed', error);
       toast.error('Failed to remove book');
       return;
     }
 
+    emitEvent('book:removed', { bookId });
     toast.success('Book removed from library');
-  }, [userId, bookshelf]);
+  }, [userId]);
 
   const isInBookshelf = useCallback((bookId: string) => {
     return bookshelf.some(b => b.id === bookId);
