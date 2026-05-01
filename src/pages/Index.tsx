@@ -20,6 +20,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Loader2 } from 'lucide-react';
+import { onEvent } from '@/lib/system';
 
 // Lazy load heavy components for better initial load
 const EnhancedBookSearch = lazy(() => import('@/components/EnhancedBookSearch').then(m => ({ default: m.EnhancedBookSearch })));
@@ -101,11 +102,12 @@ const Index = () => {
     return false;
   });
 
-  // Listen for sidebar collapse changes
+  // Listen for sidebar collapse changes via event bus (no polling).
   useEffect(() => {
-    const check = () => setSidebarCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true');
-    const interval = setInterval(check, 200);
-    return () => clearInterval(interval);
+    const off = onEvent('sidebar:toggle', ({ collapsed }) => setSidebarCollapsed(collapsed));
+    // Sync once on mount in case Navigation already emitted before we subscribed.
+    setSidebarCollapsed(localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === 'true');
+    return off;
   }, []);
 
   useEffect(() => {
