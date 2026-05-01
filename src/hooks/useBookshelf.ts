@@ -3,6 +3,7 @@ import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { createLogger, emitEvent, measure } from '@/lib/system';
+import { logBookAction, diffBooks } from '@/lib/system/auditLog';
 
 const log = createLogger('bookshelf');
 
@@ -113,6 +114,13 @@ export const useBookshelf = (userId: string | undefined) => {
     }
 
     emitEvent('book:added', { bookId: book.id });
+    void logBookAction({
+      userId,
+      bookId: book.id,
+      bookTitle: book.title,
+      action: 'add',
+      metadata: { authors: book.authors, source: 'addBook' },
+    });
     toast.success('Book added to your library!');
   }, [userId]);
 
@@ -122,8 +130,10 @@ export const useBookshelf = (userId: string | undefined) => {
     // Capture rollback snapshot inside the setter to avoid stale-closure races
     // when many updates fire in quick succession.
     let snapshot: Book[] = [];
+    let previous: Book | undefined;
     setBookshelf(prev => {
       snapshot = prev;
+      previous = prev.find(b => b.id === updatedBook.id);
       return prev.map(b => b.id === updatedBook.id ? updatedBook : b);
     });
 
@@ -154,6 +164,20 @@ export const useBookshelf = (userId: string | undefined) => {
     }
 
     emitEvent('book:updated', { bookId: updatedBook.id });
+    const trackedKeys = [
+      'readingStatus', 'personalRating', 'readingProgress', 'currentPage',
+      'timeSpentReading', 'notes', 'myThoughts', 'tags', 'dateStarted', 'dateFinished',
+    ];
+    const changes = previous
+      ? diffBooks(previous as unknown as Record<string, unknown>, updatedBook as unknown as Record<string, unknown>, trackedKeys)
+      : {};
+    void logBookAction({
+      userId,
+      bookId: updatedBook.id,
+      bookTitle: updatedBook.title,
+      action: 'update',
+      changes,
+    });
     toast.success('Book updated!');
   }, [userId]);
 
@@ -161,8 +185,10 @@ export const useBookshelf = (userId: string | undefined) => {
     if (!userId) return;
 
     let snapshot: Book[] = [];
+    let removed: Book | undefined;
     setBookshelf(prev => {
       snapshot = prev;
+      removed = prev.find(b => b.id === bookId);
       return prev.filter(b => b.id !== bookId);
     });
 
@@ -180,6 +206,13 @@ export const useBookshelf = (userId: string | undefined) => {
     }
 
     emitEvent('book:removed', { bookId });
+    void logBookAction({
+      userId,
+      bookId,
+      bookTitle: removed?.title,
+      action: 'remove',
+      metadata: { authors: removed?.authors },
+    });
     toast.success('Book removed from library');
   }, [userId]);
 
