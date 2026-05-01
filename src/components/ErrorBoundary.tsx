@@ -1,6 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { createLogger } from '@/lib/system';
+
+const log = createLogger('error-boundary');
 
 interface Props {
   children: React.ReactNode;
@@ -22,7 +25,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error Boundary caught:', error, errorInfo);
+    log.error('caught', { message: error.message, stack: error.stack, componentStack: errorInfo.componentStack });
   }
 
   render() {
