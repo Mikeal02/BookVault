@@ -109,7 +109,7 @@ export const BookDetailsModal = ({
   const [descExpanded, setDescExpanded] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const sectionRefs = useRef<Record<Section, HTMLDivElement | null>>({
+  const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
     overview: null, about: null, details: null, similar: null, purchase: null,
   });
 
