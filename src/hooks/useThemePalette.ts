@@ -14,7 +14,7 @@ interface ThemeOption {
 }
 
 export const themes: ThemeOption[] = [
-  { id: 'sapphire-rose', name: 'Sapphire & Rose', emoji: '💎', preview: { primary: '#3366CC', secondary: '#D4517D', accent: '#6C5CE7' } },
+  { id: 'sapphire-rose', name: 'Editorial Ink', emoji: '📜', preview: { primary: '#1E2A4A', secondary: '#B8893E', accent: '#2A3A5E' } },
   { id: 'emerald-gold', name: 'Emerald & Gold', emoji: '🌿', preview: { primary: '#10B981', secondary: '#F59E0B', accent: '#059669' } },
   { id: 'violet-amber', name: 'Violet & Amber', emoji: '🔮', preview: { primary: '#8B5CF6', secondary: '#F97316', accent: '#A78BFA' } },
   { id: 'ocean-coral', name: 'Ocean & Coral', emoji: '🌊', preview: { primary: '#0EA5E9', secondary: '#F43F5E', accent: '#38BDF8' } },

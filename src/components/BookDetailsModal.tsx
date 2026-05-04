@@ -410,7 +410,7 @@ export const BookDetailsModal = ({
           {/* OVERVIEW: opening line + personal notes + progress */}
           <section
             data-section="overview"
-            ref={el => (sectionRefs.current.overview = el)}
+            ref={el => { sectionRefs.current.overview = el; }}
             className="space-y-4 scroll-mt-2"
           >
             {displayBook.firstSentence && (
@@ -487,7 +487,7 @@ export const BookDetailsModal = ({
           {/* ABOUT */}
           <section
             data-section="about"
-            ref={el => (sectionRefs.current.about = el)}
+            ref={el => { sectionRefs.current.about = el; }}
             className="space-y-4 scroll-mt-2"
           >
             <div className="flex items-center gap-2">
@@ -564,7 +564,7 @@ export const BookDetailsModal = ({
           {/* DETAILS */}
           <section
             data-section="details"
-            ref={el => (sectionRefs.current.details = el)}
+            ref={el => { sectionRefs.current.details = el; }}
             className="space-y-4 scroll-mt-2"
           >
             <div className="flex items-center gap-2">
@@ -618,7 +618,7 @@ export const BookDetailsModal = ({
           {/* SIMILAR */}
           <section
             data-section="similar"
-            ref={el => (sectionRefs.current.similar = el)}
+            ref={el => { sectionRefs.current.similar = el; }}
             className="space-y-3 scroll-mt-2"
           >
             <div className="flex items-center justify-between">
@@ -677,7 +677,7 @@ export const BookDetailsModal = ({
           {/* PURCHASE */}
           <section
             data-section="purchase"
-            ref={el => (sectionRefs.current.purchase = el)}
+            ref={el => { sectionRefs.current.purchase = el; }}
             className="space-y-3 scroll-mt-2"
           >
             <div className="flex items-center gap-2">
