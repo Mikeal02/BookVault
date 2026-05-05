@@ -48,6 +48,21 @@ export interface Book {
   subjects?: string[];
   subjectPlaces?: string[];
   subjectPeople?: string[];
+  subjectTimes?: string[];
+  // Author enrichment
+  authorBio?: string;
+  authorBirthDate?: string;
+  authorWikipediaUrl?: string;
+  // Provenance & accuracy
+  originalPublicationYear?: number;
+  wordCountEstimate?: number;
+  translationCount?: number;
+  awards?: string[];
+  wikipediaUrl?: string;
+  /** Confidence of the enriched record (0..1). */
+  dataConfidence?: number;
+  /** Sources we successfully merged data from. */
+  dataSources?: Array<'google' | 'openlibrary' | 'wikipedia'>;
   // Personal bookshelf fields
   tags?: string[];
   notes?: string;
