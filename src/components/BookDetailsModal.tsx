@@ -809,3 +809,28 @@ const DetailItem = ({
     </div>
   );
 };
+
+const GlanceStat = ({
+  icon: Icon, label, value, sub, accent,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  sub?: string;
+  accent?: 'primary' | 'warning' | 'success';
+}) => {
+  const accentClass =
+    accent === 'warning' ? 'text-warning' :
+    accent === 'success' ? 'text-success' :
+    'text-primary';
+  return (
+    <div className="relative p-3 rounded-xl bg-card/60 border border-border/60 backdrop-blur-sm hover:border-primary/30 transition-colors">
+      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <Icon className={`w-3 h-3 ${accentClass}`} />
+        {label}
+      </div>
+      <div className="mt-1 text-base font-bold text-foreground tabular-nums leading-none">{value}</div>
+      {sub && <div className="mt-1 text-[10px] text-muted-foreground truncate">{sub}</div>}
+    </div>
+  );
+};
