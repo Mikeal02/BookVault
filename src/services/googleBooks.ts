@@ -408,6 +408,7 @@ export const enrichBook = async (book: Book): Promise<Book> => {
   if (cached) return { ...book, ...cached };
 
   const enrichments: Partial<Book> = {};
+  const sources = new Set<'google' | 'openlibrary' | 'wikipedia'>(book.dataSources || []);
 
   try {
     const promises: Promise<void>[] = [];
@@ -420,6 +421,7 @@ export const enrichBook = async (book: Book): Promise<Book> => {
           .then(data => {
             if (data.volumeInfo) {
               const full = transformGoogleBookToBook(data);
+              sources.add('google');
               if (full.description && (full.description.length > (book.description?.length || 0))) {
                 enrichments.description = full.description;
               }
@@ -448,13 +450,15 @@ export const enrichBook = async (book: Book): Promise<Book> => {
     const isbn = book.isbn13 || book.isbn10;
     if (isbn && (!book.subjects?.length || !book.subjectPeople?.length)) {
       promises.push(
-        fetchWithRetry(`${OPEN_LIBRARY_SEARCH_URL}?isbn=${isbn}&limit=1&fields=key,subject,subject_place,person,first_sentence,edition_count,has_fulltext,number_of_pages_median,ratings_average,ratings_count`)
+        fetchWithRetry(`${OPEN_LIBRARY_SEARCH_URL}?isbn=${isbn}&limit=1&fields=key,subject,subject_place,subject_time,person,first_sentence,edition_count,has_fulltext,number_of_pages_median,ratings_average,ratings_count,first_publish_year,author_key,author_name`)
           .then(r => r.json())
           .then(data => {
             const doc = data.docs?.[0];
             if (doc) {
+              sources.add('openlibrary');
               if (doc.subject?.length && !book.subjects?.length) enrichments.subjects = doc.subject.slice(0, 10);
               if (doc.subject_place?.length && !book.subjectPlaces?.length) enrichments.subjectPlaces = doc.subject_place.slice(0, 5);
+              if (doc.subject_time?.length && !book.subjectTimes?.length) enrichments.subjectTimes = doc.subject_time.slice(0, 5);
               if ((doc.person?.length || doc.subject_people?.length) && !book.subjectPeople?.length) {
                 enrichments.subjectPeople = (doc.person || doc.subject_people)?.slice(0, 5);
               }
@@ -462,6 +466,28 @@ export const enrichBook = async (book: Book): Promise<Book> => {
               if (doc.edition_count && !book.editionCount) enrichments.editionCount = doc.edition_count;
               if (doc.has_fulltext) enrichments.freeReading = true;
               if (doc.number_of_pages_median && !book.pageCount) enrichments.pageCount = doc.number_of_pages_median;
+              if (doc.first_publish_year && !book.originalPublicationYear) {
+                enrichments.originalPublicationYear = doc.first_publish_year;
+              }
+              // Translation count proxy via edition_count
+              if (doc.edition_count && doc.edition_count > 5 && !book.translationCount) {
+                enrichments.translationCount = Math.round(doc.edition_count / 4);
+              }
+              // Author OL enrichment (bio + birth date)
+              const authorKey = doc.author_key?.[0];
+              if (authorKey && !book.authorBio) {
+                promises.push(
+                  fetchWithRetry(`https://openlibrary.org/authors/${authorKey}.json`)
+                    .then(r => r.json())
+                    .then(adata => {
+                      const bio = typeof adata.bio === 'string' ? adata.bio : adata.bio?.value;
+                      if (bio) enrichments.authorBio = bio.split('\n')[0].slice(0, 600);
+                      if (adata.birth_date) enrichments.authorBirthDate = adata.birth_date;
+                      if (adata.wikipedia) enrichments.authorWikipediaUrl = adata.wikipedia;
+                    })
+                    .catch(() => {})
+                );
+              }
             }
           })
           .catch(() => {})
@@ -469,6 +495,8 @@ export const enrichBook = async (book: Book): Promise<Book> => {
     }
 
     if (promises.length > 0) {
+      await Promise.allSettled(promises);
+      // Run any author follow-ups added during the first wave
       await Promise.allSettled(promises);
     }
 
@@ -478,6 +506,22 @@ export const enrichBook = async (book: Book): Promise<Book> => {
     if (!book.readingDifficulty && (mergedPageCount || mergedSubjects?.length)) {
       enrichments.readingDifficulty = estimateReadingDifficulty(mergedPageCount, mergedSubjects);
     }
+    // Word count estimate (industry avg ~250 words/page)
+    if (mergedPageCount && !book.wordCountEstimate) {
+      enrichments.wordCountEstimate = Math.round(mergedPageCount * 250);
+    }
+
+    // Compute data confidence
+    enrichments.dataSources = Array.from(sources);
+    let confidence = 0;
+    if (sources.has('google')) confidence += 0.45;
+    if (sources.has('openlibrary')) confidence += 0.35;
+    const merged = { ...book, ...enrichments };
+    if (merged.imageLinks?.thumbnail) confidence += 0.05;
+    if (merged.description && merged.description.length > 200) confidence += 0.05;
+    if (merged.isbn13 || merged.isbn10) confidence += 0.05;
+    if (merged.averageRating && merged.ratingsCount && merged.ratingsCount > 50) confidence += 0.05;
+    enrichments.dataConfidence = Math.min(1, Math.round(confidence * 100) / 100);
 
     setCache(enrichmentCache, cacheKey, enrichments, 200);
   } catch {
