@@ -327,7 +327,7 @@ export const BookDetailsModal = ({
               </div>
 
               {/* Status badges */}
-              <div className="flex flex-wrap gap-1.5 mt-3">
+              <div className="flex flex-wrap gap-1.5 mt-2">
                 {displayBook.isEbook && (
                   <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-semibold flex items-center gap-1">
                     <Tablet className="w-3 h-3" /> eBook
