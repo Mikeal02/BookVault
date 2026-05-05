@@ -247,8 +247,12 @@ const transformOpenLibraryBook = (item: any): Book => {
     subjects,
     subjectPlaces: item.subject_place?.slice(0, 5) || undefined,
     subjectPeople: item.person?.slice(0, 5) || item.subject_people?.slice(0, 5) || undefined,
+    subjectTimes: item.subject_time?.slice(0, 5) || undefined,
     freeReading: item.has_fulltext || false,
     readingDifficulty: difficulty,
+    originalPublicationYear: item.first_publish_year || undefined,
+    dataSources: ['openlibrary'],
+    dataConfidence: 0.55,
     ...series,
   };
 };
@@ -326,6 +330,8 @@ const transformGoogleBookToBook = (item: any): Book => {
     seriesName,
     seriesPosition,
     readingDifficulty: difficulty,
+    dataSources: ['google'],
+    dataConfidence: 0.7,
   };
 };
 
