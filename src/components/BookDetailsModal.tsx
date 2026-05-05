@@ -3,7 +3,8 @@ import {
   X, Star, Plus, Trash2, ExternalLink, ShoppingCart, Clock, Play, Settings,
   Layers, Tablet, BookMarked, Globe, Users, MapPin, Brain, Sparkles, Loader2,
   BookOpen, Hash, Copy, Check, ChevronDown, Calendar, Building2, Languages,
-  ScrollText, Tags, Library, Quote, ShieldCheck, BookCopy,
+  ScrollText, Tags, Library, Quote, ShieldCheck, BookCopy, History, FileText,
+  UserCircle2,
 } from 'lucide-react';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
@@ -413,6 +414,43 @@ export const BookDetailsModal = ({
             ref={el => { sectionRefs.current.overview = el; }}
             className="space-y-4 scroll-mt-2"
           >
+            {/* At a Glance — elite info-density stat strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {displayBook.averageRating && (
+                <GlanceStat
+                  icon={Star}
+                  label="Rating"
+                  value={displayBook.averageRating.toFixed(1)}
+                  sub={displayBook.ratingsCount ? `${displayBook.ratingsCount.toLocaleString()} reviews` : undefined}
+                  accent="warning"
+                />
+              )}
+              {displayBook.pageCount && (
+                <GlanceStat
+                  icon={BookOpen}
+                  label="Length"
+                  value={`${displayBook.pageCount} pp`}
+                  sub={displayBook.wordCountEstimate ? `~${(displayBook.wordCountEstimate / 1000).toFixed(0)}k words` : undefined}
+                />
+              )}
+              {readingTimeLabel && (
+                <GlanceStat
+                  icon={Clock}
+                  label="Read time"
+                  value={`~${readingTimeLabel}`}
+                  sub={displayBook.readingDifficulty ? `${displayBook.readingDifficulty} pace` : undefined}
+                />
+              )}
+              {(displayBook.originalPublicationYear || displayBook.publishedDate) && (
+                <GlanceStat
+                  icon={History}
+                  label="First published"
+                  value={(displayBook.originalPublicationYear || formatYear(displayBook.publishedDate))!.toString()}
+                  sub={displayBook.editionCount && displayBook.editionCount > 1 ? `${displayBook.editionCount} editions` : undefined}
+                />
+              )}
+            </div>
+
             {displayBook.firstSentence && (
               <div className="relative bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-5 border border-primary/10">
                 <Quote className="absolute top-3 right-3 w-8 h-8 text-primary/15" />
@@ -516,6 +554,31 @@ export const BookDetailsModal = ({
               <div className="text-sm text-muted-foreground italic px-1">No description available.</div>
             )}
 
+            {displayBook.authorBio && (
+              <div className="bg-gradient-to-br from-secondary/5 to-primary/5 rounded-xl p-4 border border-secondary/15">
+                <div className="flex items-center gap-2 mb-2">
+                  <UserCircle2 className="w-4 h-4 text-secondary" />
+                  <h4 className="text-sm font-semibold text-foreground">
+                    About {displayBook.authors?.[0] || 'the author'}
+                  </h4>
+                  {displayBook.authorBirthDate && (
+                    <span className="text-[10px] text-muted-foreground">· b. {displayBook.authorBirthDate}</span>
+                  )}
+                </div>
+                <p className="text-sm text-foreground/85 leading-relaxed">{displayBook.authorBio}</p>
+                {displayBook.authorWikipediaUrl && (
+                  <a
+                    href={displayBook.authorWikipediaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+                  >
+                    Wikipedia <ExternalLink className="w-3 h-3" />
+                  </a>
+                )}
+              </div>
+            )}
+
             {displayBook.categories && displayBook.categories.length > 0 && (
               <div>
                 <div className="flex items-center gap-1.5 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -559,6 +622,19 @@ export const BookDetailsModal = ({
                 )}
               </div>
             )}
+
+            {displayBook.subjectTimes && displayBook.subjectTimes.length > 0 && (
+              <div>
+                <div className="flex items-center gap-1.5 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <History className="w-3 h-3" /> Eras & Periods
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {displayBook.subjectTimes.map((t, i) => (
+                    <span key={i} className="px-2 py-0.5 bg-warning/10 text-warning rounded-md text-xs font-medium">{t}</span>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
 
           {/* DETAILS */}
@@ -574,8 +650,14 @@ export const BookDetailsModal = ({
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               <DetailItem icon={Calendar} label="Published" value={formatYear(displayBook.publishedDate)} />
+              {displayBook.originalPublicationYear && (
+                <DetailItem icon={History} label="First published" value={displayBook.originalPublicationYear.toString()} />
+              )}
               <DetailItem icon={Building2} label="Publisher" value={displayBook.publisher} />
               <DetailItem icon={BookOpen} label="Pages" value={displayBook.pageCount?.toString()} />
+              {displayBook.wordCountEstimate && (
+                <DetailItem icon={FileText} label="Word count" value={`~${displayBook.wordCountEstimate.toLocaleString()}`} />
+              )}
               <DetailItem icon={Globe} label="Language" value={displayBook.language?.toUpperCase()} />
               {displayBook.editionCount && displayBook.editionCount > 1 && (
                 <DetailItem icon={BookCopy} label="Editions" value={`${displayBook.editionCount}`} />
@@ -610,6 +692,29 @@ export const BookDetailsModal = ({
                   <span className="text-muted-foreground line-through text-xs">
                     ${displayBook.listPrice.amount.toFixed(2)}
                   </span>
+                )}
+              </div>
+            )}
+
+            {(displayBook.dataConfidence !== undefined || displayBook.dataSources?.length) && (
+              <div className="flex items-center justify-between gap-3 text-[11px] bg-muted/20 rounded-lg p-2.5 border border-border/50">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <ShieldCheck className="w-3.5 h-3.5 text-success" />
+                  <span className="font-semibold uppercase tracking-wider">Data accuracy</span>
+                  {displayBook.dataConfidence !== undefined && (
+                    <span className="text-foreground tabular-nums">
+                      {Math.round(displayBook.dataConfidence * 100)}%
+                    </span>
+                  )}
+                </div>
+                {displayBook.dataSources && displayBook.dataSources.length > 0 && (
+                  <div className="flex items-center gap-1">
+                    {displayBook.dataSources.map(s => (
+                      <span key={s} className="px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-mono uppercase">
+                        {s === 'google' ? 'Google' : s === 'openlibrary' ? 'OpenLib' : 'Wiki'}
+                      </span>
+                    ))}
+                  </div>
                 )}
               </div>
             )}
@@ -768,6 +873,31 @@ const DetailItem = ({
         <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
         <div className="text-sm font-medium text-foreground truncate">{value}</div>
       </div>
+    </div>
+  );
+};
+
+const GlanceStat = ({
+  icon: Icon, label, value, sub, accent,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+  sub?: string;
+  accent?: 'primary' | 'warning' | 'success';
+}) => {
+  const accentClass =
+    accent === 'warning' ? 'text-warning' :
+    accent === 'success' ? 'text-success' :
+    'text-primary';
+  return (
+    <div className="relative p-3 rounded-xl bg-card/60 border border-border/60 backdrop-blur-sm hover:border-primary/30 transition-colors">
+      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        <Icon className={`w-3 h-3 ${accentClass}`} />
+        {label}
+      </div>
+      <div className="mt-1 text-base font-bold text-foreground tabular-nums leading-none">{value}</div>
+      {sub && <div className="mt-1 text-[10px] text-muted-foreground truncate">{sub}</div>}
     </div>
   );
 };
