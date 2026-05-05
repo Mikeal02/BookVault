@@ -235,7 +235,7 @@ export const BookDetailsModal = ({
       <div
         className="frosted-panel rounded-t-3xl sm:rounded-2xl w-full sm:max-w-5xl flex flex-col shadow-2xl animate-scale-in relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
-        style={{ overscrollBehavior: 'contain', maxHeight: '92dvh', height: 'auto' }}
+        style={{ overscrollBehavior: 'contain', height: '92dvh', maxHeight: '92dvh' }}
       >
         {/* Top accent */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary z-20" />
