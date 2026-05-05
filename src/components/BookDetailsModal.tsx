@@ -3,7 +3,8 @@ import {
   X, Star, Plus, Trash2, ExternalLink, ShoppingCart, Clock, Play, Settings,
   Layers, Tablet, BookMarked, Globe, Users, MapPin, Brain, Sparkles, Loader2,
   BookOpen, Hash, Copy, Check, ChevronDown, Calendar, Building2, Languages,
-  ScrollText, Tags, Library, Quote, ShieldCheck, BookCopy,
+  ScrollText, Tags, Library, Quote, ShieldCheck, BookCopy, History, FileText,
+  TrendingUp, UserCircle2, Award,
 } from 'lucide-react';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
