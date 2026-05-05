@@ -414,6 +414,43 @@ export const BookDetailsModal = ({
             ref={el => { sectionRefs.current.overview = el; }}
             className="space-y-4 scroll-mt-2"
           >
+            {/* At a Glance — elite info-density stat strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {displayBook.averageRating && (
+                <GlanceStat
+                  icon={Star}
+                  label="Rating"
+                  value={displayBook.averageRating.toFixed(1)}
+                  sub={displayBook.ratingsCount ? `${displayBook.ratingsCount.toLocaleString()} reviews` : undefined}
+                  accent="warning"
+                />
+              )}
+              {displayBook.pageCount && (
+                <GlanceStat
+                  icon={BookOpen}
+                  label="Length"
+                  value={`${displayBook.pageCount} pp`}
+                  sub={displayBook.wordCountEstimate ? `~${(displayBook.wordCountEstimate / 1000).toFixed(0)}k words` : undefined}
+                />
+              )}
+              {readingTimeLabel && (
+                <GlanceStat
+                  icon={Clock}
+                  label="Read time"
+                  value={`~${readingTimeLabel}`}
+                  sub={displayBook.readingDifficulty ? `${displayBook.readingDifficulty} pace` : undefined}
+                />
+              )}
+              {(displayBook.originalPublicationYear || displayBook.publishedDate) && (
+                <GlanceStat
+                  icon={History}
+                  label="First published"
+                  value={(displayBook.originalPublicationYear || formatYear(displayBook.publishedDate))!.toString()}
+                  sub={displayBook.editionCount && displayBook.editionCount > 1 ? `${displayBook.editionCount} editions` : undefined}
+                />
+              )}
+            </div>
+
             {displayBook.firstSentence && (
               <div className="relative bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-5 border border-primary/10">
                 <Quote className="absolute top-3 right-3 w-8 h-8 text-primary/15" />
