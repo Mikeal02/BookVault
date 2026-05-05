@@ -31,7 +31,7 @@ const ModalCoverImage = ({ book }: { book: Book }) => {
       <BookCoverPlaceholder
         title={book.title}
         author={book.authors?.[0]}
-        className="w-32 h-48 sm:w-44 sm:h-64 rounded-xl shadow-2xl"
+        className="w-20 h-28 sm:w-28 sm:h-40 rounded-lg shadow-xl"
       />
     );
   }
@@ -39,7 +39,7 @@ const ModalCoverImage = ({ book }: { book: Book }) => {
     <img
       src={book.imageLinks.thumbnail}
       alt={book.title}
-      className="w-32 h-48 sm:w-44 sm:h-64 object-cover rounded-xl shadow-2xl ring-1 ring-border/40 transition-transform duration-300 group-hover:scale-[1.03]"
+      className="w-20 h-28 sm:w-28 sm:h-40 object-cover rounded-lg shadow-xl ring-1 ring-border/40 transition-transform duration-300 group-hover:scale-[1.03]"
       onError={() => setFailed(true)}
     />
   );
@@ -235,7 +235,7 @@ export const BookDetailsModal = ({
       <div
         className="frosted-panel rounded-t-3xl sm:rounded-2xl w-full sm:max-w-5xl flex flex-col shadow-2xl animate-scale-in relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
-        style={{ overscrollBehavior: 'contain', maxHeight: '92dvh', height: 'auto' }}
+        style={{ overscrollBehavior: 'contain', height: '92dvh', maxHeight: '92dvh' }}
       >
         {/* Top accent */}
         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-secondary to-primary z-20" />
@@ -257,7 +257,7 @@ export const BookDetailsModal = ({
           )}
           <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background/95" />
 
-          <div className="relative p-4 sm:p-6 flex gap-4 sm:gap-6">
+          <div className="relative p-3 sm:p-5 flex gap-3 sm:gap-5">
             {/* Cover */}
             <div className="group flex-shrink-0">
               <ModalCoverImage book={displayBook} />
@@ -274,11 +274,11 @@ export const BookDetailsModal = ({
                       {displayBook.seriesPosition && <span className="text-muted-foreground">· #{displayBook.seriesPosition}</span>}
                     </div>
                   )}
-                  <h2 className="font-display text-xl sm:text-3xl font-bold text-foreground leading-tight tracking-tight line-clamp-3">
+                  <h2 className="font-display text-lg sm:text-2xl font-bold text-foreground leading-tight tracking-tight line-clamp-2">
                     {displayBook.title}
                     {isEnriching && <Loader2 className="inline-block w-4 h-4 ml-2 animate-spin text-muted-foreground" />}
                   </h2>
-                  <p className="text-sm sm:text-base text-muted-foreground mt-1.5">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     by <span className="text-foreground font-medium">{displayBook.authors?.join(', ') || 'Unknown Author'}</span>
                   </p>
                 </div>
@@ -292,7 +292,7 @@ export const BookDetailsModal = ({
               </div>
 
               {/* Key facts strip */}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 sm:mt-4 text-xs sm:text-sm">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2 sm:mt-2.5 text-[11px] sm:text-xs">
                 {displayBook.averageRating && (
                   <div className="flex items-center gap-1.5">
                     <div className="flex">{renderStars(displayBook.averageRating)}</div>
@@ -327,7 +327,7 @@ export const BookDetailsModal = ({
               </div>
 
               {/* Status badges */}
-              <div className="flex flex-wrap gap-1.5 mt-3">
+              <div className="flex flex-wrap gap-1.5 mt-2">
                 {displayBook.isEbook && (
                   <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-semibold flex items-center gap-1">
                     <Tablet className="w-3 h-3" /> eBook
