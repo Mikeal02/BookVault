@@ -257,7 +257,7 @@ export const BookDetailsModal = ({
           )}
           <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background/95" />
 
-          <div className="relative p-4 sm:p-6 flex gap-4 sm:gap-6">
+          <div className="relative p-3 sm:p-5 flex gap-3 sm:gap-5">
             {/* Cover */}
             <div className="group flex-shrink-0">
               <ModalCoverImage book={displayBook} />
@@ -274,11 +274,11 @@ export const BookDetailsModal = ({
                       {displayBook.seriesPosition && <span className="text-muted-foreground">· #{displayBook.seriesPosition}</span>}
                     </div>
                   )}
-                  <h2 className="font-display text-xl sm:text-3xl font-bold text-foreground leading-tight tracking-tight line-clamp-3">
+                  <h2 className="font-display text-lg sm:text-2xl font-bold text-foreground leading-tight tracking-tight line-clamp-2">
                     {displayBook.title}
                     {isEnriching && <Loader2 className="inline-block w-4 h-4 ml-2 animate-spin text-muted-foreground" />}
                   </h2>
-                  <p className="text-sm sm:text-base text-muted-foreground mt-1.5">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     by <span className="text-foreground font-medium">{displayBook.authors?.join(', ') || 'Unknown Author'}</span>
                   </p>
                 </div>
@@ -292,7 +292,7 @@ export const BookDetailsModal = ({
               </div>
 
               {/* Key facts strip */}
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-3 sm:mt-4 text-xs sm:text-sm">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2 sm:mt-2.5 text-[11px] sm:text-xs">
                 {displayBook.averageRating && (
                   <div className="flex items-center gap-1.5">
                     <div className="flex">{renderStars(displayBook.averageRating)}</div>
