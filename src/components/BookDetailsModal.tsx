@@ -31,7 +31,7 @@ const ModalCoverImage = ({ book }: { book: Book }) => {
       <BookCoverPlaceholder
         title={book.title}
         author={book.authors?.[0]}
-        className="w-32 h-48 sm:w-44 sm:h-64 rounded-xl shadow-2xl"
+        className="w-20 h-28 sm:w-28 sm:h-40 rounded-lg shadow-xl"
       />
     );
   }
@@ -39,7 +39,7 @@ const ModalCoverImage = ({ book }: { book: Book }) => {
     <img
       src={book.imageLinks.thumbnail}
       alt={book.title}
-      className="w-32 h-48 sm:w-44 sm:h-64 object-cover rounded-xl shadow-2xl ring-1 ring-border/40 transition-transform duration-300 group-hover:scale-[1.03]"
+      className="w-20 h-28 sm:w-28 sm:h-40 object-cover rounded-lg shadow-xl ring-1 ring-border/40 transition-transform duration-300 group-hover:scale-[1.03]"
       onError={() => setFailed(true)}
     />
   );
