@@ -26,7 +26,7 @@ import { onEvent } from '@/lib/system';
 const EnhancedBookSearch = lazy(() => import('@/components/EnhancedBookSearch').then(m => ({ default: m.EnhancedBookSearch })));
 const BookRecommendations = lazy(() => import('@/components/BookRecommendations').then(m => ({ default: m.BookRecommendations })));
 const MyBookshelf = lazy(() => import('@/components/MyBookshelf').then(m => ({ default: m.MyBookshelf })));
-const StatsDashboard = lazy(() => import('@/components/StatsDashboard').then(m => ({ default: m.StatsDashboard })));
+const EliteAnalytics = lazy(() => import('@/components/EliteAnalytics').then(m => ({ default: m.EliteAnalytics })));
 const ProfileSection = lazy(() => import('@/components/ProfileSection').then(m => ({ default: m.ProfileSection })));
 const QuoteCollection = lazy(() => import('@/components/QuoteCollection').then(m => ({ default: m.QuoteCollection })));
 const ReadingMoodJournal = lazy(() => import('@/components/ReadingMoodJournal').then(m => ({ default: m.ReadingMoodJournal })));
@@ -369,9 +369,10 @@ const Index = () => {
               )}
               
               {currentView === 'stats' && (
-                <StatsDashboard 
-                  books={bookshelf} 
+                <EliteAnalytics
+                  books={bookshelf}
                   currentUser={currentUser}
+                  readingGoal={readingGoal}
                 />
               )}
 
