@@ -1280,6 +1280,230 @@
   background: hsl(var(--muted-foreground) / 0.3);
   transition: all 0.3s;
 }
+
+/* ═══════════════════════════════════════════════
+   ELITE V5 — NOIR & GOLD EDITORIAL
+   ═══════════════════════════════════════════════ */
+
+/* Hairline gold rule — thin double line, used as section divider */
+.gold-rule {
+  border: 0;
+  height: 6px;
+  background:
+    linear-gradient(to bottom,
+      hsl(var(--primary) / 0.55) 0,
+      hsl(var(--primary) / 0.55) 1px,
+      transparent 1px,
+      transparent 5px,
+      hsl(var(--primary) / 0.25) 5px,
+      hsl(var(--primary) / 0.25) 6px);
+  margin: 1.25rem 0;
+}
+
+/* Editorial eyebrow — small caps tracked label */
+.eyebrow {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: hsl(var(--primary));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.eyebrow::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: hsl(var(--primary) / 0.6);
+}
+
+/* Editorial drop-cap for first paragraph */
+.dropcap::first-letter {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 3.4em;
+  font-weight: 700;
+  line-height: 0.85;
+  float: left;
+  padding: 0.08em 0.12em 0 0;
+  color: hsl(var(--primary));
+  font-style: italic;
+}
+
+/* Editorial card — paper feel with hairline gold top edge */
+.card-editorial {
+  position: relative;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.35s ease, box-shadow 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-editorial::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 14px;
+  right: 14px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.55), transparent);
+  opacity: 0.6;
+  transition: opacity 0.35s ease;
+}
+.card-editorial:hover {
+  border-color: hsl(var(--primary) / 0.35);
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+.card-editorial:hover::before { opacity: 1; }
+
+/* Gold edge — used on focal images / book covers */
+.gold-edge {
+  box-shadow:
+    0 0 0 1px hsl(var(--border)),
+    inset 0 0 0 1px hsl(var(--primary) / 0);
+  transition: box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.gold-edge:hover {
+  box-shadow:
+    0 0 0 1px hsl(var(--primary) / 0.55),
+    inset 0 0 0 1px hsl(var(--primary) / 0.18),
+    0 14px 40px rgba(0,0,0,0.35);
+}
+
+/* Numeric ornament — Playfair italic large numerals */
+.numeral {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-feature-settings: 'lnum' 1, 'pnum' 1;
+  letter-spacing: -0.02em;
+}
+
+/* Editorial small-caps */
+.smcp {
+  font-variant-caps: all-small-caps;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+}
+
+/* Page chrome — sticky elegant header */
+.editorial-chrome {
+  background: linear-gradient(180deg, hsl(var(--background) / 0.92), hsl(var(--background) / 0.7));
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+/* Sidebar active — editorial pill with gold left edge */
+.sidebar-active-bar {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 22px;
+  background: hsl(var(--primary));
+  border-radius: 0 2px 2px 0;
+}
+
+/* Subtle grain — paper texture over surfaces */
+.grain {
+  position: relative;
+  isolation: isolate;
+}
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+.dark .grain::after { opacity: 0.06; }
+
+/* Editorial button — outlined, refined, no glow */
+.btn-editorial {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: hsl(var(--primary));
+  background: transparent;
+  border: 1px solid hsl(var(--primary) / 0.55);
+  border-radius: 0;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+}
+.btn-editorial::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: hsl(var(--primary));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: -1;
+}
+.btn-editorial:hover {
+  color: hsl(var(--primary-foreground));
+  border-color: hsl(var(--primary));
+}
+.btn-editorial:hover::before { transform: scaleX(1); }
+
+/* Editorial badge — sharp rectangle, gold border */
+.badge-editorial {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid hsl(var(--primary) / 0.45);
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.06);
+  border-radius: 2px;
+}
+
+/* Modal overlay — ink-deep with vignette */
+.modal-overlay-noir {
+  background:
+    radial-gradient(ellipse at center, hsl(0 0% 0% / 0.55) 0%, hsl(0 0% 0% / 0.85) 80%);
+  backdrop-filter: blur(8px) saturate(0.9);
+  -webkit-backdrop-filter: blur(8px) saturate(0.9);
+}
+
+/* Sharp serif heading helper */
+.h-editorial {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  line-height: 1.05;
+}
+
+/* Cover spine shadow — gives book covers a subtle 3D lean */
+.cover-spine {
+  position: relative;
+}
+.cover-spine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,0.18) 0%, transparent 6%, transparent 94%, rgba(255,255,255,0.06) 100%);
+  pointer-events: none;
+  border-radius: inherit;
+}
 .scroll-dots > span.active {
   width: 20px;
   border-radius: 99px;
