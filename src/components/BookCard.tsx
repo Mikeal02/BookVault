@@ -1,6 +1,6 @@
 
 import { useState, useRef, useCallback } from 'react';
-import { Star, Plus, Trash2, BookOpen, Layers, Tablet, BookMarked, Clock } from 'lucide-react';
+import { Star, Plus, Trash2, Layers, Tablet, BookMarked, Clock } from 'lucide-react';
 import { Book } from '@/types/book';
 import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 import { motion } from 'framer-motion';
