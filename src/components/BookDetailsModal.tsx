@@ -230,7 +230,7 @@ export const BookDetailsModal = ({
 
   return (
     <div
-      className="fixed inset-0 bg-background/80 backdrop-blur-md flex items-end sm:items-center justify-center z-50 animate-fade-in p-0 sm:p-4"
+      className="fixed inset-0 modal-overlay-noir flex items-end sm:items-center justify-center z-50 animate-fade-in p-0 sm:p-4"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div

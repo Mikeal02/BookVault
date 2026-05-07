@@ -1,6 +1,6 @@
 
 import { useState, useRef, useCallback } from 'react';
-import { Star, Plus, Trash2, BookOpen, Layers, Tablet, BookMarked, Clock } from 'lucide-react';
+import { Star, Plus, Trash2, Layers, Tablet, BookMarked, Clock } from 'lucide-react';
 import { Book } from '@/types/book';
 import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 import { motion } from 'framer-motion';
@@ -109,48 +109,36 @@ export const BookCard = ({ book, onSelect, onAddToBookshelf, onRemoveFromBookshe
         style={tiltStyle}
         onMouseMove={handleMove}
         onMouseLeave={handleLeave}
-        className="glass-card rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-[var(--shadow-card-hover)] group-hover:border-primary/10"
+        className="card-editorial grain rounded-md overflow-hidden cursor-pointer"
       >
-        {/* Top accent shimmer */}
-        <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/0 via-primary/40 to-secondary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 z-10" />
-        
-        {/* Card shine sweep */}
-        <div className="absolute inset-0 pointer-events-none z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 overflow-hidden rounded-2xl">
-          <div className="absolute -inset-full bg-gradient-to-tr from-transparent via-white/[0.07] to-transparent rotate-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-out" />
-        </div>
-
-        <div onClick={onSelect} className="p-3.5">
-          {/* Cover with 3D depth */}
-          <div className="relative mb-3 overflow-hidden rounded-xl aspect-[2/3] ring-1 ring-border/40 group-hover:ring-primary/25 transition-all duration-300 shadow-sm group-hover:shadow-xl">
+        <div onClick={onSelect} className="p-3.5 relative z-10">
+          {/* Cover — editorial gold edge, no shine */}
+          <div className="relative mb-3 overflow-hidden rounded-sm aspect-[2/3] gold-edge cover-spine transition-all duration-300">
             <CoverImage book={book} className="w-full h-full rounded-xl" />
 
-            {/* Shine effect on hover */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-xl" />
-
-            {/* Hover overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-foreground/60 via-foreground/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-4">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-background/95 backdrop-blur-sm text-xs font-medium text-primary shadow-lg border border-primary/20 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                <BookOpen className="w-3.5 h-3.5" />
-                View Details
-              </div>
+            {/* Hover ink overlay with editorial label */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400 flex items-end justify-center pb-4 pointer-events-none">
+              <span className="px-3 py-1 text-[9.5px] font-bold tracking-[0.2em] uppercase text-primary border border-primary/60 bg-black/30 backdrop-blur-sm">
+                Read More
+              </span>
             </div>
 
             {/* Badges */}
             <div className="absolute top-1.5 left-1.5 flex flex-col gap-1">
               {book.seriesName && (
-                <span className="px-1.5 py-0.5 rounded-md bg-accent/90 backdrop-blur-sm text-accent-foreground flex items-center gap-0.5 text-[9px] font-semibold">
+                <span className="badge-editorial bg-black/60 border-primary/60 text-primary backdrop-blur-sm">
                   <Layers className="w-2.5 h-2.5" />
-                  {book.seriesPosition ? `#${book.seriesPosition}` : 'Series'}
+                  {book.seriesPosition ? `№${book.seriesPosition}` : 'Series'}
                 </span>
               )}
               {book.isEbook && (
-                <span className="px-1.5 py-0.5 rounded-md bg-primary/90 backdrop-blur-sm text-primary-foreground flex items-center gap-0.5 text-[9px] font-semibold">
+                <span className="badge-editorial bg-black/60 border-primary/60 text-primary backdrop-blur-sm">
                   <Tablet className="w-2.5 h-2.5" />
                   eBook
                 </span>
               )}
               {book.freeReading && (
-                <span className="px-1.5 py-0.5 rounded-md bg-success/90 backdrop-blur-sm text-success-foreground flex items-center gap-0.5 text-[9px] font-semibold">
+                <span className="badge-editorial bg-black/60 border-success/60 text-success backdrop-blur-sm">
                   <BookMarked className="w-2.5 h-2.5" />
                   Free
                 </span>
@@ -158,20 +146,20 @@ export const BookCard = ({ book, onSelect, onAddToBookshelf, onRemoveFromBookshe
             </div>
 
             {book.averageRating && book.averageRating >= 3.5 && (
-              <div className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded-full bg-background/90 backdrop-blur-sm border border-border/60 flex items-center gap-0.5">
+              <div className="absolute top-1.5 right-1.5 px-2 py-0.5 bg-black/65 backdrop-blur-sm border border-primary/50 flex items-center gap-1 rounded-sm">
                 <Star className="w-2.5 h-2.5 text-primary fill-primary" />
-                <span className="text-[10px] font-bold text-foreground">{book.averageRating.toFixed(1)}</span>
+                <span className="text-[10px] font-bold text-primary numeral">{book.averageRating.toFixed(1)}</span>
               </div>
             )}
           </div>
 
           {/* Info */}
           <div className="space-y-1.5">
-            <h3 className="font-display text-sm font-semibold text-foreground line-clamp-2 leading-snug tracking-tight">
+            <h3 className="h-editorial text-[15px] text-foreground line-clamp-2 leading-snug">
               {book.title}
             </h3>
-            <p className="text-xs text-muted-foreground font-medium line-clamp-1">
-              {book.authors?.join(', ') || 'Unknown Author'}
+            <p className="text-[11px] text-muted-foreground smcp line-clamp-1">
+              by {book.authors?.join(' · ') || 'Unknown Author'}
             </p>
 
             {book.readingStatus === 'reading' && book.readingProgress !== undefined && book.readingProgress > 0 && (
@@ -194,17 +182,17 @@ export const BookCard = ({ book, onSelect, onAddToBookshelf, onRemoveFromBookshe
             )}
 
             <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/70 flex-wrap">
-              {book.publishedDate && <span>{new Date(book.publishedDate).getFullYear()}</span>}
+              {book.publishedDate && <span className="numeral text-primary/80 text-[12px]">{new Date(book.publishedDate).getFullYear()}</span>}
               {book.pageCount && (
                 <>
                   <span className="opacity-40">·</span>
-                  <span>{book.pageCount}p</span>
+                  <span className="numeral">{book.pageCount}<span className="text-muted-foreground/50">p</span></span>
                 </>
               )}
               {estimatedTime && (
                 <>
                   <span className="opacity-40">·</span>
-                  <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{estimatedTime}h</span>
+                  <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /><span className="numeral">{estimatedTime}h</span></span>
                 </>
               )}
             </div>
@@ -246,19 +234,19 @@ export const BookCard = ({ book, onSelect, onAddToBookshelf, onRemoveFromBookshe
           <button
             onClick={handleActionClick}
             disabled={showAddButton && isInBookshelf}
-            className={`w-full py-2 px-4 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1.5 ${
+            className={`w-full py-2.5 px-4 rounded-sm text-[10.5px] font-bold uppercase tracking-[0.18em] transition-all duration-300 flex items-center justify-center gap-2 border ${
               showAddButton
                 ? isInBookshelf
-                  ? 'bg-success/10 text-success border border-success/20 cursor-default'
-                  : 'gradient-primary text-primary-foreground hover:opacity-90 shadow-sm hover:shadow-md active:scale-[0.98]'
-                : 'bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive hover:text-destructive-foreground active:scale-[0.98]'
+                  ? 'bg-transparent text-success border-success/40 cursor-default'
+                  : 'bg-transparent text-primary border-primary/55 hover:bg-primary hover:text-primary-foreground'
+                : 'bg-transparent text-destructive border-destructive/40 hover:bg-destructive hover:text-destructive-foreground'
             }`}
           >
             {showAddButton ? (
               isInBookshelf ? (
                 <><Star className="w-3 h-3 fill-current" />In Library</>
               ) : (
-                <><Plus className="w-3 h-3" />Add to Shelf</>
+                <><Plus className="w-3 h-3" />Add</>
               )
             ) : (
               <><Trash2 className="w-3 h-3" />Remove</>

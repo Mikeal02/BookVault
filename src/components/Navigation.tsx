@@ -116,23 +116,23 @@ const DesktopNavItem = ({
     <div className="relative group">
       <button
         onClick={onClick}
-        className={`relative w-full flex items-center ${collapsed ? 'justify-center' : ''} gap-3 ${collapsed ? 'px-0 py-2.5' : 'px-3 py-2.5'} rounded-xl text-[13px] font-medium transition-all duration-200 ${
+        className={`relative w-full flex items-center ${collapsed ? 'justify-center' : ''} gap-3 ${collapsed ? 'px-0 py-2.5' : 'px-3 py-2.5'} rounded-sm text-[12.5px] font-medium tracking-tight transition-all duration-200 ${
           isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
         }`}
       >
-        {/* Active background */}
+        {/* Active editorial wash */}
         {isActive && (
           <motion.div
             layoutId="sidebar-active"
-            className="absolute inset-0 bg-primary/8 border border-primary/15 rounded-xl"
+            className="absolute inset-0 bg-primary/[0.06] rounded-sm"
             transition={{ type: 'spring', damping: 26, stiffness: 320 }}
           />
         )}
-        {/* Active left bar */}
+        {/* Active gold edge */}
         {isActive && (
           <motion.div
             layoutId="sidebar-bar"
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-primary rounded-r-full shadow-[0_0_10px_hsl(var(--primary)/0.5)]"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-6 bg-primary rounded-r-full"
             transition={{ type: 'spring', damping: 26, stiffness: 320 }}
           />
         )}
@@ -148,8 +148,8 @@ const DesktopNavItem = ({
             key={bookshelfCount}
             initial={{ scale: 1.3, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className={`relative z-10 text-[10px] font-bold px-1.5 py-0.5 rounded-full tabular-nums ${
-              isActive ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
+            className={`relative z-10 text-[10px] font-bold px-1.5 py-0.5 rounded-sm numeral ${
+              isActive ? 'text-primary' : 'text-muted-foreground/70'
             }`}
           >
             {bookshelfCount}
