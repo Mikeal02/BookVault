@@ -124,6 +124,10 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
 
   return (
     <div ref={revealRef} className="relative">
+      <div className="section-marker">
+        <span className="serial-numeral">№ 01 — Indicators</span>
+        <span className="h-editorial text-base text-foreground/90">At a Glance</span>
+      </div>
       <div ref={ref} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statItems.map((stat, index) => (
           <motion.div
@@ -133,15 +137,17 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
             initial="hidden"
             animate={isVisible ? "visible" : "hidden"}
             style={{ y: yValues[index] }}
-            className={`stat-card glass-card surface-card hover-lift rounded-2xl group ${stat.accent}`}
+            className={`stat-card glass-card surface-card hover-lift rounded-2xl group frame-brackets ${stat.accent}`}
           >
+            <span className="cross-mark" />
+            <span className="serial-numeral absolute top-3 left-4 z-10">{String(index + 1).padStart(2, '0')}</span>
             {/* Subtle right-side accent line */}
             <div className="absolute inset-y-0 right-0 w-[2px] rounded-r-2xl bg-gradient-to-b from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className={`w-11 h-11 ${stat.bgClass} flex items-center justify-center mb-4`}>
+            <div className={`w-11 h-11 ${stat.bgClass} flex items-center justify-center mb-4 mt-3`}>
               <stat.icon className="w-5 h-5" />
             </div>
             <AnimatedStatValue value={stat.value} suffix={stat.suffix} />
-            <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
+            <p className="text-[11px] text-muted-foreground font-bold tracking-[0.18em] uppercase">{stat.label}</p>
           </motion.div>
         ))}
       </div>
