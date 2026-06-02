@@ -527,9 +527,9 @@ export const BookDetailsModal = ({
             ref={el => { sectionRefs.current.about = el; }}
             className="space-y-4 scroll-mt-2"
           >
-            <div className="flex items-center gap-2">
-              <ScrollText className="w-4 h-4 text-primary" />
-              <h3 className="font-display text-lg font-semibold text-foreground">About this book</h3>
+            <div className="section-marker">
+              <span className="serial-numeral">№ 02</span>
+              <h3 className="h-editorial text-xl text-foreground italic">About this book</h3>
             </div>
 
             {description ? (
@@ -642,9 +642,9 @@ export const BookDetailsModal = ({
             ref={el => { sectionRefs.current.details = el; }}
             className="space-y-4 scroll-mt-2"
           >
-            <div className="flex items-center gap-2">
-              <Library className="w-4 h-4 text-primary" />
-              <h3 className="font-display text-lg font-semibold text-foreground">Publication & Identifiers</h3>
+            <div className="section-marker">
+              <span className="serial-numeral">№ 03</span>
+              <h3 className="h-editorial text-xl text-foreground italic">Publication &amp; Identifiers</h3>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -725,11 +725,9 @@ export const BookDetailsModal = ({
             ref={el => { sectionRefs.current.similar = el; }}
             className="space-y-3 scroll-mt-2"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <h3 className="font-display text-lg font-semibold text-foreground">You Might Also Like</h3>
-              </div>
+            <div className="section-marker">
+              <span className="serial-numeral">№ 04</span>
+              <h3 className="h-editorial text-xl text-foreground italic flex-1">Kindred Volumes</h3>
               {loadingSimilar && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 snap-x scrollbar-thin -mx-1 px-1">
@@ -784,9 +782,9 @@ export const BookDetailsModal = ({
             ref={el => { sectionRefs.current.purchase = el; }}
             className="space-y-3 scroll-mt-2"
           >
-            <div className="flex items-center gap-2">
-              <ShoppingCart className="w-4 h-4 text-primary" />
-              <h3 className="font-display text-lg font-semibold text-foreground">Where to Buy or Borrow</h3>
+            <div className="section-marker">
+              <span className="serial-numeral">№ 05</span>
+              <h3 className="h-editorial text-xl text-foreground italic">Acquire &amp; Borrow</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {purchaseLinks.map((link, i) => (
