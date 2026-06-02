@@ -384,16 +384,19 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
             >
-              <span className="section-pill">
+              <span className="eyebrow-tick">
                 <Calendar className="w-3 h-3" />
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </span>
             </motion.div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3">
-              <span className="gradient-text">Welcome back,</span>{' '}
-              <span className="gradient-text-coral hero-glow">{currentUser}</span>
+            <h1 className="h-editorial text-4xl sm:text-5xl lg:text-6xl mb-4">
+              <span className="italic font-light text-foreground/70">Welcome back,</span>{' '}
+              <span className="gold-underline text-foreground">{currentUser}</span>
             </h1>
-            <p className="text-muted-foreground text-base sm:text-lg max-w-xl">
+            <div className="ornament-rule max-w-md mb-4 mx-auto lg:mx-0">
+              <span>❦</span>
+            </div>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-xl font-light">
               You're on a roll! Keep reading to reach your yearly goal.
             </p>
             {/* Quick genre chips */}
