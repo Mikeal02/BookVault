@@ -124,6 +124,10 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
 
   return (
     <div ref={revealRef} className="relative">
+      <div className="section-marker">
+        <span className="serial-numeral">№ 01 — Indicators</span>
+        <span className="h-editorial text-base text-foreground/90">At a Glance</span>
+      </div>
       <div ref={ref} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statItems.map((stat, index) => (
           <motion.div
@@ -133,15 +137,17 @@ const ParallaxStatsGrid = ({ stats }: { stats: any }) => {
             initial="hidden"
             animate={isVisible ? "visible" : "hidden"}
             style={{ y: yValues[index] }}
-            className={`stat-card glass-card surface-card hover-lift rounded-2xl group ${stat.accent}`}
+            className={`stat-card glass-card surface-card hover-lift rounded-2xl group frame-brackets ${stat.accent}`}
           >
+            <span className="cross-mark" />
+            <span className="serial-numeral absolute top-3 left-4 z-10">{String(index + 1).padStart(2, '0')}</span>
             {/* Subtle right-side accent line */}
             <div className="absolute inset-y-0 right-0 w-[2px] rounded-r-2xl bg-gradient-to-b from-transparent via-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className={`w-11 h-11 ${stat.bgClass} flex items-center justify-center mb-4`}>
+            <div className={`w-11 h-11 ${stat.bgClass} flex items-center justify-center mb-4 mt-3`}>
               <stat.icon className="w-5 h-5" />
             </div>
             <AnimatedStatValue value={stat.value} suffix={stat.suffix} />
-            <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
+            <p className="text-[11px] text-muted-foreground font-bold tracking-[0.18em] uppercase">{stat.label}</p>
           </motion.div>
         ))}
       </div>
@@ -378,16 +384,19 @@ export const ReadingDashboard = ({ books, currentUser, onViewChange, readingGoal
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
             >
-              <span className="section-pill">
+              <span className="eyebrow-tick">
                 <Calendar className="w-3 h-3" />
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
               </span>
             </motion.div>
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3">
-              <span className="gradient-text">Welcome back,</span>{' '}
-              <span className="gradient-text-coral hero-glow">{currentUser}</span>
+            <h1 className="h-editorial text-4xl sm:text-5xl lg:text-6xl mb-4">
+              <span className="italic font-light text-foreground/70">Welcome back,</span>{' '}
+              <span className="gold-underline text-foreground">{currentUser}</span>
             </h1>
-            <p className="text-muted-foreground text-base sm:text-lg max-w-xl">
+            <div className="ornament-rule max-w-md mb-4 mx-auto lg:mx-0">
+              <span>❦</span>
+            </div>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-xl font-light">
               You're on a roll! Keep reading to reach your yearly goal.
             </p>
             {/* Quick genre chips */}
