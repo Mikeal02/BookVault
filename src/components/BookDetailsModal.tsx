@@ -413,8 +413,12 @@ export const BookDetailsModal = ({
             ref={el => { sectionRefs.current.overview = el; }}
             className="space-y-4 scroll-mt-2"
           >
+            <div className="section-marker">
+              <span className="serial-numeral">№ 01</span>
+              <h3 className="h-editorial text-xl text-foreground italic">At a Glance</h3>
+            </div>
             {/* At a Glance — elite info-density stat strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {displayBook.averageRating && (
                 <GlanceStat
                   icon={Star}
@@ -449,6 +453,7 @@ export const BookDetailsModal = ({
                 />
               )}
             </div>
+            <div className="ornament-rule"><span>❦</span></div>
 
             {displayBook.firstSentence && (
               <div className="relative card-hairline frame-brackets p-6">
