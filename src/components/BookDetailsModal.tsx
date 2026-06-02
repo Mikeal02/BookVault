@@ -798,16 +798,17 @@ export const BookDetailsModal = ({
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${link.className} flex items-center justify-between p-3 rounded-xl border transition-all duration-200 hover:scale-[1.01] shadow-sm hover:shadow-md`}
+                  className="card-hairline frame-brackets flex items-center justify-between p-3.5 group/buy"
                 >
+                  <span className="serial-numeral absolute top-2 left-3">{String(i + 1).padStart(2, '0')}</span>
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-xl flex-shrink-0">{link.icon}</span>
+                    <span className="text-2xl flex-shrink-0 mt-3">{link.icon}</span>
                     <div className="min-w-0">
-                      <div className="font-semibold text-sm truncate">{link.name}</div>
-                      <div className="text-[10px] opacity-75 truncate">{link.desc}</div>
+                      <div className="h-editorial text-base text-foreground truncate group-hover/buy:text-primary transition-colors">{link.name}</div>
+                      <div className="text-[10px] text-muted-foreground tracking-[0.14em] uppercase font-semibold truncate mt-0.5">{link.desc}</div>
                     </div>
                   </div>
-                  <ExternalLink className="w-4 h-4 flex-shrink-0" />
+                  <ExternalLink className="w-4 h-4 flex-shrink-0 text-primary/60 group-hover/buy:text-primary transition-colors" />
                 </a>
               ))}
             </div>
