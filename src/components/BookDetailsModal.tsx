@@ -864,11 +864,11 @@ const DetailItem = ({
 }: { icon: React.ComponentType<{ className?: string }>; label: string; value?: string }) => {
   if (!value || value === '—') return null;
   return (
-    <div className="flex items-start gap-2 p-2.5 bg-muted/30 rounded-lg border border-border/60">
-      <Icon className="w-3.5 h-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+    <div className="card-hairline frame-brackets flex items-start gap-2 p-3">
+      <Icon className="w-3.5 h-3.5 text-primary/70 mt-1 flex-shrink-0" />
       <div className="min-w-0">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
-        <div className="text-sm font-medium text-foreground truncate">{value}</div>
+        <div className="text-[9.5px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
+        <div className="editorial-num text-base text-foreground truncate mt-0.5">{value}</div>
       </div>
     </div>
   );
@@ -888,13 +888,14 @@ const GlanceStat = ({
     accent === 'success' ? 'text-success' :
     'text-primary';
   return (
-    <div className="relative p-3 rounded-xl bg-card/60 border border-border/60 backdrop-blur-sm hover:border-primary/30 transition-colors">
-      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="relative card-hairline frame-brackets p-3.5">
+      <span className="cross-mark" />
+      <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
         <Icon className={`w-3 h-3 ${accentClass}`} />
         {label}
       </div>
-      <div className="mt-1 text-base font-bold text-foreground tabular-nums leading-none">{value}</div>
-      {sub && <div className="mt-1 text-[10px] text-muted-foreground truncate">{sub}</div>}
+      <div className="mt-2 editorial-num text-2xl text-foreground leading-none">{value}</div>
+      {sub && <div className="mt-1.5 text-[10px] text-muted-foreground/80 truncate italic">{sub}</div>}
     </div>
   );
 };
