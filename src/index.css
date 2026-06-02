@@ -1510,3 +1510,189 @@
   background: hsl(var(--primary));
 }
 
+/* ═══════════════════════════════════════════════
+   ELITE V4 — EDITORIAL POLISH LAYER
+   Drop caps · serial numerals · corner brackets ·
+   kinetic gold underline · ornament dividers
+   ═══════════════════════════════════════════════ */
+
+/* Refined serial number — for stat cards & section markers */
+.serial-numeral {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  color: hsl(var(--primary) / 0.55);
+  text-transform: uppercase;
+}
+
+/* Drop cap for editorial paragraphs */
+.drop-cap::first-letter {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 700;
+  font-size: 3.4em;
+  line-height: 0.85;
+  float: left;
+  margin: 0.08em 0.12em 0 -0.04em;
+  color: hsl(var(--primary));
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Ornament divider — centered fleuron between two hairlines */
+.ornament-rule {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: hsl(var(--primary) / 0.55);
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1;
+}
+.ornament-rule::before,
+.ornament-rule::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, hsl(var(--border)) 30%, hsl(var(--primary) / 0.35) 50%, hsl(var(--border)) 70%, transparent);
+}
+
+/* Corner-bracketed editorial frame — adds Δ-style gold corners */
+.frame-brackets {
+  position: relative;
+}
+.frame-brackets::before,
+.frame-brackets::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 1px solid hsl(var(--primary) / 0.55);
+  pointer-events: none;
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1), height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.frame-brackets::before {
+  top: 6px; left: 6px;
+  border-right: 0; border-bottom: 0;
+}
+.frame-brackets::after {
+  bottom: 6px; right: 6px;
+  border-left: 0; border-top: 0;
+}
+.frame-brackets:hover::before,
+.frame-brackets:hover::after {
+  width: 22px; height: 22px;
+}
+
+/* Kinetic gold underline — for hero h1 keywords */
+.gold-underline {
+  position: relative;
+  display: inline-block;
+}
+.gold-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -0.12em;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, hsl(var(--primary)) 20%, hsl(var(--secondary)) 50%, hsl(var(--primary)) 80%, transparent);
+  transform-origin: left;
+  animation: gold-line-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+@keyframes gold-line-in {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+
+/* Section header — serial number + serif label */
+.section-marker {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid hsl(var(--border));
+  position: relative;
+}
+.section-marker::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 48px;
+  height: 1px;
+  background: hsl(var(--primary));
+}
+
+/* Editorial number — Playfair italic for tabular stat values */
+.editorial-num {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-feature-settings: 'lnum' 1, 'tnum' 1;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* Hairline card — refined with corner bracket emphasis on hover */
+.card-hairline {
+  position: relative;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  transition: border-color 0.3s ease, transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s ease;
+}
+.card-hairline::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) - 4px);
+  pointer-events: none;
+  transition: border-color 0.3s ease;
+}
+.card-hairline:hover {
+  border-color: hsl(var(--primary) / 0.35);
+  box-shadow: var(--shadow-card-hover);
+}
+.card-hairline:hover::before {
+  border-color: hsl(var(--primary) / 0.10);
+}
+
+/* Floating decorative cross-mark — top-right of premium cards */
+.cross-mark {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 8px;
+  height: 8px;
+  opacity: 0.5;
+}
+.cross-mark::before, .cross-mark::after {
+  content: '';
+  position: absolute;
+  background: hsl(var(--primary));
+}
+.cross-mark::before { left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%); }
+.cross-mark::after  { top: 50%; left: 0; right: 0; height: 1px; transform: translateY(-50%); }
+
+/* Editorial eyebrow — refined small-caps with gold tick */
+.eyebrow-tick {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: hsl(var(--primary));
+}
+.eyebrow-tick::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: hsl(var(--primary));
+}
