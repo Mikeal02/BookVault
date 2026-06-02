@@ -269,18 +269,17 @@ export const BookDetailsModal = ({
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   {displayBook.seriesName && (
-                    <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent mb-1.5">
+                    <div className="eyebrow-tick mb-2">
                       <Layers className="w-3 h-3" />
-                      {displayBook.seriesName}
-                      {displayBook.seriesPosition && <span className="text-muted-foreground">· #{displayBook.seriesPosition}</span>}
+                      <span>{displayBook.seriesName}{displayBook.seriesPosition && ` · № ${displayBook.seriesPosition}`}</span>
                     </div>
                   )}
-                  <h2 className="font-display text-lg sm:text-2xl font-bold text-foreground leading-tight tracking-tight line-clamp-2">
-                    {displayBook.title}
+                  <h2 className="h-editorial text-xl sm:text-3xl text-foreground line-clamp-2 italic">
+                    <span className="gold-underline not-italic font-semibold">{displayBook.title}</span>
                     {isEnriching && <Loader2 className="inline-block w-4 h-4 ml-2 animate-spin text-muted-foreground" />}
                   </h2>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    by <span className="text-foreground font-medium">{displayBook.authors?.join(', ') || 'Unknown Author'}</span>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground mt-2 tracking-[0.16em] uppercase font-semibold">
+                    by <span className="text-foreground/90">{displayBook.authors?.join(', ') || 'Unknown Author'}</span>
                   </p>
                 </div>
                 <button
@@ -414,8 +413,12 @@ export const BookDetailsModal = ({
             ref={el => { sectionRefs.current.overview = el; }}
             className="space-y-4 scroll-mt-2"
           >
+            <div className="section-marker">
+              <span className="serial-numeral">№ 01</span>
+              <h3 className="h-editorial text-xl text-foreground italic">At a Glance</h3>
+            </div>
             {/* At a Glance — elite info-density stat strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {displayBook.averageRating && (
                 <GlanceStat
                   icon={Star}
@@ -450,21 +453,22 @@ export const BookDetailsModal = ({
                 />
               )}
             </div>
+            <div className="ornament-rule"><span>❦</span></div>
 
             {displayBook.firstSentence && (
-              <div className="relative bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-5 border border-primary/10">
-                <Quote className="absolute top-3 right-3 w-8 h-8 text-primary/15" />
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Opening Line</span>
-                <p className="font-display italic text-base sm:text-lg text-foreground mt-2 leading-relaxed">
-                  "{displayBook.firstSentence}"
+              <div className="relative card-hairline frame-brackets p-6">
+                <span className="cross-mark" />
+                <span className="serial-numeral">№ 01 — Incipit</span>
+                <p className="h-editorial italic text-base sm:text-xl text-foreground mt-2 leading-snug">
+                  <span aria-hidden className="text-primary mr-1">“</span>{displayBook.firstSentence}<span aria-hidden className="text-primary ml-1">”</span>
                 </p>
               </div>
             )}
 
             {displayBook.textSnippet && !displayBook.firstSentence && (
-              <div className="bg-muted/30 rounded-xl p-4 border border-border">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Excerpt</span>
-                <p className="text-sm text-foreground/90 mt-1.5 leading-relaxed italic">"{displayBook.textSnippet}"</p>
+              <div className="card-hairline frame-brackets p-4">
+                <span className="serial-numeral">№ 01 — Excerpt</span>
+                <p className="h-editorial italic text-sm text-foreground/90 mt-1.5 leading-relaxed">“{displayBook.textSnippet}”</p>
               </div>
             )}
 
@@ -528,9 +532,9 @@ export const BookDetailsModal = ({
             ref={el => { sectionRefs.current.about = el; }}
             className="space-y-4 scroll-mt-2"
           >
-            <div className="flex items-center gap-2">
-              <ScrollText className="w-4 h-4 text-primary" />
-              <h3 className="font-display text-lg font-semibold text-foreground">About this book</h3>
+            <div className="section-marker">
+              <span className="serial-numeral">№ 02</span>
+              <h3 className="h-editorial text-xl text-foreground italic">About this book</h3>
             </div>
 
             {description ? (
@@ -643,9 +647,9 @@ export const BookDetailsModal = ({
             ref={el => { sectionRefs.current.details = el; }}
             className="space-y-4 scroll-mt-2"
           >
-            <div className="flex items-center gap-2">
-              <Library className="w-4 h-4 text-primary" />
-              <h3 className="font-display text-lg font-semibold text-foreground">Publication & Identifiers</h3>
+            <div className="section-marker">
+              <span className="serial-numeral">№ 03</span>
+              <h3 className="h-editorial text-xl text-foreground italic">Publication &amp; Identifiers</h3>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -726,11 +730,9 @@ export const BookDetailsModal = ({
             ref={el => { sectionRefs.current.similar = el; }}
             className="space-y-3 scroll-mt-2"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <h3 className="font-display text-lg font-semibold text-foreground">You Might Also Like</h3>
-              </div>
+            <div className="section-marker">
+              <span className="serial-numeral">№ 04</span>
+              <h3 className="h-editorial text-xl text-foreground italic flex-1">Kindred Volumes</h3>
               {loadingSimilar && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 snap-x scrollbar-thin -mx-1 px-1">
@@ -785,9 +787,9 @@ export const BookDetailsModal = ({
             ref={el => { sectionRefs.current.purchase = el; }}
             className="space-y-3 scroll-mt-2"
           >
-            <div className="flex items-center gap-2">
-              <ShoppingCart className="w-4 h-4 text-primary" />
-              <h3 className="font-display text-lg font-semibold text-foreground">Where to Buy or Borrow</h3>
+            <div className="section-marker">
+              <span className="serial-numeral">№ 05</span>
+              <h3 className="h-editorial text-xl text-foreground italic">Acquire &amp; Borrow</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {purchaseLinks.map((link, i) => (
@@ -796,16 +798,17 @@ export const BookDetailsModal = ({
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`${link.className} flex items-center justify-between p-3 rounded-xl border transition-all duration-200 hover:scale-[1.01] shadow-sm hover:shadow-md`}
+                  className="card-hairline frame-brackets flex items-center justify-between p-3.5 group/buy"
                 >
+                  <span className="serial-numeral absolute top-2 left-3">{String(i + 1).padStart(2, '0')}</span>
                   <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-xl flex-shrink-0">{link.icon}</span>
+                    <span className="text-2xl flex-shrink-0 mt-3">{link.icon}</span>
                     <div className="min-w-0">
-                      <div className="font-semibold text-sm truncate">{link.name}</div>
-                      <div className="text-[10px] opacity-75 truncate">{link.desc}</div>
+                      <div className="h-editorial text-base text-foreground truncate group-hover/buy:text-primary transition-colors">{link.name}</div>
+                      <div className="text-[10px] text-muted-foreground tracking-[0.14em] uppercase font-semibold truncate mt-0.5">{link.desc}</div>
                     </div>
                   </div>
-                  <ExternalLink className="w-4 h-4 flex-shrink-0" />
+                  <ExternalLink className="w-4 h-4 flex-shrink-0 text-primary/60 group-hover/buy:text-primary transition-colors" />
                 </a>
               ))}
             </div>
@@ -867,11 +870,11 @@ const DetailItem = ({
 }: { icon: React.ComponentType<{ className?: string }>; label: string; value?: string }) => {
   if (!value || value === '—') return null;
   return (
-    <div className="flex items-start gap-2 p-2.5 bg-muted/30 rounded-lg border border-border/60">
-      <Icon className="w-3.5 h-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+    <div className="card-hairline frame-brackets flex items-start gap-2 p-3">
+      <Icon className="w-3.5 h-3.5 text-primary/70 mt-1 flex-shrink-0" />
       <div className="min-w-0">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</div>
-        <div className="text-sm font-medium text-foreground truncate">{value}</div>
+        <div className="text-[9.5px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
+        <div className="editorial-num text-base text-foreground truncate mt-0.5">{value}</div>
       </div>
     </div>
   );
@@ -891,13 +894,14 @@ const GlanceStat = ({
     accent === 'success' ? 'text-success' :
     'text-primary';
   return (
-    <div className="relative p-3 rounded-xl bg-card/60 border border-border/60 backdrop-blur-sm hover:border-primary/30 transition-colors">
-      <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="relative card-hairline frame-brackets p-3.5">
+      <span className="cross-mark" />
+      <div className="flex items-center gap-1.5 text-[9.5px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
         <Icon className={`w-3 h-3 ${accentClass}`} />
         {label}
       </div>
-      <div className="mt-1 text-base font-bold text-foreground tabular-nums leading-none">{value}</div>
-      {sub && <div className="mt-1 text-[10px] text-muted-foreground truncate">{sub}</div>}
+      <div className="mt-2 editorial-num text-2xl text-foreground leading-none">{value}</div>
+      {sub && <div className="mt-1.5 text-[10px] text-muted-foreground/80 truncate italic">{sub}</div>}
     </div>
   );
 };
