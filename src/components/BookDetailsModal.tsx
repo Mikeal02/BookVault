@@ -451,19 +451,19 @@ export const BookDetailsModal = ({
             </div>
 
             {displayBook.firstSentence && (
-              <div className="relative bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl p-5 border border-primary/10">
-                <Quote className="absolute top-3 right-3 w-8 h-8 text-primary/15" />
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Opening Line</span>
-                <p className="font-display italic text-base sm:text-lg text-foreground mt-2 leading-relaxed">
-                  "{displayBook.firstSentence}"
+              <div className="relative card-hairline frame-brackets p-6">
+                <span className="cross-mark" />
+                <span className="serial-numeral">№ 01 — Incipit</span>
+                <p className="h-editorial italic text-base sm:text-xl text-foreground mt-2 leading-snug">
+                  <span aria-hidden className="text-primary mr-1">“</span>{displayBook.firstSentence}<span aria-hidden className="text-primary ml-1">”</span>
                 </p>
               </div>
             )}
 
             {displayBook.textSnippet && !displayBook.firstSentence && (
-              <div className="bg-muted/30 rounded-xl p-4 border border-border">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Excerpt</span>
-                <p className="text-sm text-foreground/90 mt-1.5 leading-relaxed italic">"{displayBook.textSnippet}"</p>
+              <div className="card-hairline frame-brackets p-4">
+                <span className="serial-numeral">№ 01 — Excerpt</span>
+                <p className="h-editorial italic text-sm text-foreground/90 mt-1.5 leading-relaxed">“{displayBook.textSnippet}”</p>
               </div>
             )}
 
