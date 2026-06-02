@@ -269,18 +269,17 @@ export const BookDetailsModal = ({
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   {displayBook.seriesName && (
-                    <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-accent mb-1.5">
+                    <div className="eyebrow-tick mb-2">
                       <Layers className="w-3 h-3" />
-                      {displayBook.seriesName}
-                      {displayBook.seriesPosition && <span className="text-muted-foreground">· #{displayBook.seriesPosition}</span>}
+                      <span>{displayBook.seriesName}{displayBook.seriesPosition && ` · № ${displayBook.seriesPosition}`}</span>
                     </div>
                   )}
-                  <h2 className="font-display text-lg sm:text-2xl font-bold text-foreground leading-tight tracking-tight line-clamp-2">
-                    {displayBook.title}
+                  <h2 className="h-editorial text-xl sm:text-3xl text-foreground line-clamp-2 italic">
+                    <span className="gold-underline not-italic font-semibold">{displayBook.title}</span>
                     {isEnriching && <Loader2 className="inline-block w-4 h-4 ml-2 animate-spin text-muted-foreground" />}
                   </h2>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    by <span className="text-foreground font-medium">{displayBook.authors?.join(', ') || 'Unknown Author'}</span>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground mt-2 tracking-[0.16em] uppercase font-semibold">
+                    by <span className="text-foreground/90">{displayBook.authors?.join(', ') || 'Unknown Author'}</span>
                   </p>
                 </div>
                 <button
