@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { Search, BookOpen, Filter, Settings, FileText, Bot, LayoutGrid, List, LayoutList, Layers, Calendar, Image, SlidersHorizontal, GraduationCap } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Search, BookOpen, FileText, Bot, LayoutGrid, List, LayoutList, Layers, Calendar, Image, SlidersHorizontal, GraduationCap, Star, BookMarked, CheckCircle2, Clock } from 'lucide-react';
 import { Book } from '@/types/book';
 import { BookCard } from './BookCard';
 import { BookManagementModal } from './BookManagementModal';
@@ -408,69 +408,85 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
 
   return (
     <div className="space-y-5">
-      {/* Header — scroll revealed */}
-      <motion.div
+      {/* Editorial masthead */}
+      <motion.section
         ref={headerRef}
         initial={{ opacity: 0, y: 18 }}
         animate={headerVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 18 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="flex items-center justify-between flex-wrap gap-3"
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="glass-card grain rounded-2xl p-5 sm:p-7 frame-brackets relative overflow-hidden"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-md logo-glow flex-shrink-0">
-            <BookOpen className="w-5 h-5 text-primary-foreground" />
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="hidden sm:flex w-12 h-12 rounded-lg border border-primary/30 items-center justify-center shrink-0 relative">
+              <BookOpen className="w-5 h-5 text-primary" />
+              <span className="serial-numeral absolute -top-2 -right-2 text-[9px] bg-background px-1">№ 02</span>
+            </div>
+            <div>
+              <div className="section-marker">
+                <span className="serial-numeral">Vol. I</span>
+                <span className="eyebrow-tick">The Personal Library</span>
+              </div>
+              <h2 className="h-editorial text-3xl sm:text-4xl mt-2">
+                My <span className="gold-underline italic">collection</span>
+              </h2>
+              <p className="text-xs text-muted-foreground/70 mt-2 leading-relaxed max-w-md font-serif italic">
+                Curated, catalogued and quietly waiting — every volume held under your name.
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-2xl font-display font-bold gradient-text">My Library</h2>
-            <p className="text-xs text-muted-foreground/60 font-medium">
-              <span className="text-primary font-bold">{vaultBooks.length}</span> books · <span className="text-success font-bold">{statusCounts.finished}</span> finished · <span className="text-warning font-bold">{statusCounts.reading}</span> reading
-            </p>
+
+          {/* Editorial stat ledger */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full lg:max-w-[520px]">
+            <LedgerTile icon={BookMarked} label="Volumes" value={vaultBooks.length} idx="I" accent />
+            <LedgerTile icon={CheckCircle2} label="Finished" value={statusCounts.finished} idx="II" tone="success" />
+            <LedgerTile icon={Clock} label="Reading" value={statusCounts.reading} idx="III" tone="warning" />
+            <LedgerTile icon={Star} label="Rated" value={vaultBooks.filter(b => (b.personalRating || 0) > 0).length} idx="IV" />
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Vault Switcher */}
-          {vaults && vaults.length > 0 && onVaultSelect && onVaultCreate && onVaultUpdate && onVaultDelete && (
-            <VaultSwitcher
-              vaults={vaults}
-              activeVaultId={activeVaultId ?? null}
-              onSelect={onVaultSelect}
-              onCreate={onVaultCreate}
-              onUpdate={onVaultUpdate}
-              onDelete={onVaultDelete}
-            />
-          )}
-          <button
-            onClick={() => setShowExport(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all chip"
-          >
-            <FileText className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Export</span>
-          </button>
-          <button
-            onClick={() => setShowCitations(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all chip"
-          >
-            <GraduationCap className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Cite</span>
-          </button>
-          <button
-            onClick={() => setShowAIChat(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/8 transition-all chip"
-          >
-            <Bot className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">AI Chat</span>
-          </button>
+        <div className="ornament-rule my-5">❦</div>
+
+        {/* Vault + tooling row */}
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="eyebrow text-[10px] text-muted-foreground/50 hidden sm:inline">Tooling</span>
+            <span className="hidden sm:inline w-px h-3 bg-border/60" />
+            {vaults && vaults.length > 0 && onVaultSelect && onVaultCreate && onVaultUpdate && onVaultDelete && (
+              <VaultSwitcher
+                vaults={vaults}
+                activeVaultId={activeVaultId ?? null}
+                onSelect={onVaultSelect}
+                onCreate={onVaultCreate}
+                onUpdate={onVaultUpdate}
+                onDelete={onVaultDelete}
+              />
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <EditorialAction icon={FileText} label="Export" onClick={() => setShowExport(true)} />
+            <EditorialAction icon={GraduationCap} label="Cite" onClick={() => setShowCitations(true)} />
+            <EditorialAction icon={Bot} label="AI Chat" onClick={() => setShowAIChat(true)} accent />
+          </div>
         </div>
-      </motion.div>
+      </motion.section>
 
       {/* Search, filter, view controls — all in one refined panel */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
-        className="glass-card surface-card rounded-2xl p-4"
+        className="glass-card surface-card rounded-2xl p-4 relative"
       >
+        <div className="flex items-center justify-between mb-3">
+          <div className="section-marker">
+            <span className="serial-numeral text-[10px]">§</span>
+            <span className="eyebrow text-[10px]">Search · Sort · Survey</span>
+          </div>
+          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40 smcp hidden sm:inline">
+            {filteredBooks.length} / {vaultBooks.length}
+          </span>
+        </div>
         <div className="flex flex-col sm:flex-row gap-3">
           {/* Search */}
           <div className="relative flex-1">
