@@ -633,3 +633,62 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
     </div>
   );
 };
+
+// ── Editorial ledger stat tile ──
+const LedgerTile = ({
+  icon: Icon,
+  label,
+  value,
+  idx,
+  accent,
+  tone,
+}: {
+  icon: typeof Star;
+  label: string;
+  value: number;
+  idx: string;
+  accent?: boolean;
+  tone?: 'success' | 'warning';
+}) => {
+  const toneClass =
+    tone === 'success'
+      ? 'text-success'
+      : tone === 'warning'
+      ? 'text-warning'
+      : accent
+      ? 'text-primary'
+      : 'text-foreground';
+  return (
+    <div className="card-hairline rounded-md px-3 py-2.5 relative group">
+      <span className="serial-numeral absolute top-1.5 right-2 text-[8px] opacity-50">№ {idx}</span>
+      <Icon className={`w-3.5 h-3.5 ${toneClass} opacity-80`} />
+      <div className={`editorial-num text-2xl leading-tight mt-1 ${toneClass}`}>{value}</div>
+      <div className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/55 smcp">{label}</div>
+    </div>
+  );
+};
+
+// ── Editorial action chip ──
+const EditorialAction = ({
+  icon: Icon,
+  label,
+  onClick,
+  accent,
+}: {
+  icon: typeof Star;
+  label: string;
+  onClick: () => void;
+  accent?: boolean;
+}) => (
+  <button
+    onClick={onClick}
+    className={`group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-[11px] uppercase tracking-[0.16em] smcp transition-all ${
+      accent
+        ? 'border-primary/40 text-primary hover:bg-primary/10 hover:border-primary/60'
+        : 'border-border/60 text-muted-foreground hover:text-foreground hover:border-border'
+    }`}
+  >
+    <Icon className="w-3 h-3" />
+    <span className="hidden sm:inline">{label}</span>
+  </button>
+);
