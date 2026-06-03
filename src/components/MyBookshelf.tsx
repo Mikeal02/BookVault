@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from 'react';
-import { Search, BookOpen, FileText, Bot, LayoutGrid, List, LayoutList, Layers, Calendar, Image, SlidersHorizontal, GraduationCap, Star, BookMarked, CheckCircle2, Clock } from 'lucide-react';
+import { Search, BookOpen, FileText, Bot, LayoutGrid, List, LayoutList, Layers, Calendar, Image, SlidersHorizontal, GraduationCap, Star, BookMarked, CheckCircle2, Clock, X } from 'lucide-react';
 import { Book } from '@/types/book';
 import { BookCard } from './BookCard';
 import { BookManagementModal } from './BookManagementModal';
@@ -27,6 +27,8 @@ interface MyBookshelfProps {
   onVaultUpdate?: (vaultId: string, updates: Partial<Pick<Vault, 'name' | 'icon' | 'color' | 'description'>>) => Promise<void>;
   onVaultDelete?: (vaultId: string) => Promise<void>;
   onAssignBookToVault?: (bookId: string, vaultId: string | null) => Promise<void>;
+  periodFilter?: { kind: 'day' | 'month' | 'weekday'; key: string; label: string } | null;
+  onClearPeriodFilter?: () => void;
 }
 
 type ViewMode = 'grid' | 'list' | 'compact' | 'spine' | 'timeline' | 'wall';
@@ -356,7 +358,7 @@ const CompactView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) =
   </div>
 );
 
-export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpdateBook, onManageBook, vaults, activeVaultId, onVaultSelect, onVaultCreate, onVaultUpdate, onVaultDelete, onAssignBookToVault }: MyBookshelfProps) => {
+export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpdateBook, onManageBook, vaults, activeVaultId, onVaultSelect, onVaultCreate, onVaultUpdate, onVaultDelete, onAssignBookToVault, periodFilter, onClearPeriodFilter }: MyBookshelfProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'title' | 'author' | 'rating' | 'dateAdded'>('title');
   const [filterStatus, setFilterStatus] = useState<'all' | 'not-read' | 'reading' | 'finished'>('all');
@@ -371,7 +373,25 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
     ? books.filter(b => b.vaultId === activeVaultId)
     : books;
 
-  const filteredBooks = vaultBooks
+  // Apply almanac period filter — match any of dateAdded / dateStarted / dateFinished
+  const periodBooks = periodFilter
+    ? vaultBooks.filter(b => {
+        const dates = [b.dateAdded, b.dateStarted, b.dateFinished].filter(Boolean) as string[];
+        return dates.some(d => {
+          const dt = new Date(d);
+          if (Number.isNaN(dt.getTime())) return false;
+          if (periodFilter.kind === 'day') return d.slice(0, 10) === periodFilter.key;
+          if (periodFilter.kind === 'month') {
+            const k = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}`;
+            return k === periodFilter.key;
+          }
+          if (periodFilter.kind === 'weekday') return String(dt.getDay()) === periodFilter.key;
+          return false;
+        });
+      })
+    : vaultBooks;
+
+  const filteredBooks = periodBooks
     .filter(book => {
       const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         book.authors.some(author => author.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -400,10 +420,10 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
   }
 
   const statusCounts = {
-    all: vaultBooks.length,
-    'not-read': vaultBooks.filter(b => b.readingStatus === 'not-read').length,
-    reading: vaultBooks.filter(b => b.readingStatus === 'reading').length,
-    finished: vaultBooks.filter(b => b.readingStatus === 'finished').length,
+    all: periodBooks.length,
+    'not-read': periodBooks.filter(b => b.readingStatus === 'not-read').length,
+    reading: periodBooks.filter(b => b.readingStatus === 'reading').length,
+    finished: periodBooks.filter(b => b.readingStatus === 'finished').length,
   };
 
   return (
@@ -446,6 +466,27 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
         </div>
 
         <div className="ornament-rule my-5">❦</div>
+
+        {/* Almanac period filter chip */}
+        {periodFilter && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 flex items-center gap-2 flex-wrap"
+          >
+            <span className="eyebrow text-[10px] text-muted-foreground/60 smcp">Almanac filter</span>
+            <button
+              onClick={onClearPeriodFilter}
+              className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-primary/40 bg-primary/5 text-primary text-[11px] uppercase tracking-[0.16em] smcp hover:bg-primary/10 transition-all"
+              title="Clear almanac filter"
+            >
+              <span>{periodFilter.label}</span>
+              <span className="text-muted-foreground/50 normal-case tracking-normal">·</span>
+              <span className="text-muted-foreground/70 normal-case tracking-normal">{periodBooks.length} book{periodBooks.length === 1 ? '' : 's'}</span>
+              <X className="w-3 h-3 opacity-60 group-hover:opacity-100" />
+            </button>
+          </motion.div>
+        )}
 
         {/* Vault + tooling row */}
         <div className="flex items-center justify-between gap-2 flex-wrap">

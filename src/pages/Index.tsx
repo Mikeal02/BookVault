@@ -69,6 +69,27 @@ const Index = () => {
   const [readingGoal, setReadingGoal] = useState<number>(12);
   const isMobile = useIsMobile();
 
+  // Almanac → bookshelf filter bridge
+  const [periodFilter, setPeriodFilter] = useState<{
+    kind: 'day' | 'month' | 'weekday';
+    key: string;
+    label: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const off = onEvent('almanac:filter', (payload) => {
+      if (payload.kind === 'clear') {
+        setPeriodFilter(null);
+        return;
+      }
+      if (payload.key && payload.label) {
+        setPeriodFilter({ kind: payload.kind, key: payload.key, label: payload.label });
+        setCurrentView('shelf');
+      }
+    });
+    return off;
+  }, []);
+
   // Keyboard shortcuts
   const navViews = ['dashboard', 'search', 'shelf', 'stats', 'recommendations', 'quotes', 'mood', 'atmosphere', 'challenges'] as const;
   useKeyboardShortcuts(
@@ -365,6 +386,8 @@ const Index = () => {
                   onVaultUpdate={updateVault}
                   onVaultDelete={deleteVault}
                   onAssignBookToVault={assignBookToVault}
+                  periodFilter={periodFilter}
+                  onClearPeriodFilter={() => setPeriodFilter(null)}
                 />
               )}
               

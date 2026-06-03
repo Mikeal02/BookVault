@@ -2,6 +2,9 @@ import { useMemo, useState } from 'react';
 import { Book } from '@/types/book';
 import { Flame, BookMarked, CalendarRange, Sparkles, TrendingUp } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { emitEvent, onEvent } from '@/lib/system';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 interface ReadingHeatmapProps {
   books: Book[];
@@ -12,6 +15,40 @@ const DOW_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 export const ReadingHeatmap = ({ books }: ReadingHeatmapProps) => {
   const [hover, setHover] = useState<{ date: Date; count: number; x: number; y: number } | null>(null);
+  const [activeFilter, setActiveFilter] = useState<{ kind: 'day' | 'month' | 'weekday'; key: string } | null>(null);
+
+  // Reflect external "clear" events
+  useEffect(() => {
+    const off = onEvent('almanac:filter', ({ kind }) => {
+      if (kind === 'clear') setActiveFilter(null);
+    });
+    return off;
+  }, []);
+
+  const applyFilter = (
+    kind: 'day' | 'month' | 'weekday',
+    key: string,
+    label: string,
+  ) => {
+    // Toggle off if same chip clicked again
+    if (activeFilter && activeFilter.kind === kind && activeFilter.key === key) {
+      setActiveFilter(null);
+      emitEvent('almanac:filter', { kind: 'clear' });
+      toast.message('Library filter cleared');
+      return;
+    }
+    setActiveFilter({ kind, key });
+    emitEvent('almanac:filter', { kind, key, label });
+    toast.success(`Library filtered · ${label}`, {
+      action: {
+        label: 'Clear',
+        onClick: () => {
+          setActiveFilter(null);
+          emitEvent('almanac:filter', { kind: 'clear' });
+        },
+      },
+    });
+  };
 
   const heatmapData = useMemo(() => {
     const today = new Date();
@@ -230,6 +267,8 @@ export const ReadingHeatmap = ({ books }: ReadingHeatmapProps) => {
                     {Array.from({ length: 7 }, (_, di) => {
                       const day = week.find(d => d.date.getDay() === di);
                       if (!day) return <div key={di} className="w-[12px] h-[12px]" />;
+                      const dayKey = day.date.toISOString().slice(0, 10);
+                      const isActive = activeFilter?.kind === 'day' && activeFilter.key === dayKey;
                       return (
                         <motion.div
                           key={di}
@@ -247,7 +286,11 @@ export const ReadingHeatmap = ({ books }: ReadingHeatmapProps) => {
                             });
                           }}
                           onMouseLeave={() => setHover(null)}
-                          className={`w-[12px] h-[12px] rounded-[2px] border ${levelStyles[day.level]} transition-all cursor-default hover:scale-[1.6] hover:z-10 hover:ring-1 hover:ring-primary/60`}
+                          onClick={() => {
+                            const label = day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                            applyFilter('day', dayKey, label);
+                          }}
+                          className={`w-[12px] h-[12px] rounded-[2px] border ${levelStyles[day.level]} transition-all cursor-pointer hover:scale-[1.6] hover:z-10 hover:ring-1 hover:ring-primary/60 ${isActive ? 'ring-2 ring-primary scale-[1.6] z-10' : ''}`}
                         />
                       );
                     })}
@@ -303,24 +346,31 @@ export const ReadingHeatmap = ({ books }: ReadingHeatmapProps) => {
               {heatmapData.dowCounts.map((v, i) => {
                 const h = (v / peakDowPct) * 100;
                 const isPeak = i === heatmapData.peakDow && v > 0;
+                const isActive = activeFilter?.kind === 'weekday' && activeFilter.key === String(i);
                 return (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+                  <button
+                    key={i}
+                    type="button"
+                    title={`Filter library by ${DOW_LABELS[i]}s · ${v} events`}
+                    onClick={() => applyFilter('weekday', String(i), `${DOW_LABELS[i]}s`)}
+                    className={`flex-1 flex flex-col items-center gap-1.5 cursor-pointer group/wd rounded-sm transition-all ${isActive ? 'ring-1 ring-primary/60 bg-primary/5' : 'hover:bg-primary/5'}`}
+                  >
                     <div className="w-full h-full flex items-end">
                       <motion.div
                         initial={{ height: 0 }}
                         animate={{ height: `${Math.max(h, 4)}%` }}
                         transition={{ delay: i * 0.05, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                         className={`w-full rounded-sm ${
-                          isPeak
+                          isActive || isPeak
                             ? 'bg-gradient-to-t from-primary to-primary/60 shadow-[0_0_8px_hsl(var(--primary)/0.35)]'
                             : 'bg-primary/25'
                         }`}
                       />
                     </div>
-                    <span className={`text-[9px] uppercase tracking-wider ${isPeak ? 'text-primary font-bold' : 'text-muted-foreground/50'}`}>
+                    <span className={`text-[9px] uppercase tracking-wider ${isActive || isPeak ? 'text-primary font-bold' : 'text-muted-foreground/50'}`}>
                       {DOW_SHORT[i]}
                     </span>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -339,24 +389,36 @@ export const ReadingHeatmap = ({ books }: ReadingHeatmapProps) => {
               {heatmapData.months.map((m, i) => {
                 const h = (m.value / heatmapData.monthMax) * 100;
                 const isPeak = m.key === heatmapData.peakMonth.key && m.value > 0;
+                const isActive = activeFilter?.kind === 'month' && activeFilter.key === m.key;
                 return (
-                  <div key={m.key} className="flex-1 flex flex-col items-center gap-1.5 group">
+                  <button
+                    key={m.key}
+                    type="button"
+                    title={`Filter library by ${m.label} · ${m.value} events`}
+                    onClick={() => {
+                      const [y, mo] = m.key.split('-');
+                      const labelDate = new Date(Number(y), Number(mo) - 1, 1)
+                        .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                      applyFilter('month', m.key, labelDate);
+                    }}
+                    className={`flex-1 flex flex-col items-center gap-1.5 group cursor-pointer rounded-sm transition-all ${isActive ? 'ring-1 ring-primary/60 bg-primary/5' : ''}`}
+                  >
                     <div className="w-full h-full flex items-end relative">
                       <motion.div
                         initial={{ height: 0 }}
                         animate={{ height: `${Math.max(h, 3)}%` }}
                         transition={{ delay: i * 0.04, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                         className={`w-full rounded-sm ${
-                          isPeak
+                          isActive || isPeak
                             ? 'bg-gradient-to-t from-primary to-primary/60'
                             : 'bg-primary/20 group-hover:bg-primary/40'
                         } transition-colors`}
                       />
                     </div>
-                    <span className={`text-[8px] uppercase tracking-wider ${isPeak ? 'text-primary font-bold' : 'text-muted-foreground/40'}`}>
+                    <span className={`text-[8px] uppercase tracking-wider ${isActive || isPeak ? 'text-primary font-bold' : 'text-muted-foreground/40'}`}>
                       {m.label[0]}
                     </span>
-                  </div>
+                  </button>
                 );
               })}
             </div>

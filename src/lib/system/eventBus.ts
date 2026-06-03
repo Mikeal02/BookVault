@@ -11,6 +11,11 @@ export interface AppEventMap {
   'book:updated': { bookId: string };
   'session:completed': { bookId: string; minutes: number };
   'theme:changed': { palette: string };
+  'almanac:filter': {
+    kind: 'day' | 'month' | 'weekday' | 'clear';
+    key?: string;       // 'YYYY-MM-DD' | 'YYYY-MM' | '0'..'6'
+    label?: string;     // human readable, e.g. "Mar 14, 2025" / "March 2025" / "Tuesdays"
+  };
 }
 
 type AppEventName = keyof AppEventMap;
