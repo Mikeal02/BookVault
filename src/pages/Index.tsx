@@ -42,6 +42,8 @@ const ReadingWrapped = lazy(() => import('@/components/ReadingWrapped').then(m =
 const GoodreadsImport = lazy(() => import('@/components/GoodreadsImport').then(m => ({ default: m.GoodreadsImport })));
 const LiveReadingTimer = lazy(() => import('@/components/LiveReadingTimer').then(m => ({ default: m.LiveReadingTimer })));
 const AIReadingCoach = lazy(() => import('@/components/AIReadingCoach').then(m => ({ default: m.AIReadingCoach })));
+const LiteraryDNA = lazy(() => import('@/components/LiteraryDNA').then(m => ({ default: m.LiteraryDNA })));
+const LiteraryConstellation = lazy(() => import('@/components/LiteraryConstellation').then(m => ({ default: m.LiteraryConstellation })));
 
 const LazyFallback = () => (
   <div className="flex items-center justify-center py-24">
@@ -57,7 +59,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna' | 'constellation'>('dashboard');
   const [showAuthPage, setShowAuthPage] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -472,6 +474,14 @@ const Index = () => {
 
               {currentView === 'coach' && (
                 <AIReadingCoach books={bookshelf} userId={user?.id} />
+              )}
+
+              {currentView === 'dna' && (
+                <LiteraryDNA books={bookshelf} />
+              )}
+
+              {currentView === 'constellation' && (
+                <LiteraryConstellation books={bookshelf} onBookSelect={handleBookSelect} />
               )}
               </Suspense>
             </motion.div>
