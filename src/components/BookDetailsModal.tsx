@@ -1165,3 +1165,79 @@ const GlanceStat = ({
     </div>
   );
 };
+
+const SubHeading = ({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) => (
+  <div className="flex items-center gap-1.5 mb-2 text-[10.5px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+    <Icon className="w-3 h-3 text-primary" />
+    {children}
+  </div>
+);
+
+const StatTile = ({
+  label, value, accent = 'primary',
+}: { label: string; value: number; accent?: 'primary' | 'warning' | 'success' }) => {
+  const tone =
+    accent === 'warning' ? 'text-warning bg-warning/10 border-warning/20' :
+    accent === 'success' ? 'text-success bg-success/10 border-success/20' :
+    'text-primary bg-primary/10 border-primary/20';
+  return (
+    <div className={`rounded-lg border p-2.5 text-center ${tone}`}>
+      <div className="editorial-num text-xl leading-none tabular-nums">{value.toLocaleString()}</div>
+      <div className="mt-1 text-[9.5px] font-bold uppercase tracking-wider opacity-80">{label}</div>
+    </div>
+  );
+};
+
+const RatingsHistogram = ({
+  data,
+}: { data: { 1: number; 2: number; 3: number; 4: number; 5: number } }) => {
+  const max = Math.max(data[1], data[2], data[3], data[4], data[5], 1);
+  const total = data[1] + data[2] + data[3] + data[4] + data[5];
+  return (
+    <div className="space-y-1.5 bg-card rounded-xl p-3 border border-border">
+      {[5, 4, 3, 2, 1].map(n => {
+        const v = data[n as 1 | 2 | 3 | 4 | 5];
+        const pct = (v / max) * 100;
+        const share = total ? Math.round((v / total) * 100) : 0;
+        return (
+          <div key={n} className="flex items-center gap-2 text-[11px]">
+            <span className="w-6 flex items-center gap-0.5 text-muted-foreground tabular-nums">
+              {n}<span className="text-warning">★</span>
+            </span>
+            <div className="flex-1 h-2 bg-muted/50 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all"
+                style={{ width: `${pct}%` }} />
+            </div>
+            <span className="w-16 text-right tabular-nums text-muted-foreground">
+              {v.toLocaleString()} <span className="opacity-60">· {share}%</span>
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const PermBadge = ({
+  icon: Icon, label, tone = 'muted',
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  tone?: 'primary' | 'success' | 'muted';
+}) => {
+  const cls =
+    tone === 'primary' ? 'bg-primary/10 text-primary border-primary/20' :
+    tone === 'success' ? 'bg-success/10 text-success border-success/20' :
+    'bg-muted text-muted-foreground border-border';
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10.5px] font-medium ${cls}`}>
+      <Icon className="w-3 h-3" /> {label}
+    </span>
+  );
+};
