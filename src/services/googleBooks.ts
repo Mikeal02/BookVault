@@ -258,7 +258,7 @@ const transformOpenLibraryBook = (item: any): Book => {
 };
 
 const transformGoogleBookToBook = (item: any): Book => {
-  const { volumeInfo, saleInfo, searchInfo } = item;
+  const { volumeInfo, saleInfo, searchInfo, accessInfo } = item;
   const buyLinks = generatePurchaseLinks(volumeInfo.title, volumeInfo.authors?.[0]);
 
   let thumbnail = volumeInfo.imageLinks?.thumbnail;
@@ -275,10 +275,27 @@ const transformGoogleBookToBook = (item: any): Book => {
   if (smallThumbnail) {
     smallThumbnail = smallThumbnail.replace('http://', 'https://');
   }
+  const upgradeImg = (u?: string) =>
+    u ? u.replace('http://', 'https://') : undefined;
+  const imageLinks = volumeInfo.imageLinks
+    ? {
+        thumbnail,
+        smallThumbnail,
+        small: upgradeImg(volumeInfo.imageLinks.small),
+        medium: upgradeImg(volumeInfo.imageLinks.medium),
+        large: upgradeImg(volumeInfo.imageLinks.large),
+        extraLarge: upgradeImg(volumeInfo.imageLinks.extraLarge),
+      }
+    : thumbnail
+    ? { thumbnail, smallThumbnail }
+    : undefined;
 
   const identifiers = volumeInfo.industryIdentifiers || [];
   const isbn13 = identifiers.find((id: any) => id.type === 'ISBN_13')?.identifier;
   const isbn10 = identifiers.find((id: any) => id.type === 'ISBN_10')?.identifier;
+  const otherIdentifiers = identifiers
+    .filter((id: any) => id.type !== 'ISBN_13' && id.type !== 'ISBN_10')
+    .map((id: any) => ({ type: id.type, identifier: id.identifier }));
 
   const seriesInfo = volumeInfo.seriesInfo;
   let seriesName: string | undefined;
@@ -304,29 +321,46 @@ const transformGoogleBookToBook = (item: any): Book => {
   return {
     id: item.id,
     title: volumeInfo.title || 'Unknown Title',
+    subtitle: volumeInfo.subtitle,
     authors: volumeInfo.authors || ['Unknown Author'],
     description: volumeInfo.description,
     publishedDate: volumeInfo.publishedDate,
     publisher: volumeInfo.publisher,
     pageCount: volumeInfo.pageCount,
+    printedPageCount: volumeInfo.printedPageCount,
     categories: volumeInfo.categories,
-    imageLinks: thumbnail ? { thumbnail, smallThumbnail } : undefined,
+    mainCategory: volumeInfo.mainCategory,
+    imageLinks,
     averageRating: volumeInfo.averageRating,
     ratingsCount: volumeInfo.ratingsCount,
     language: volumeInfo.language,
     previewLink: volumeInfo.previewLink,
     infoLink: volumeInfo.infoLink,
+    canonicalVolumeLink: volumeInfo.canonicalVolumeLink,
+    webReaderLink: accessInfo?.webReaderLink,
     buyLinks,
+    buyLink: saleInfo?.buyLink,
     isEbook: saleInfo?.isEbook || false,
     hasEpub: saleInfo?.epub?.isAvailable || false,
     hasPdf: saleInfo?.pdf?.isAvailable || false,
     listPrice: saleInfo?.listPrice || undefined,
     retailPrice: saleInfo?.retailPrice || undefined,
     saleability: saleInfo?.saleability as Book['saleability'] || undefined,
+    country: saleInfo?.country || accessInfo?.country,
+    viewability: accessInfo?.viewability,
+    embeddable: accessInfo?.embeddable,
+    publicDomain: accessInfo?.publicDomain,
+    textToSpeechAllowed: accessInfo?.textToSpeechPermission === 'ALLOWED',
+    quoteSharingAllowed: accessInfo?.quoteSharingAllowed,
+    readingModes: volumeInfo.readingModes,
+    printType: volumeInfo.printType,
+    contentVersion: volumeInfo.contentVersion,
+    panelizationSummary: volumeInfo.panelizationSummary,
     textSnippet,
     maturityRating: volumeInfo.maturityRating as Book['maturityRating'] || undefined,
     isbn10,
     isbn13,
+    otherIdentifiers: otherIdentifiers.length ? otherIdentifiers : undefined,
     seriesName,
     seriesPosition,
     readingDifficulty: difficulty,
