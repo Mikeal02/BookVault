@@ -4,7 +4,8 @@ import {
   Layers, Tablet, BookMarked, Globe, Users, MapPin, Brain, Sparkles, Loader2,
   BookOpen, Hash, Copy, Check, ChevronDown, Calendar, Building2, Languages,
   ScrollText, Tags, Library, Quote, ShieldCheck, BookCopy, History, FileText,
-  UserCircle2,
+  UserCircle2, Ruler, Weight, ListTree, Link2, Eye, Headphones, BookOpenCheck,
+  Globe2, BarChart3, TrendingUp,
 } from 'lucide-react';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
@@ -46,11 +47,12 @@ const ModalCoverImage = ({ book }: { book: Book }) => {
   );
 };
 
-type Section = 'overview' | 'about' | 'details' | 'similar' | 'purchase';
+type Section = 'overview' | 'about' | 'compendium' | 'details' | 'similar' | 'purchase';
 
 const SECTIONS: Array<{ id: Section; label: string; icon: React.ComponentType<{ className?: string }> }> = [
   { id: 'overview', label: 'Overview', icon: BookOpen },
   { id: 'about', label: 'About', icon: ScrollText },
+  { id: 'compendium', label: 'Compendium', icon: ListTree },
   { id: 'details', label: 'Details', icon: Library },
   { id: 'similar', label: 'Similar', icon: Sparkles },
   { id: 'purchase', label: 'Buy', icon: ShoppingCart },
@@ -111,7 +113,7 @@ export const BookDetailsModal = ({
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
-    overview: null, about: null, details: null, similar: null, purchase: null,
+    overview: null, about: null, compendium: null, details: null, similar: null, purchase: null,
   });
 
   // Auto-enrich
