@@ -280,6 +280,9 @@ export const BookDetailsModal = ({
                     <span className="gold-underline not-italic font-semibold">{displayBook.title}</span>
                     {isEnriching && <Loader2 className="inline-block w-4 h-4 ml-2 animate-spin text-muted-foreground" />}
                   </h2>
+                  {displayBook.subtitle && (
+                    <p className="text-sm sm:text-base text-foreground/75 italic mt-1.5 line-clamp-2">{displayBook.subtitle}</p>
+                  )}
                   <p className="text-[11px] sm:text-xs text-muted-foreground mt-2 tracking-[0.16em] uppercase font-semibold">
                     by <span className="text-foreground/90">{displayBook.authors?.join(', ') || 'Unknown Author'}</span>
                   </p>
