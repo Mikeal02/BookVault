@@ -507,25 +507,60 @@ export const enrichBook = async (book: Book): Promise<Book> => {
               if (doc.edition_count && doc.edition_count > 5 && !book.translationCount) {
                 enrichments.translationCount = Math.round(doc.edition_count / 4);
               }
-              // Author OL enrichment (bio + birth date)
+              // Author OL enrichment (full bio + photo + dates + links)
               const authorKey = doc.author_key?.[0];
-              if (authorKey && !book.authorBio) {
+              if (authorKey) {
                 promises.push(
                   fetchWithRetry(`https://openlibrary.org/authors/${authorKey}.json`)
                     .then(r => r.json())
                     .then(adata => {
                       const bio = typeof adata.bio === 'string' ? adata.bio : adata.bio?.value;
-                      if (bio) enrichments.authorBio = bio.split('\n')[0].slice(0, 600);
+                      if (bio && !book.authorBio) enrichments.authorBio = bio.split('\n').filter(Boolean).slice(0, 4).join('\n\n').slice(0, 1400);
                       if (adata.birth_date) enrichments.authorBirthDate = adata.birth_date;
+                      if (adata.death_date) enrichments.authorDeathDate = adata.death_date;
                       if (adata.wikipedia) enrichments.authorWikipediaUrl = adata.wikipedia;
+                      if (adata.personal_name) enrichments.authorPersonalName = adata.personal_name;
+                      if (adata.alternate_names?.length) enrichments.authorAlternateNames = adata.alternate_names.slice(0, 6);
+                      if (adata.top_work) enrichments.authorTopWork = adata.top_work;
+                      if (adata.photos?.[0] && adata.photos[0] !== -1) {
+                        enrichments.authorPhotoUrl = `https://covers.openlibrary.org/a/id/${adata.photos[0]}-M.jpg`;
+                      } else {
+                        enrichments.authorPhotoUrl = `https://covers.openlibrary.org/a/olid/${authorKey}-M.jpg`;
+                      }
+                      if (Array.isArray(adata.links)) {
+                        enrichments.authorLinks = adata.links
+                          .filter((l: any) => l?.url && l?.title)
+                          .slice(0, 6)
+                          .map((l: any) => ({ title: l.title, url: l.url }));
+                      }
                     })
                     .catch(() => {})
                 );
+                // Author works count
+                promises.push(
+                  fetchWithRetry(`https://openlibrary.org/authors/${authorKey}/works.json?limit=1`)
+                    .then(r => r.json())
+                    .then(wdata => {
+                      if (typeof wdata.size === 'number') enrichments.authorWorkCount = wdata.size;
+                    })
+                    .catch(() => {})
+                );
+              }
+              // Resolve work key from ISBN lookup so we can pull work/editions/ratings/bookshelves
+              const workKey: string | undefined = doc.key?.replace('/works/', '');
+              if (workKey) {
+                promises.push(fetchWorkBundle(workKey, enrichments, sources));
               }
             }
           })
           .catch(() => {})
       );
+    }
+
+    // If book ID is already an OL work key, fetch the work bundle directly
+    if (book.id.startsWith('ol_')) {
+      const workKey = book.id.replace('ol_', '');
+      promises.push(fetchWorkBundle(workKey, enrichments, sources));
     }
 
     if (promises.length > 0) {
@@ -563,6 +598,141 @@ export const enrichBook = async (book: Book): Promise<Book> => {
   }
 
   return { ...book, ...enrichments };
+};
+
+// === Fetch Open Library work bundle: work doc, editions, ratings, bookshelves ===
+const fetchWorkBundle = async (
+  workKey: string,
+  enrichments: Partial<Book>,
+  sources: Set<'google' | 'openlibrary' | 'wikipedia'>
+): Promise<void> => {
+  const base = `https://openlibrary.org/works/${workKey}`;
+  const settled = await Promise.allSettled([
+    fetchWithRetry(`${base}.json`).then(r => r.json()),
+    fetchWithRetry(`${base}/editions.json?limit=20`).then(r => r.json()),
+    fetchWithRetry(`${base}/ratings.json`).then(r => r.json()),
+    fetchWithRetry(`${base}/bookshelves.json`).then(r => r.json()),
+  ]);
+
+  const [workRes, editionsRes, ratingsRes, shelvesRes] = settled;
+
+  // Work document
+  if (workRes.status === 'fulfilled' && workRes.value) {
+    const work = workRes.value;
+    sources.add('openlibrary');
+    const desc = typeof work.description === 'string' ? work.description : work.description?.value;
+    if (desc && (!enrichments.description || enrichments.description.length < desc.length)) {
+      enrichments.description = desc;
+    }
+    if (work.subtitle && !enrichments.subtitle) enrichments.subtitle = work.subtitle;
+    if (work.first_publish_date) enrichments.firstPublishDate = work.first_publish_date;
+    if (work.subjects?.length && !enrichments.subjects?.length) {
+      enrichments.subjects = work.subjects.slice(0, 16);
+    }
+    if (work.subject_places?.length && !enrichments.subjectPlaces?.length) {
+      enrichments.subjectPlaces = work.subject_places.slice(0, 10);
+    }
+    if (work.subject_people?.length && !enrichments.subjectPeople?.length) {
+      enrichments.subjectPeople = work.subject_people.slice(0, 10);
+    }
+    if (work.subject_times?.length && !enrichments.subjectTimes?.length) {
+      enrichments.subjectTimes = work.subject_times.slice(0, 10);
+    }
+    if (work.dewey_decimal_class?.length) enrichments.deweyDecimal = work.dewey_decimal_class.slice(0, 4);
+    if (work.lc_classifications?.length) enrichments.lcClassifications = work.lc_classifications.slice(0, 4);
+    if (Array.isArray(work.excerpts) && work.excerpts.length) {
+      enrichments.excerpts = work.excerpts
+        .map((e: any) => ({
+          text: typeof e.excerpt === 'string' ? e.excerpt : e.excerpt?.value,
+          comment: e.comment,
+          author: e.author?.key,
+        }))
+        .filter((e: any) => e.text)
+        .slice(0, 4);
+    }
+    if (Array.isArray(work.links) && work.links.length) {
+      enrichments.externalLinks = work.links
+        .filter((l: any) => l?.url && l?.title)
+        .slice(0, 8)
+        .map((l: any) => ({ title: l.title, url: l.url }));
+    }
+    if (Array.isArray(work.covers) && work.covers.length) {
+      enrichments.coverIds = work.covers.filter((c: any) => typeof c === 'number' && c > 0).slice(0, 6);
+    }
+    if (typeof work.latest_revision === 'number') enrichments.latestRevision = work.latest_revision;
+    if (typeof work.revision === 'number') enrichments.revisionCount = work.revision;
+  }
+
+  // Editions list — first edition with rich physical metadata wins
+  if (editionsRes.status === 'fulfilled' && editionsRes.value?.entries?.length) {
+    const entries: any[] = editionsRes.value.entries;
+    if (!enrichments.editionCount && typeof editionsRes.value.size === 'number') {
+      enrichments.editionCount = editionsRes.value.size;
+    }
+    const pickFirst = (key: string) => entries.find(e => e?.[key])?.[key];
+    const physicalFormat = pickFirst('physical_format');
+    const physicalDimensions = pickFirst('physical_dimensions');
+    const weight = pickFirst('weight');
+    const pagination = pickFirst('pagination');
+    const publishPlaces = pickFirst('publish_places');
+    const byStatement = pickFirst('by_statement');
+    const copyrightDate = pickFirst('copyright_date');
+    const contributors = pickFirst('contributors');
+    const toc = entries.find(e => Array.isArray(e?.table_of_contents) && e.table_of_contents.length)?.table_of_contents;
+
+    if (physicalFormat) enrichments.physicalFormat = physicalFormat;
+    if (physicalDimensions) enrichments.physicalDimensions = physicalDimensions;
+    if (weight) enrichments.weight = weight;
+    if (pagination) enrichments.pagination = pagination;
+    if (Array.isArray(publishPlaces)) enrichments.publishPlaces = publishPlaces.slice(0, 6);
+    if (byStatement) enrichments.byStatement = byStatement;
+    if (copyrightDate) enrichments.copyrightDate = copyrightDate;
+    if (Array.isArray(contributors)) {
+      enrichments.contributors = contributors
+        .filter((c: any) => c?.name)
+        .slice(0, 8)
+        .map((c: any) => ({ name: c.name, role: c.role }));
+    }
+    if (Array.isArray(toc)) {
+      enrichments.tableOfContents = toc
+        .filter((t: any) => t?.title || t?.label)
+        .slice(0, 40)
+        .map((t: any) => ({
+          title: typeof t.title === 'string' ? t.title : t.title?.value || t.label,
+          label: t.label,
+          level: typeof t.level === 'number' ? t.level : undefined,
+          pagenum: t.pagenum,
+        }));
+    }
+  }
+
+  // Ratings histogram
+  if (ratingsRes.status === 'fulfilled' && ratingsRes.value?.counts) {
+    const c = ratingsRes.value.counts;
+    enrichments.ratingsHistogram = {
+      1: c['1'] || 0,
+      2: c['2'] || 0,
+      3: c['2'] !== undefined ? (c['3'] || 0) : (c['3'] || 0),
+      4: c['4'] || 0,
+      5: c['5'] || 0,
+    };
+    if (!enrichments.averageRating && typeof ratingsRes.value.summary?.average === 'number') {
+      enrichments.averageRating = Math.round(ratingsRes.value.summary.average * 10) / 10;
+    }
+    if (!enrichments.ratingsCount && typeof ratingsRes.value.summary?.count === 'number') {
+      enrichments.ratingsCount = ratingsRes.value.summary.count;
+    }
+  }
+
+  // Reading log stats
+  if (shelvesRes.status === 'fulfilled' && shelvesRes.value?.counts) {
+    const c = shelvesRes.value.counts;
+    enrichments.readerStats = {
+      wantToRead: c.want_to_read || 0,
+      currentlyReading: c.currently_reading || 0,
+      alreadyRead: c.already_read || 0,
+    };
+  }
 };
 
 // === Fetch book by ISBN (for barcode scanning / direct lookup) ===
