@@ -2,27 +2,37 @@
 export interface Book {
   id: string;
   title: string;
+  subtitle?: string;
   authors: string[];
   description?: string;
   publishedDate?: string;
   publisher?: string;
   pageCount?: number;
+  printedPageCount?: number;
   categories?: string[];
+  mainCategory?: string;
   imageLinks?: {
     thumbnail?: string;
     smallThumbnail?: string;
+    small?: string;
+    medium?: string;
+    large?: string;
+    extraLarge?: string;
   };
   averageRating?: number;
   ratingsCount?: number;
   language?: string;
   previewLink?: string;
   infoLink?: string;
+  canonicalVolumeLink?: string;
+  webReaderLink?: string;
   // Purchase links
   buyLinks?: {
     googlePlay?: string;
     amazon?: string;
     barnes?: string;
   };
+  buyLink?: string;
   // === Enhanced metadata ===
   // Series & related works
   seriesName?: string;
@@ -37,6 +47,17 @@ export interface Book {
   retailPrice?: { amount: number; currencyCode: string };
   saleability?: 'FOR_SALE' | 'FREE' | 'NOT_FOR_SALE' | 'FOR_PREORDER';
   freeReading?: boolean; // Open Library borrow
+  country?: string;
+  // Access permissions (Google accessInfo)
+  viewability?: 'PARTIAL' | 'ALL_PAGES' | 'NO_PAGES' | 'UNKNOWN';
+  embeddable?: boolean;
+  publicDomain?: boolean;
+  textToSpeechAllowed?: boolean;
+  quoteSharingAllowed?: boolean;
+  readingModes?: { text?: boolean; image?: boolean };
+  printType?: 'BOOK' | 'MAGAZINE';
+  contentVersion?: string;
+  panelizationSummary?: { containsEpubBubbles?: boolean; containsImageBubbles?: boolean };
   // Content previews
   textSnippet?: string;
   firstSentence?: string;
@@ -44,15 +65,47 @@ export interface Book {
   readingDifficulty?: 'easy' | 'moderate' | 'advanced';
   isbn10?: string;
   isbn13?: string;
+  otherIdentifiers?: Array<{ type: string; identifier: string }>;
   // Subjects / rich categories
   subjects?: string[];
   subjectPlaces?: string[];
   subjectPeople?: string[];
   subjectTimes?: string[];
+  // Physical edition data (Open Library editions)
+  physicalFormat?: string;
+  physicalDimensions?: string;
+  weight?: string;
+  pagination?: string;
+  publishPlaces?: string[];
+  contributors?: Array<{ name: string; role?: string }>;
+  byStatement?: string;
+  copyrightDate?: string;
+  firstPublishDate?: string;
+  // Classifications
+  deweyDecimal?: string[];
+  lcClassifications?: string[];
+  // Long-form content
+  tableOfContents?: Array<{ title: string; level?: number; pagenum?: string; label?: string }>;
+  excerpts?: Array<{ text: string; comment?: string; author?: string }>;
+  externalLinks?: Array<{ title: string; url: string }>;
+  coverIds?: number[];
+  latestRevision?: number;
+  revisionCount?: number;
+  // Detailed ratings
+  ratingsHistogram?: { 1: number; 2: number; 3: number; 4: number; 5: number };
+  // Open Library reading log stats
+  readerStats?: { wantToRead: number; currentlyReading: number; alreadyRead: number };
   // Author enrichment
   authorBio?: string;
   authorBirthDate?: string;
   authorWikipediaUrl?: string;
+  authorDeathDate?: string;
+  authorPhotoUrl?: string;
+  authorAlternateNames?: string[];
+  authorPersonalName?: string;
+  authorTopWork?: string;
+  authorWorkCount?: number;
+  authorLinks?: Array<{ title: string; url: string }>;
   // Provenance & accuracy
   originalPublicationYear?: number;
   wordCountEstimate?: number;

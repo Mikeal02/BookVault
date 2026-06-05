@@ -4,7 +4,8 @@ import {
   Layers, Tablet, BookMarked, Globe, Users, MapPin, Brain, Sparkles, Loader2,
   BookOpen, Hash, Copy, Check, ChevronDown, Calendar, Building2, Languages,
   ScrollText, Tags, Library, Quote, ShieldCheck, BookCopy, History, FileText,
-  UserCircle2,
+  UserCircle2, Ruler, Weight, ListTree, Link2, Eye, Headphones, BookOpenCheck,
+  Globe2, BarChart3, TrendingUp,
 } from 'lucide-react';
 import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
@@ -46,11 +47,12 @@ const ModalCoverImage = ({ book }: { book: Book }) => {
   );
 };
 
-type Section = 'overview' | 'about' | 'details' | 'similar' | 'purchase';
+type Section = 'overview' | 'about' | 'compendium' | 'details' | 'similar' | 'purchase';
 
 const SECTIONS: Array<{ id: Section; label: string; icon: React.ComponentType<{ className?: string }> }> = [
   { id: 'overview', label: 'Overview', icon: BookOpen },
   { id: 'about', label: 'About', icon: ScrollText },
+  { id: 'compendium', label: 'Compendium', icon: ListTree },
   { id: 'details', label: 'Details', icon: Library },
   { id: 'similar', label: 'Similar', icon: Sparkles },
   { id: 'purchase', label: 'Buy', icon: ShoppingCart },
@@ -111,7 +113,7 @@ export const BookDetailsModal = ({
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
-    overview: null, about: null, details: null, similar: null, purchase: null,
+    overview: null, about: null, compendium: null, details: null, similar: null, purchase: null,
   });
 
   // Auto-enrich
@@ -278,6 +280,9 @@ export const BookDetailsModal = ({
                     <span className="gold-underline not-italic font-semibold">{displayBook.title}</span>
                     {isEnriching && <Loader2 className="inline-block w-4 h-4 ml-2 animate-spin text-muted-foreground" />}
                   </h2>
+                  {displayBook.subtitle && (
+                    <p className="text-sm sm:text-base text-foreground/75 italic mt-1.5 line-clamp-2">{displayBook.subtitle}</p>
+                  )}
                   <p className="text-[11px] sm:text-xs text-muted-foreground mt-2 tracking-[0.16em] uppercase font-semibold">
                     by <span className="text-foreground/90">{displayBook.authors?.join(', ') || 'Unknown Author'}</span>
                   </p>
@@ -560,26 +565,55 @@ export const BookDetailsModal = ({
 
             {displayBook.authorBio && (
               <div className="bg-gradient-to-br from-secondary/5 to-primary/5 rounded-xl p-4 border border-secondary/15">
-                <div className="flex items-center gap-2 mb-2">
-                  <UserCircle2 className="w-4 h-4 text-secondary" />
-                  <h4 className="text-sm font-semibold text-foreground">
-                    About {displayBook.authors?.[0] || 'the author'}
-                  </h4>
-                  {displayBook.authorBirthDate && (
-                    <span className="text-[10px] text-muted-foreground">· b. {displayBook.authorBirthDate}</span>
+                <div className="flex items-start gap-3">
+                  {displayBook.authorPhotoUrl ? (
+                    <img
+                      src={displayBook.authorPhotoUrl}
+                      alt={displayBook.authors?.[0] || 'Author portrait'}
+                      className="w-16 h-20 sm:w-20 sm:h-24 object-cover rounded-md ring-1 ring-border/40 flex-shrink-0 bg-muted"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  ) : (
+                    <div className="w-16 h-20 sm:w-20 sm:h-24 rounded-md bg-secondary/10 flex items-center justify-center flex-shrink-0">
+                      <UserCircle2 className="w-8 h-8 text-secondary/60" />
+                    </div>
                   )}
+                  <div className="min-w-0 flex-1">
+                    <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5 flex-wrap">
+                      <span>About {displayBook.authors?.[0] || 'the author'}</span>
+                    </h4>
+                    <div className="text-[10.5px] text-muted-foreground tracking-wide mt-0.5 flex flex-wrap gap-x-2 gap-y-0.5">
+                      {displayBook.authorPersonalName && displayBook.authorPersonalName !== displayBook.authors?.[0] && (
+                        <span>né {displayBook.authorPersonalName}</span>
+                      )}
+                      {displayBook.authorBirthDate && <span>b. {displayBook.authorBirthDate}</span>}
+                      {displayBook.authorDeathDate && <span>d. {displayBook.authorDeathDate}</span>}
+                      {displayBook.authorWorkCount && <span>{displayBook.authorWorkCount.toLocaleString()} works</span>}
+                      {displayBook.authorTopWork && <span className="italic truncate">top: {displayBook.authorTopWork}</span>}
+                    </div>
+                    <p className="text-sm text-foreground/85 leading-relaxed mt-2 whitespace-pre-wrap">{displayBook.authorBio}</p>
+                    {displayBook.authorAlternateNames?.length ? (
+                      <div className="mt-2 text-[10.5px] text-muted-foreground">
+                        <span className="font-semibold uppercase tracking-wider">Also known as: </span>
+                        {displayBook.authorAlternateNames.join(' · ')}
+                      </div>
+                    ) : null}
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {displayBook.authorWikipediaUrl && (
+                        <a href={displayBook.authorWikipediaUrl} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline">
+                          Wikipedia <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                      {displayBook.authorLinks?.map((l, i) => (
+                        <a key={i} href={l.url} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-secondary hover:underline">
+                          {l.title} <ExternalLink className="w-3 h-3" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-                <p className="text-sm text-foreground/85 leading-relaxed">{displayBook.authorBio}</p>
-                {displayBook.authorWikipediaUrl && (
-                  <a
-                    href={displayBook.authorWikipediaUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
-                  >
-                    Wikipedia <ExternalLink className="w-3 h-3" />
-                  </a>
-                )}
               </div>
             )}
 
@@ -641,6 +675,232 @@ export const BookDetailsModal = ({
             )}
           </section>
 
+          {/* COMPENDIUM — exhaustive API data */}
+          <section
+            data-section="compendium"
+            ref={el => { sectionRefs.current.compendium = el; }}
+            className="space-y-5 scroll-mt-2"
+          >
+            <div className="section-marker">
+              <span className="serial-numeral">№ 03</span>
+              <h3 className="h-editorial text-xl text-foreground italic">Compendium</h3>
+            </div>
+
+            {/* Reader community stats */}
+            {displayBook.readerStats && (
+              displayBook.readerStats.wantToRead + displayBook.readerStats.currentlyReading + displayBook.readerStats.alreadyRead > 0
+            ) && (
+              <div>
+                <SubHeading icon={TrendingUp}>Reader community</SubHeading>
+                <div className="grid grid-cols-3 gap-2">
+                  <StatTile label="Want to read" value={displayBook.readerStats.wantToRead} accent="primary" />
+                  <StatTile label="Reading now" value={displayBook.readerStats.currentlyReading} accent="warning" />
+                  <StatTile label="Already read" value={displayBook.readerStats.alreadyRead} accent="success" />
+                </div>
+              </div>
+            )}
+
+            {/* Ratings histogram */}
+            {displayBook.ratingsHistogram && (
+              Object.values(displayBook.ratingsHistogram).some(v => v > 0)
+            ) && (
+              <div>
+                <SubHeading icon={BarChart3}>Ratings distribution</SubHeading>
+                <RatingsHistogram data={displayBook.ratingsHistogram} />
+              </div>
+            )}
+
+            {/* Physical edition */}
+            {(displayBook.physicalFormat || displayBook.physicalDimensions || displayBook.weight ||
+              displayBook.pagination || displayBook.printedPageCount) && (
+              <div>
+                <SubHeading icon={Ruler}>Physical edition</SubHeading>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <DetailItem icon={BookCopy} label="Format" value={displayBook.physicalFormat} />
+                  <DetailItem icon={Ruler} label="Dimensions" value={displayBook.physicalDimensions} />
+                  <DetailItem icon={Weight} label="Weight" value={displayBook.weight} />
+                  <DetailItem icon={FileText} label="Pagination" value={displayBook.pagination} />
+                  {displayBook.printedPageCount && (
+                    <DetailItem icon={BookOpen} label="Printed pages" value={displayBook.printedPageCount.toString()} />
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Publishing footprint */}
+            {(displayBook.byStatement || displayBook.copyrightDate || displayBook.firstPublishDate ||
+              displayBook.publishPlaces?.length) && (
+              <div>
+                <SubHeading icon={Building2}>Publishing footprint</SubHeading>
+                <div className="space-y-2">
+                  {displayBook.byStatement && (
+                    <div className="text-sm text-foreground/85 italic">{displayBook.byStatement}</div>
+                  )}
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+                    {displayBook.firstPublishDate && <span><strong className="text-foreground">First published:</strong> {displayBook.firstPublishDate}</span>}
+                    {displayBook.copyrightDate && <span><strong className="text-foreground">© </strong>{displayBook.copyrightDate}</span>}
+                  </div>
+                  {displayBook.publishPlaces?.length ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {displayBook.publishPlaces.map((p, i) => (
+                        <span key={i} className="px-2 py-0.5 bg-muted/60 text-foreground/80 rounded-md text-xs">
+                          <MapPin className="w-3 h-3 inline mr-1 text-muted-foreground" />{p}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            )}
+
+            {/* Contributors */}
+            {displayBook.contributors?.length ? (
+              <div>
+                <SubHeading icon={Users}>Contributors</SubHeading>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                  {displayBook.contributors.map((c, i) => (
+                    <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 bg-muted/40 rounded-md text-xs">
+                      <UserCircle2 className="w-3.5 h-3.5 text-muted-foreground" />
+                      <span className="font-medium text-foreground">{c.name}</span>
+                      {c.role && <span className="text-muted-foreground italic">· {c.role}</span>}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {/* Classifications */}
+            {(displayBook.deweyDecimal?.length || displayBook.lcClassifications?.length) && (
+              <div>
+                <SubHeading icon={Library}>Library classifications</SubHeading>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {displayBook.deweyDecimal?.length ? (
+                    <div className="bg-primary/5 rounded-lg p-2.5 border border-primary/15">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">Dewey Decimal</div>
+                      <div className="font-mono text-sm text-foreground">{displayBook.deweyDecimal.join(' · ')}</div>
+                    </div>
+                  ) : null}
+                  {displayBook.lcClassifications?.length ? (
+                    <div className="bg-secondary/5 rounded-lg p-2.5 border border-secondary/15">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-secondary mb-1">LC Classification</div>
+                      <div className="font-mono text-sm text-foreground">{displayBook.lcClassifications.join(' · ')}</div>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            )}
+
+            {/* Table of contents */}
+            {displayBook.tableOfContents?.length ? (
+              <div>
+                <SubHeading icon={ListTree}>Table of contents</SubHeading>
+                <ol className="space-y-1 bg-card rounded-xl p-3 border border-border max-h-72 overflow-y-auto">
+                  {displayBook.tableOfContents.map((t, i) => (
+                    <li key={i} className="flex items-baseline gap-2 text-sm" style={{ paddingLeft: `${(t.level || 0) * 12}px` }}>
+                      {t.label && <span className="text-[10px] font-mono text-muted-foreground">{t.label}</span>}
+                      <span className="text-foreground/85 flex-1 truncate">{t.title}</span>
+                      {t.pagenum && <span className="text-[10px] text-muted-foreground tabular-nums">p. {t.pagenum}</span>}
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ) : null}
+
+            {/* Excerpts */}
+            {displayBook.excerpts?.length ? (
+              <div>
+                <SubHeading icon={Quote}>Excerpts</SubHeading>
+                <div className="space-y-2">
+                  {displayBook.excerpts.map((e, i) => (
+                    <blockquote key={i} className="card-hairline p-3 text-sm italic text-foreground/85 border-l-2 border-primary/40">
+                      <span className="text-primary mr-1">“</span>{e.text}<span className="text-primary ml-1">”</span>
+                      {e.comment && <div className="not-italic text-[10.5px] text-muted-foreground mt-1.5">— {e.comment}</div>}
+                    </blockquote>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {/* Access & permissions (Google accessInfo) */}
+            {(displayBook.viewability || displayBook.publicDomain !== undefined ||
+              displayBook.textToSpeechAllowed !== undefined || displayBook.quoteSharingAllowed !== undefined ||
+              displayBook.embeddable !== undefined || displayBook.readingModes || displayBook.country) && (
+              <div>
+                <SubHeading icon={Eye}>Access &amp; permissions</SubHeading>
+                <div className="flex flex-wrap gap-1.5">
+                  {displayBook.viewability && displayBook.viewability !== 'NO_PAGES' && (
+                    <PermBadge icon={Eye} label={`View: ${displayBook.viewability.replace('_', ' ').toLowerCase()}`} tone="primary" />
+                  )}
+                  {displayBook.publicDomain && <PermBadge icon={Globe2} label="Public domain" tone="success" />}
+                  {displayBook.embeddable && <PermBadge icon={BookOpenCheck} label="Embeddable" tone="primary" />}
+                  {displayBook.textToSpeechAllowed && <PermBadge icon={Headphones} label="Text-to-speech" tone="success" />}
+                  {displayBook.quoteSharingAllowed && <PermBadge icon={Quote} label="Quote sharing" tone="success" />}
+                  {displayBook.readingModes?.text && <PermBadge icon={FileText} label="Text mode" tone="muted" />}
+                  {displayBook.readingModes?.image && <PermBadge icon={Eye} label="Scanned pages" tone="muted" />}
+                  {displayBook.panelizationSummary?.containsEpubBubbles && <PermBadge icon={ScrollText} label="ePub speech bubbles" tone="muted" />}
+                  {displayBook.panelizationSummary?.containsImageBubbles && <PermBadge icon={ScrollText} label="Image speech bubbles" tone="muted" />}
+                  {displayBook.country && <PermBadge icon={Globe2} label={`Region: ${displayBook.country}`} tone="muted" />}
+                  {displayBook.printType && <PermBadge icon={BookCopy} label={displayBook.printType} tone="muted" />}
+                </div>
+              </div>
+            )}
+
+            {/* External links */}
+            {displayBook.externalLinks?.length ? (
+              <div>
+                <SubHeading icon={Link2}>External resources</SubHeading>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                  {displayBook.externalLinks.map((l, i) => (
+                    <a key={i} href={l.url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center justify-between gap-2 px-3 py-2 rounded-md bg-muted/40 hover:bg-muted/70 text-sm transition-colors group">
+                      <span className="truncate text-foreground/85 group-hover:text-primary">{l.title}</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary flex-shrink-0" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {/* Cover gallery */}
+            {displayBook.coverIds?.length && displayBook.coverIds.length > 1 ? (
+              <div>
+                <SubHeading icon={BookCopy}>Cover gallery</SubHeading>
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin">
+                  {displayBook.coverIds.map((id) => (
+                    <img
+                      key={id}
+                      src={`https://covers.openlibrary.org/b/id/${id}-M.jpg`}
+                      alt="Edition cover"
+                      className="h-32 w-auto rounded-md ring-1 ring-border/40 object-cover flex-shrink-0 bg-muted"
+                      loading="lazy"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {/* Identifiers extras */}
+            {displayBook.otherIdentifiers?.length ? (
+              <div>
+                <SubHeading icon={Hash}>Other identifiers</SubHeading>
+                <div className="flex flex-wrap gap-2">
+                  {displayBook.otherIdentifiers.map((id, i) => (
+                    <CopyChip key={i} label={id.type} value={id.identifier} />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {/* Provenance footer */}
+            {(displayBook.contentVersion || displayBook.latestRevision || displayBook.revisionCount) && (
+              <div className="text-[10.5px] text-muted-foreground/80 italic flex flex-wrap gap-x-3 gap-y-0.5">
+                {displayBook.contentVersion && <span>Content version: <span className="font-mono">{displayBook.contentVersion}</span></span>}
+                {displayBook.latestRevision && <span>OL revision: <span className="font-mono">{displayBook.latestRevision}</span></span>}
+              </div>
+            )}
+          </section>
+
           {/* DETAILS */}
           <section
             data-section="details"
@@ -648,7 +908,7 @@ export const BookDetailsModal = ({
             className="space-y-4 scroll-mt-2"
           >
             <div className="section-marker">
-              <span className="serial-numeral">№ 03</span>
+              <span className="serial-numeral">№ 04</span>
               <h3 className="h-editorial text-xl text-foreground italic">Publication &amp; Identifiers</h3>
             </div>
 
@@ -903,5 +1163,81 @@ const GlanceStat = ({
       <div className="mt-2 editorial-num text-2xl text-foreground leading-none">{value}</div>
       {sub && <div className="mt-1.5 text-[10px] text-muted-foreground/80 truncate italic">{sub}</div>}
     </div>
+  );
+};
+
+const SubHeading = ({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) => (
+  <div className="flex items-center gap-1.5 mb-2 text-[10.5px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+    <Icon className="w-3 h-3 text-primary" />
+    {children}
+  </div>
+);
+
+const StatTile = ({
+  label, value, accent = 'primary',
+}: { label: string; value: number; accent?: 'primary' | 'warning' | 'success' }) => {
+  const tone =
+    accent === 'warning' ? 'text-warning bg-warning/10 border-warning/20' :
+    accent === 'success' ? 'text-success bg-success/10 border-success/20' :
+    'text-primary bg-primary/10 border-primary/20';
+  return (
+    <div className={`rounded-lg border p-2.5 text-center ${tone}`}>
+      <div className="editorial-num text-xl leading-none tabular-nums">{value.toLocaleString()}</div>
+      <div className="mt-1 text-[9.5px] font-bold uppercase tracking-wider opacity-80">{label}</div>
+    </div>
+  );
+};
+
+const RatingsHistogram = ({
+  data,
+}: { data: { 1: number; 2: number; 3: number; 4: number; 5: number } }) => {
+  const max = Math.max(data[1], data[2], data[3], data[4], data[5], 1);
+  const total = data[1] + data[2] + data[3] + data[4] + data[5];
+  return (
+    <div className="space-y-1.5 bg-card rounded-xl p-3 border border-border">
+      {[5, 4, 3, 2, 1].map(n => {
+        const v = data[n as 1 | 2 | 3 | 4 | 5];
+        const pct = (v / max) * 100;
+        const share = total ? Math.round((v / total) * 100) : 0;
+        return (
+          <div key={n} className="flex items-center gap-2 text-[11px]">
+            <span className="w-6 flex items-center gap-0.5 text-muted-foreground tabular-nums">
+              {n}<span className="text-warning">★</span>
+            </span>
+            <div className="flex-1 h-2 bg-muted/50 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all"
+                style={{ width: `${pct}%` }} />
+            </div>
+            <span className="w-16 text-right tabular-nums text-muted-foreground">
+              {v.toLocaleString()} <span className="opacity-60">· {share}%</span>
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
+const PermBadge = ({
+  icon: Icon, label, tone = 'muted',
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  tone?: 'primary' | 'success' | 'muted';
+}) => {
+  const cls =
+    tone === 'primary' ? 'bg-primary/10 text-primary border-primary/20' :
+    tone === 'success' ? 'bg-success/10 text-success border-success/20' :
+    'bg-muted text-muted-foreground border-border';
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10.5px] font-medium ${cls}`}>
+      <Icon className="w-3 h-3" /> {label}
+    </span>
   );
 };
