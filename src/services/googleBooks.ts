@@ -712,7 +712,7 @@ const fetchWorkBundle = async (
     enrichments.ratingsHistogram = {
       1: c['1'] || 0,
       2: c['2'] || 0,
-      3: c['2'] !== undefined ? (c['3'] || 0) : (c['3'] || 0),
+      3: c['3'] || 0,
       4: c['4'] || 0,
       5: c['5'] || 0,
     };
