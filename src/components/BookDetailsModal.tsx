@@ -110,7 +110,17 @@ export const BookDetailsModal = ({
   const [similarBooks, setSimilarBooks] = useState<Book[]>([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
-  const [isHeroCollapsed, setIsHeroCollapsed] = useState(false);
+
+  // Scroll-linked smooth hero collapse (0 = expanded, 1 = collapsed)
+  const scrollProgress = useMotionValue(0);
+  const smoothProgress = useSpring(scrollProgress, { stiffness: 180, damping: 28, mass: 0.5 });
+  const heroHeight = useTransform(smoothProgress, [0, 1], ['auto' as any, '0px']);
+  const heroOpacity = useTransform(smoothProgress, [0, 0.7], [1, 0]);
+  const heroScale = useTransform(smoothProgress, [0, 1], [1, 0.96]);
+  const heroTranslate = useTransform(smoothProgress, [0, 1], [0, -12]);
+  const compactOpacity = useTransform(smoothProgress, [0.4, 1], [0, 1]);
+  const compactHeight = useTransform(smoothProgress, [0, 1], ['0px', '56px']);
+  const compactTranslate = useTransform(smoothProgress, [0, 1], [-8, 0]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
@@ -157,8 +167,15 @@ export const BookDetailsModal = ({
   useEffect(() => {
     const root = scrollRef.current;
     if (!root) return;
+    let rafId = 0;
+    const COLLAPSE_RANGE = 120; // px of scroll for full collapse
     const onScroll = () => {
-      setIsHeroCollapsed(root.scrollTop > 60);
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        const p = Math.min(1, Math.max(0, root.scrollTop / COLLAPSE_RANGE));
+        scrollProgress.set(p);
+      });
     };
     root.addEventListener('scroll', onScroll, { passive: true });
     const observer = new IntersectionObserver(
@@ -178,6 +195,7 @@ export const BookDetailsModal = ({
     return () => {
       observer.disconnect();
       root.removeEventListener('scroll', onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, [enrichedBook.id]);
 
