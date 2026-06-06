@@ -299,18 +299,18 @@ export const BookDetailsModal = ({
           <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background/95" />
 
           <motion.div
-            initial={false}
-            animate={{
-              maxHeight: isHeroCollapsed ? 0 : 600,
-              opacity: isHeroCollapsed ? 0 : 1,
-              paddingTop: isHeroCollapsed ? 0 : undefined,
-              paddingBottom: isHeroCollapsed ? 0 : undefined,
+            style={{
+              maxHeight: heroNaturalH ? heroMaxHeight : undefined,
+              opacity: heroOpacity,
+              scale: heroScale,
+              y: heroTranslate,
+              overflow: 'hidden',
+              transformOrigin: 'top center',
+              willChange: 'max-height, opacity, transform',
             }}
-            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
-            style={{ overflow: 'hidden' }}
             className="relative"
           >
-          <div className="relative p-3 sm:p-5 flex gap-3 sm:gap-5">
+          <div ref={heroInnerRef} className="relative p-3 sm:p-5 flex gap-3 sm:gap-5">
             {/* Cover */}
             <div className="group flex-shrink-0">
               <ModalCoverImage book={displayBook} />
@@ -429,13 +429,13 @@ export const BookDetailsModal = ({
 
           {/* Compact title bar when collapsed */}
           <motion.div
-            initial={false}
-            animate={{
-              maxHeight: isHeroCollapsed ? 64 : 0,
-              opacity: isHeroCollapsed ? 1 : 0,
+            style={{
+              maxHeight: compactMaxHeight,
+              opacity: compactOpacity,
+              y: compactTranslate,
+              overflow: 'hidden',
+              willChange: 'max-height, opacity, transform',
             }}
-            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
-            style={{ overflow: 'hidden' }}
             className="relative"
           >
             <div className="px-4 sm:px-5 py-2.5 flex items-center gap-3 border-b border-border/30">
