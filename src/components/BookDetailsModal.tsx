@@ -11,7 +11,7 @@ import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
 import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 import { enrichBook, findSimilarBooks } from '@/services/googleBooks';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { toast } from 'sonner';
 
 interface BookDetailsModalProps {
@@ -110,7 +110,29 @@ export const BookDetailsModal = ({
   const [similarBooks, setSimilarBooks] = useState<Book[]>([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
-  const [isHeroCollapsed, setIsHeroCollapsed] = useState(false);
+
+  // Scroll-linked smooth hero collapse (0 = expanded, 1 = collapsed)
+  const heroInnerRef = useRef<HTMLDivElement>(null);
+  const [heroNaturalH, setHeroNaturalH] = useState(0);
+  const scrollProgress = useMotionValue(0);
+  const smoothProgress = useSpring(scrollProgress, { stiffness: 220, damping: 32, mass: 0.45 });
+  const heroMaxHeight = useTransform(smoothProgress, p => `${(1 - p) * heroNaturalH}px`);
+  const heroOpacity = useTransform(smoothProgress, [0, 0.65], [1, 0]);
+  const heroScale = useTransform(smoothProgress, [0, 1], [1, 0.97]);
+  const heroTranslate = useTransform(smoothProgress, [0, 1], [0, -14]);
+  const compactOpacity = useTransform(smoothProgress, [0.45, 1], [0, 1]);
+  const compactMaxHeight = useTransform(smoothProgress, [0, 1], ['0px', '64px']);
+  const compactTranslate = useTransform(smoothProgress, [0, 1], [-10, 0]);
+
+  useEffect(() => {
+    if (!heroInnerRef.current) return;
+    const el = heroInnerRef.current;
+    const update = () => setHeroNaturalH(el.scrollHeight);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [enrichedBook.id, isEnriching]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
@@ -157,8 +179,15 @@ export const BookDetailsModal = ({
   useEffect(() => {
     const root = scrollRef.current;
     if (!root) return;
+    let rafId = 0;
+    const COLLAPSE_RANGE = 120; // px of scroll for full collapse
     const onScroll = () => {
-      setIsHeroCollapsed(root.scrollTop > 60);
+      if (rafId) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = 0;
+        const p = Math.min(1, Math.max(0, root.scrollTop / COLLAPSE_RANGE));
+        scrollProgress.set(p);
+      });
     };
     root.addEventListener('scroll', onScroll, { passive: true });
     const observer = new IntersectionObserver(
@@ -178,6 +207,7 @@ export const BookDetailsModal = ({
     return () => {
       observer.disconnect();
       root.removeEventListener('scroll', onScroll);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, [enrichedBook.id]);
 
@@ -269,18 +299,18 @@ export const BookDetailsModal = ({
           <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background/95" />
 
           <motion.div
-            initial={false}
-            animate={{
-              maxHeight: isHeroCollapsed ? 0 : 600,
-              opacity: isHeroCollapsed ? 0 : 1,
-              paddingTop: isHeroCollapsed ? 0 : undefined,
-              paddingBottom: isHeroCollapsed ? 0 : undefined,
+            style={{
+              maxHeight: heroNaturalH ? heroMaxHeight : undefined,
+              opacity: heroOpacity,
+              scale: heroScale,
+              y: heroTranslate,
+              overflow: 'hidden',
+              transformOrigin: 'top center',
+              willChange: 'max-height, opacity, transform',
             }}
-            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
-            style={{ overflow: 'hidden' }}
             className="relative"
           >
-          <div className="relative p-3 sm:p-5 flex gap-3 sm:gap-5">
+          <div ref={heroInnerRef} className="relative p-3 sm:p-5 flex gap-3 sm:gap-5">
             {/* Cover */}
             <div className="group flex-shrink-0">
               <ModalCoverImage book={displayBook} />
@@ -399,13 +429,13 @@ export const BookDetailsModal = ({
 
           {/* Compact title bar when collapsed */}
           <motion.div
-            initial={false}
-            animate={{
-              maxHeight: isHeroCollapsed ? 64 : 0,
-              opacity: isHeroCollapsed ? 1 : 0,
+            style={{
+              maxHeight: compactMaxHeight,
+              opacity: compactOpacity,
+              y: compactTranslate,
+              overflow: 'hidden',
+              willChange: 'max-height, opacity, transform',
             }}
-            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
-            style={{ overflow: 'hidden' }}
             className="relative"
           >
             <div className="px-4 sm:px-5 py-2.5 flex items-center gap-3 border-b border-border/30">
