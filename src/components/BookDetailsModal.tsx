@@ -11,7 +11,7 @@ import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
 import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 import { enrichBook, findSimilarBooks } from '@/services/googleBooks';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { toast } from 'sonner';
 
 interface BookDetailsModalProps {
