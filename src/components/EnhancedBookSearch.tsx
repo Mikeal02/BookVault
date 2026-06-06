@@ -1,6 +1,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
-import { Search, Clock, TrendingUp, X, SortAsc, Sparkles, Star, Sliders, BookOpen, ArrowRight } from 'lucide-react';
+import { Search, Clock, TrendingUp, X, SortAsc, Sparkles, Star, Sliders, BookOpen, ArrowRight,
+  Tablet, BookMarked, Languages, Users, Calendar, Layers, Globe2, BarChart3, FileText, Gauge } from 'lucide-react';
 import { searchBooks, SearchFilters } from '@/services/googleBooks';
 import { Book } from '@/types/book';
 import { BookCard } from './BookCard';
@@ -122,6 +123,91 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
     const withEbook = books.filter(b => b.isEbook || b.hasEpub).length;
     const withFree = books.filter(b => b.freeReading || b.saleability === 'FREE').length;
     return { total: books.length, avgRating, withEbook, withFree };
+  }, [books]);
+
+  // ── Elite analytics over the search result set ──
+  const resultInsights = useMemo(() => {
+    if (!books.length) return null;
+
+    const ratings = books.map(b => b.averageRating).filter((r): r is number => typeof r === 'number');
+    const ratingsCount = books.reduce((acc, b) => acc + (b.ratingsCount || 0), 0);
+    const avgRating = ratings.length ? ratings.reduce((a, n) => a + n, 0) / ratings.length : 0;
+    const topRated = [...books].filter(b => b.averageRating).sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0)).slice(0, 3);
+
+    const pageCounts = books.map(b => b.pageCount).filter((p): p is number => typeof p === 'number' && p > 0);
+    const avgPages = pageCounts.length ? Math.round(pageCounts.reduce((a, n) => a + n, 0) / pageCounts.length) : 0;
+    const totalPages = pageCounts.reduce((a, n) => a + n, 0);
+
+    // Author leaderboard
+    const authorMap = new Map<string, number>();
+    books.forEach(b => b.authors?.forEach(a => authorMap.set(a, (authorMap.get(a) || 0) + 1)));
+    const topAuthors = [...authorMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+    // Category leaderboard
+    const catMap = new Map<string, number>();
+    books.forEach(b => b.categories?.forEach(c => {
+      const head = c.split('/')[0]?.trim();
+      if (head) catMap.set(head, (catMap.get(head) || 0) + 1);
+    }));
+    const topCategories = [...catMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+
+    // Languages
+    const langMap = new Map<string, number>();
+    books.forEach(b => { if (b.language) langMap.set(b.language, (langMap.get(b.language) || 0) + 1); });
+    const languages = [...langMap.entries()].sort((a, b) => b[1] - a[1]);
+
+    // Decade timeline
+    const decadeMap = new Map<number, number>();
+    books.forEach(b => {
+      const y = b.publishedDate ? parseInt(b.publishedDate.slice(0, 4), 10) : NaN;
+      if (!isNaN(y)) {
+        const d = Math.floor(y / 10) * 10;
+        decadeMap.set(d, (decadeMap.get(d) || 0) + 1);
+      }
+    });
+    const decadeBuckets = [...decadeMap.entries()].sort((a, b) => a[0] - b[0]);
+    const decadeMax = Math.max(1, ...decadeBuckets.map(([, n]) => n));
+
+    // Formats / availability
+    const ebookCount = books.filter(b => b.isEbook || b.hasEpub || b.hasPdf).length;
+    const epubCount = books.filter(b => b.hasEpub).length;
+    const pdfCount = books.filter(b => b.hasPdf).length;
+    const freeCount = books.filter(b => b.freeReading || b.saleability === 'FREE').length;
+    const previewCount = books.filter(b => b.viewability && b.viewability !== 'NO_PAGES').length;
+    const publicDomainCount = books.filter(b => b.publicDomain).length;
+    const matureCount = books.filter(b => b.maturityRating === 'MATURE').length;
+
+    // Difficulty mix
+    const easy = books.filter(b => b.readingDifficulty === 'easy').length;
+    const moderate = books.filter(b => b.readingDifficulty === 'moderate').length;
+    const advanced = books.filter(b => b.readingDifficulty === 'advanced').length;
+
+    // Rating histogram (0–5)
+    const histogram = [0, 0, 0, 0, 0];
+    ratings.forEach(r => {
+      const idx = Math.min(4, Math.max(0, Math.floor(r) - 1));
+      histogram[idx]++;
+    });
+    const histMax = Math.max(1, ...histogram);
+
+    // Series & publishers
+    const seriesCount = books.filter(b => b.seriesName).length;
+    const publisherMap = new Map<string, number>();
+    books.forEach(b => { if (b.publisher) publisherMap.set(b.publisher, (publisherMap.get(b.publisher) || 0) + 1); });
+    const topPublishers = [...publisherMap.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+    return {
+      total: books.length, ratingsCount, avgRating, topRated,
+      avgPages, totalPages, pageSampleSize: pageCounts.length,
+      topAuthors, topCategories, languages,
+      decadeBuckets, decadeMax,
+      ebookCount, epubCount, pdfCount, freeCount, previewCount, publicDomainCount, matureCount,
+      easy, moderate, advanced,
+      histogram, histMax,
+      seriesCount, topPublishers,
+      authorDiversity: authorMap.size,
+      categoryDiversity: catMap.size,
+    };
   }, [books]);
 
   return (
