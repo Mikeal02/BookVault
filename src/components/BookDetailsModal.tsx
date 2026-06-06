@@ -112,15 +112,27 @@ export const BookDetailsModal = ({
   const [descExpanded, setDescExpanded] = useState(false);
 
   // Scroll-linked smooth hero collapse (0 = expanded, 1 = collapsed)
+  const heroInnerRef = useRef<HTMLDivElement>(null);
+  const [heroNaturalH, setHeroNaturalH] = useState(0);
   const scrollProgress = useMotionValue(0);
-  const smoothProgress = useSpring(scrollProgress, { stiffness: 180, damping: 28, mass: 0.5 });
-  const heroHeight = useTransform(smoothProgress, [0, 1], ['auto' as any, '0px']);
-  const heroOpacity = useTransform(smoothProgress, [0, 0.7], [1, 0]);
-  const heroScale = useTransform(smoothProgress, [0, 1], [1, 0.96]);
-  const heroTranslate = useTransform(smoothProgress, [0, 1], [0, -12]);
-  const compactOpacity = useTransform(smoothProgress, [0.4, 1], [0, 1]);
-  const compactHeight = useTransform(smoothProgress, [0, 1], ['0px', '56px']);
-  const compactTranslate = useTransform(smoothProgress, [0, 1], [-8, 0]);
+  const smoothProgress = useSpring(scrollProgress, { stiffness: 220, damping: 32, mass: 0.45 });
+  const heroMaxHeight = useTransform(smoothProgress, p => `${(1 - p) * heroNaturalH}px`);
+  const heroOpacity = useTransform(smoothProgress, [0, 0.65], [1, 0]);
+  const heroScale = useTransform(smoothProgress, [0, 1], [1, 0.97]);
+  const heroTranslate = useTransform(smoothProgress, [0, 1], [0, -14]);
+  const compactOpacity = useTransform(smoothProgress, [0.45, 1], [0, 1]);
+  const compactMaxHeight = useTransform(smoothProgress, [0, 1], ['0px', '64px']);
+  const compactTranslate = useTransform(smoothProgress, [0, 1], [-10, 0]);
+
+  useEffect(() => {
+    if (!heroInnerRef.current) return;
+    const el = heroInnerRef.current;
+    const update = () => setHeroNaturalH(el.scrollHeight);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [displayBook.id, isEnriching]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
