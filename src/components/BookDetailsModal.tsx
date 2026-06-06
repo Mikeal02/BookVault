@@ -110,6 +110,7 @@ export const BookDetailsModal = ({
   const [similarBooks, setSimilarBooks] = useState<Book[]>([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
+  const [isHeroCollapsed, setIsHeroCollapsed] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
@@ -156,6 +157,10 @@ export const BookDetailsModal = ({
   useEffect(() => {
     const root = scrollRef.current;
     if (!root) return;
+    const onScroll = () => {
+      setIsHeroCollapsed(root.scrollTop > 60);
+    };
+    root.addEventListener('scroll', onScroll, { passive: true });
     const observer = new IntersectionObserver(
       entries => {
         // Pick the entry with highest intersection ratio
@@ -170,7 +175,10 @@ export const BookDetailsModal = ({
       { root, rootMargin: '-20% 0px -60% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] }
     );
     Object.values(sectionRefs.current).forEach(el => el && observer.observe(el));
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      root.removeEventListener('scroll', onScroll);
+    };
   }, [enrichedBook.id]);
 
   const scrollToSection = useCallback((id: Section) => {
@@ -260,6 +268,18 @@ export const BookDetailsModal = ({
           )}
           <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/70 to-background/95" />
 
+          <motion.div
+            initial={false}
+            animate={{
+              maxHeight: isHeroCollapsed ? 0 : 600,
+              opacity: isHeroCollapsed ? 0 : 1,
+              paddingTop: isHeroCollapsed ? 0 : undefined,
+              paddingBottom: isHeroCollapsed ? 0 : undefined,
+            }}
+            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden' }}
+            className="relative"
+          >
           <div className="relative p-3 sm:p-5 flex gap-3 sm:gap-5">
             {/* Cover */}
             <div className="group flex-shrink-0">
@@ -375,6 +395,44 @@ export const BookDetailsModal = ({
               </div>
             </div>
           </div>
+          </motion.div>
+
+          {/* Compact title bar when collapsed */}
+          <motion.div
+            initial={false}
+            animate={{
+              maxHeight: isHeroCollapsed ? 64 : 0,
+              opacity: isHeroCollapsed ? 1 : 0,
+            }}
+            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+            style={{ overflow: 'hidden' }}
+            className="relative"
+          >
+            <div className="px-4 sm:px-5 py-2.5 flex items-center gap-3 border-b border-border/30">
+              {displayBook.imageLinks?.thumbnail && (
+                <img
+                  src={displayBook.imageLinks.thumbnail}
+                  alt=""
+                  className="w-8 h-11 object-cover rounded-sm ring-1 ring-border/40 flex-shrink-0"
+                />
+              )}
+              <div className="min-w-0 flex-1">
+                <h3 className="font-serif italic text-sm sm:text-base text-foreground truncate">
+                  {displayBook.title}
+                </h3>
+                <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground truncate">
+                  {displayBook.authors?.join(', ')}
+                </p>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-1.5 hover:bg-muted/70 rounded-full transition-colors flex-shrink-0"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.div>
 
           {/* ─── Sticky section nav ─── */}
           <div className="relative border-t border-border/40 bg-background/85 backdrop-blur-md">
