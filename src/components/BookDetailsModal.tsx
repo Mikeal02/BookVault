@@ -110,6 +110,7 @@ export const BookDetailsModal = ({
   const [similarBooks, setSimilarBooks] = useState<Book[]>([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
+  const [isHeroCollapsed, setIsHeroCollapsed] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
@@ -156,6 +157,10 @@ export const BookDetailsModal = ({
   useEffect(() => {
     const root = scrollRef.current;
     if (!root) return;
+    const onScroll = () => {
+      setIsHeroCollapsed(root.scrollTop > 60);
+    };
+    root.addEventListener('scroll', onScroll, { passive: true });
     const observer = new IntersectionObserver(
       entries => {
         // Pick the entry with highest intersection ratio
@@ -170,7 +175,10 @@ export const BookDetailsModal = ({
       { root, rootMargin: '-20% 0px -60% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] }
     );
     Object.values(sectionRefs.current).forEach(el => el && observer.observe(el));
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      root.removeEventListener('scroll', onScroll);
+    };
   }, [enrichedBook.id]);
 
   const scrollToSection = useCallback((id: Section) => {
