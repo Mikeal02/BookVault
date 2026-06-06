@@ -132,7 +132,7 @@ export const BookDetailsModal = ({
     const ro = new ResizeObserver(update);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [displayBook.id, isEnriching]);
+  }, [enrichedBook.id, isEnriching]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<Section, HTMLElement | null>>({
