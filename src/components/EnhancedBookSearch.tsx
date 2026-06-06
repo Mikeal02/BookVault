@@ -116,15 +116,6 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
     category !== 'all', minRating > 0, hasCovers, sortBy !== 'relevance', ebookOnly, freeOnly,
   ].filter(Boolean).length;
 
-  const resultStats = useMemo(() => {
-    if (!books.length) return null;
-    const withRating = books.filter(b => b.averageRating);
-    const avgRating = withRating.length ? (withRating.reduce((a, b) => a + (b.averageRating || 0), 0) / withRating.length).toFixed(1) : null;
-    const withEbook = books.filter(b => b.isEbook || b.hasEpub).length;
-    const withFree = books.filter(b => b.freeReading || b.saleability === 'FREE').length;
-    return { total: books.length, avgRating, withEbook, withFree };
-  }, [books]);
-
   // ── Elite analytics over the search result set ──
   const resultInsights = useMemo(() => {
     if (!books.length) return null;
