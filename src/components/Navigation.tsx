@@ -5,7 +5,7 @@ import {
   Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart,
   Music, Menu, Trophy, GitCompareArrows, FolderOpen, FileText, Share2,
   ChevronRight, X, PanelLeftClose, PanelLeft, LogOut, ScanBarcode, Gift,
-  Timer, Upload, Brain, Dna, Atom
+  Timer, Upload, Brain, Dna, Atom, Telescope, Network
 } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { AuditLogPanel } from './AuditLogPanel';
@@ -17,7 +17,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { emitEvent } from '@/lib/system';
 
 interface NavigationProps {
-  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna' | 'constellation';
+  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna' | 'constellation' | 'nexus' | 'oracle';
   onViewChange: (view: NavigationProps['currentView']) => void;
   bookshelfCount: number;
   onLogout?: () => void;
@@ -61,6 +61,8 @@ const navGroups: NavGroup[] = [
       { id: 'stats', label: 'Analytics', icon: BarChart3, description: 'Reading insights' },
       { id: 'dna', label: 'Literary DNA', icon: Dna, description: 'Your reading fingerprint' },
       { id: 'constellation', label: 'Constellation', icon: Atom, description: 'Map of your shelves' },
+      { id: 'nexus', label: 'Nexus', icon: Network, description: 'Live physics knowledge graph' },
+      { id: 'oracle', label: 'Oracle', icon: Telescope, description: 'Predictive reading forecasts' },
       { id: 'timer', label: 'Live Timer', icon: Timer, description: 'Track sessions live' },
       { id: 'coach', label: 'AI Coach', icon: Brain, description: 'Personalized coaching' },
       { id: 'wrapped', label: 'Wrapped', icon: Gift, description: 'Year in review' },
