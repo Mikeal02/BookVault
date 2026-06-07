@@ -44,6 +44,8 @@ const LiveReadingTimer = lazy(() => import('@/components/LiveReadingTimer').then
 const AIReadingCoach = lazy(() => import('@/components/AIReadingCoach').then(m => ({ default: m.AIReadingCoach })));
 const LiteraryDNA = lazy(() => import('@/components/LiteraryDNA').then(m => ({ default: m.LiteraryDNA })));
 const LiteraryConstellation = lazy(() => import('@/components/LiteraryConstellation').then(m => ({ default: m.LiteraryConstellation })));
+const BibliothecaNexus = lazy(() => import('@/components/BibliothecaNexus').then(m => ({ default: m.BibliothecaNexus })));
+const ReadingOracle = lazy(() => import('@/components/ReadingOracle').then(m => ({ default: m.ReadingOracle })));
 
 const LazyFallback = () => (
   <div className="flex items-center justify-center py-24">
@@ -59,7 +61,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna' | 'constellation'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna' | 'constellation' | 'nexus' | 'oracle'>('dashboard');
   const [showAuthPage, setShowAuthPage] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -482,6 +484,14 @@ const Index = () => {
 
               {currentView === 'constellation' && (
                 <LiteraryConstellation books={bookshelf} onBookSelect={handleBookSelect} />
+              )}
+
+              {currentView === 'nexus' && (
+                <BibliothecaNexus books={bookshelf} onBookSelect={handleBookSelect} />
+              )}
+
+              {currentView === 'oracle' && (
+                <ReadingOracle books={bookshelf} readingGoal={readingGoal} onBookSelect={handleBookSelect} />
               )}
               </Suspense>
             </motion.div>
