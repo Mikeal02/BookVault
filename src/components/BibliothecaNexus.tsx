@@ -300,8 +300,6 @@ export const BibliothecaNexus = ({ books, onBookSelect }: Props) => {
       }
 
       // Edges
-      const ns = nodesRef.current;
-      const es = edgesRef.current;
       const hov = hoverRef.current;
       for (const e of es) {
         if (!edgeFilter.has(e.kind)) continue;
