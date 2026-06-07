@@ -58,7 +58,7 @@ export const ReadingOracle = ({ books, readingGoal = 12, onBookSelect }: Props) 
   const year = now.getFullYear();
 
   const finished = useMemo(
-    () => books.filter(b => b.readingStatus === 'completed' && b.dateCompleted),
+    () => books.filter(b => b.readingStatus === 'finished' && b.dateFinished),
     [books],
   );
   const reading = useMemo(
@@ -66,7 +66,7 @@ export const ReadingOracle = ({ books, readingGoal = 12, onBookSelect }: Props) 
     [books],
   );
   const wantToRead = useMemo(
-    () => books.filter(b => b.readingStatus === 'want-to-read'),
+    () => books.filter(b => b.readingStatus === 'not-read'),
     [books],
   );
 
@@ -76,7 +76,7 @@ export const ReadingOracle = ({ books, readingGoal = 12, onBookSelect }: Props) 
     const lookback = now.getTime() - 90 * DAY;
     const recent = finished
       .map(b => ({
-        when: b.dateCompleted ? new Date(b.dateCompleted).getTime() : 0,
+        when: b.dateFinished ? new Date(b.dateFinished).getTime() : 0,
         pages: b.pageCount || 0,
         timeMin: b.timeSpentReading || 0,
       }))
@@ -109,8 +109,8 @@ export const ReadingOracle = ({ books, readingGoal = 12, onBookSelect }: Props) 
     const totalDays = Math.floor((yearEnd - yearStart) / DAY);
 
     const thisYear = finished
-      .filter(b => new Date(b.dateCompleted!).getFullYear() === year)
-      .sort((a, b) => +new Date(a.dateCompleted!) - +new Date(b.dateCompleted!));
+      .filter(b => new Date(b.dateFinished!).getFullYear() === year)
+      .sort((a, b) => +new Date(a.dateFinished!) - +new Date(b.dateFinished!));
 
     const finishedSoFar = thisYear.length;
     const pace = finishedSoFar / Math.max(1, dayOfYear); // books per day
@@ -118,7 +118,7 @@ export const ReadingOracle = ({ books, readingGoal = 12, onBookSelect }: Props) 
 
     // Probability of hitting goal: model residual variance from monthly counts
     const monthly = new Array(12).fill(0);
-    thisYear.forEach(b => monthly[new Date(b.dateCompleted!).getMonth()]++);
+    thisYear.forEach(b => monthly[new Date(b.dateFinished!).getMonth()]++);
     const monthsElapsed = now.getMonth() + 1;
     const mean = finishedSoFar / monthsElapsed;
     const variance = monthly.slice(0, monthsElapsed)
@@ -160,7 +160,7 @@ export const ReadingOracle = ({ books, readingGoal = 12, onBookSelect }: Props) 
   const { genreSaturation, recommendations } = useMemo(() => {
     const sat = new Map<string, number>();
     finished.forEach(b => {
-      const when = b.dateCompleted ? new Date(b.dateCompleted).getTime() : 0;
+      const when = b.dateFinished ? new Date(b.dateFinished).getTime() : 0;
       if (!when) return;
       const daysAgo = (now.getTime() - when) / DAY;
       const decay = Math.exp(-daysAgo / 45); // 45-day half-life-ish
