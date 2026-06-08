@@ -13,10 +13,10 @@ serve(async (req) => {
   try {
     const { book, type, userBooks } = await req.json();
     
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('AI service is not configured');
-    }
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not configured');
+}
 
     let systemPrompt = '';
     let userPrompt = '';
@@ -33,21 +33,38 @@ serve(async (req) => {
       userPrompt = `Create a reading plan for "${book.title}" by ${book.authors?.join(', ') || 'Unknown'}. It has ${book.pageCount || 'unknown number of'} pages. The user wants to finish it efficiently while retaining key insights.`;
     }
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
+    const prompt = `
+    System Instructions:
+    ${systemPrompt}
+
+    User Request:
+    ${userPrompt}
+`;
+
+const response = await fetch(
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [
+            {
+              text: prompt,
+            },
+          ],
+        },
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 4096,
       },
-      body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        stream: true,
-      }),
-    });
+    }),
+  }
+);
 
     if (!response.ok) {
       if (response.status === 429) {
@@ -63,9 +80,26 @@ serve(async (req) => {
       throw new Error(`AI gateway error: ${response.status}`);
     }
 
-    return new Response(response.body, {
-      headers: { ...corsHeaders, 'Content-Type': 'text/event-stream' },
-    });
+    const data = await response.json();
+
+const generatedText =
+  data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+  'No response generated';
+
+return new Response(
+  JSON.stringify({
+    response: generatedText,
+  }),
+  {
+    status: 200,
+    headers: {
+      ...corsHeaders,
+      'Content-Type': 'application/json',
+    },
+  }
+);
+
+
   } catch (error) {
     console.error('AI insights error:', error);
     return new Response(JSON.stringify({ 
