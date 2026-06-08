@@ -10,8 +10,10 @@ serve(async (req) => {
 
   try {
     const { books, readingSessions } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) {
+    throw new Error('GEMINI_API_KEY is not configured');
+}
 
     // Build reading profile summary
     const totalBooks = books?.length || 0;
@@ -61,21 +63,38 @@ Keep the total response concise (under 400 words). Be specific, not generic.`;
 
 Please give me my personalized reading coach insights.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
+   const prompt = `
+System Instructions:
+${systemPrompt}
+
+User Request:
+${userPrompt}
+`;
+
+const response = await fetch(
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          parts: [
+            {
+              text: prompt,
+            },
+          ],
+        },
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 4096,
       },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        stream: true,
-      }),
-    });
+    }),
+  }
+);
 
     if (!response.ok) {
       if (response.status === 429) {
@@ -83,11 +102,7 @@ Please give me my personalized reading coach insights.`;
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "AI usage limit reached. Please add credits." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
+      
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
       return new Response(JSON.stringify({ error: "AI service error" }), {
@@ -95,9 +110,25 @@ Please give me my personalized reading coach insights.`;
       });
     }
 
-    return new Response(response.body, {
-      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-    });
+    const data = await response.json();
+
+const generatedText =
+  data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+  "No response generated";
+
+return new Response(
+  JSON.stringify({
+    response: generatedText,
+  }),
+  {
+    status: 200,
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+    },
+  }
+);
+
   } catch (e) {
     console.error("reading-coach error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
