@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { User, Mail, Lock, Eye, EyeOff, Sparkles, ArrowRight, ArrowLeft, BookOpen, Fingerprint } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { lovable } from '@/integrations/lovable/index';
+
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 
@@ -57,19 +57,30 @@ export const LoginPage = ({ onLogin, onBackToLanding }: LoginPageProps) => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleGoogleSignIn = async () => {
-    setIsGoogleLoading(true);
-    try {
-      const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (error) toast.error(error.message || 'Failed to sign in with Google');
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : 'Failed to sign in with Google');
-    } finally {
-      setIsGoogleLoading(false);
+const handleGoogleSignIn = async () => {
+  setIsGoogleLoading(true);
+
+  try {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/`,
+      },
+    });
+
+    if (error) {
+      toast.error(error.message || 'Failed to sign in with Google');
     }
-  };
+  } catch (error: unknown) {
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : 'Failed to sign in with Google'
+    );
+  } finally {
+    setIsGoogleLoading(false);
+  }
+};
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
