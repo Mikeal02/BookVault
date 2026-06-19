@@ -345,7 +345,7 @@ export const Navigation = ({ currentView, onViewChange, bookshelfCount, onLogout
     <motion.nav
       animate={{ width: collapsed ? 68 : 248 }}
       transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-      className="fixed top-0 left-0 bottom-0 z-40 flex flex-col overflow-hidden"
+      className="fixed top-0 left-0 bottom-0 z-30 flex flex-col overflow-hidden"
       style={{
         background: 'hsl(var(--card) / 0.92)',
         backdropFilter: 'blur(24px)',

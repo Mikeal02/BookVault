@@ -160,9 +160,8 @@ export const QuoteCollection = ({ books }: QuoteCollectionProps) => {
       .select()
       .single();
 
-      console.log('QUOTE INSERT DATA', data);
-      console.log('QUOTE INSERT ERROR', error);
       
+
     
     if (error) {
       console.error(error);

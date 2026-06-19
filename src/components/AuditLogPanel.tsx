@@ -113,7 +113,7 @@ export function AuditLogPanel() {
           Audit Log
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col">
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col z-[10000]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ScrollText className="h-5 w-5 text-primary" />

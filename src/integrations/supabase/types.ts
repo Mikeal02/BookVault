@@ -283,7 +283,7 @@ export type Database = {
         }
         Relationships: []
       }
-      
+
       user_books: {
         Row: {
           authors: string[] | null
@@ -391,6 +391,49 @@ export type Database = {
           },
         ]
       }
+      mood_entries: {
+        Row: {
+          id: string;
+          user_id: string;
+          book_id: string;
+          book_title: string;
+          book_cover: string | null;
+          mood: string;
+          mood_emoji: string;
+          intensity: number;
+          notes: string | null;
+          chapter: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          book_id: string;
+          book_title: string;
+          book_cover?: string | null;
+          mood: string;
+          mood_emoji: string;
+          intensity: number;
+          notes?: string | null;
+          chapter?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          book_id?: string;
+          book_title?: string;
+          book_cover?: string | null;
+          mood?: string;
+          mood_emoji?: string;
+          intensity?: number;
+          notes?: string | null;
+          chapter?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      
       user_roles: {
         Row: {
           created_at: string | null

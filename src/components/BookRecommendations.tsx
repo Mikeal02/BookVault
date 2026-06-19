@@ -191,7 +191,7 @@ export const BookRecommendations = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full sm:w-auto">
             <Button
               onClick={() => setShowFilters(!showFilters)}
               variant="outline"

@@ -24,6 +24,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface MoodEntry {
   id: string;
@@ -67,54 +68,123 @@ export const ReadingMoodJournal = ({ books }: ReadingMoodJournalProps) => {
   const [filterMood, setFilterMood] = useState<string>('all');
 
   useEffect(() => {
-    const savedEntries = localStorage.getItem('reading-mood-journal');
-    if (savedEntries) {
-      setEntries(JSON.parse(savedEntries));
-    }
+    const fetchEntries = async () => {
+      const { data, error } = await supabase
+        .from('mood_entries')
+        .select('*')
+        .order('created_at', { ascending: false });
+  
+      if (error) {
+        toast.error('Failed to load moods');
+        return;
+      }
+  
+      setEntries(
+        (data || []).map((e: any) => ({
+          id: e.id,
+          bookId: e.book_id,
+          bookTitle: e.book_title,
+          bookCover: e.book_cover,
+          mood: e.mood,
+          moodEmoji: e.mood_emoji,
+          intensity: e.intensity,
+          notes: e.notes,
+          chapter: e.chapter,
+          createdAt: e.created_at,
+        }))
+      );
+    };
+  
+    fetchEntries();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('reading-mood-journal', JSON.stringify(entries));
-  }, [entries]);
-
-  const handleAddEntry = () => {
+  const handleAddEntry = async () => {
     if (!selectedBookId || !selectedMood) {
       toast.error('Please select a book and mood');
       return;
     }
-
+  
+    const {
+      data: { user },
+      error: userError
+    } = await supabase.auth.getUser();
+  
+    if (userError || !user) {
+      toast.error('User not logged in');
+      return;
+    }
+  
     const book = books.find(b => b.id === selectedBookId);
     const mood = moodOptions.find(m => m.value === selectedMood);
+  
     if (!book || !mood) return;
-
-    const entry: MoodEntry = {
-      id: Date.now().toString(),
-      bookId: book.id,
-      bookTitle: book.title,
-      bookCover: book.imageLinks?.thumbnail,
+  
+    const payload = {
+      user_id: user.id,
+      book_id: book.id,
+      book_title: book.title,
+      book_cover: book.imageLinks?.thumbnail || null,
       mood: mood.value,
-      moodEmoji: mood.emoji,
+      mood_emoji: mood.emoji,
       intensity,
-      notes: notes.trim() || undefined,
-      chapter: chapter.trim() || undefined,
-      createdAt: new Date().toISOString(),
+      notes: notes.trim() || null,
+      chapter: chapter.trim() || null,
     };
+  
+    console.log("INSERT PAYLOAD:", payload);
+  
+    const { data, error } = await supabase
+      .from('mood_entries')
+      .insert(payload)
+      .select()
+      .single();
 
-    setEntries(prev => [entry, ...prev]);
+    if (error) {
+      console.error("SUPABASE ERROR:", error);
+      toast.error(error.message);
+      return;
+    }
+  
+    setEntries(prev => [
+      {
+        id: data.id,
+        bookId: data.book_id,
+        bookTitle: data.book_title,
+        bookCover: data.book_cover,
+        mood: data.mood,
+        moodEmoji: data.mood_emoji,
+        intensity: data.intensity,
+        notes: data.notes,
+        chapter: data.chapter,
+        createdAt: data.created_at,
+      },
+      ...prev,
+    ]);
+  
     setSelectedBookId('');
     setSelectedMood('');
     setIntensity(3);
     setNotes('');
     setChapter('');
     setIsAddingEntry(false);
-    toast.success('Mood logged! 📖');
+  
+    toast.success('Mood logged 📖');
   };
 
-  const deleteEntry = (id: string) => {
-    setEntries(prev => prev.filter(e => e.id !== id));
-    toast.success('Entry deleted');
-  };
+const deleteEntry = async (id: string) => {
+  const { error } = await supabase
+    .from('mood_entries')
+    .delete()
+    .eq('id', id);
 
+  if (error) {
+    toast.error('Delete failed');
+    return;
+  }
+
+  setEntries(prev => prev.filter(e => e.id !== id));
+  toast.success('Entry deleted');
+};
   const filteredEntries = entries.filter(e => {
     if (filterBook !== 'all' && e.bookId !== filterBook) return false;
     if (filterMood !== 'all' && e.mood !== filterMood) return false;
