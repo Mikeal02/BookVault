@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Quote, Plus, Heart, Share2, Trash2, BookOpen, Sparkles, Copy, Check, Download } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface SavedQuote {
   id: string;
@@ -71,19 +72,52 @@ export const QuoteCollection = ({ books }: QuoteCollectionProps) => {
   const [filterBook, setFilterBook] = useState<string>('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedQuotes = localStorage.getItem('book-quotes');
-    if (savedQuotes) {
-      setQuotes(JSON.parse(savedQuotes));
+  const loadQuotes = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) return;
+
+    setUserId(user.id);
+
+    const { data, error } = await supabase
+      .from('quotes')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error(error);
+      toast.error('Failed to load quotes');
+      return;
     }
-  }, []);
 
-  useEffect(() => {
-    localStorage.setItem('book-quotes', JSON.stringify(quotes));
-  }, [quotes]);
+    const mappedQuotes: SavedQuote[] =
+      data?.map((q) => ({
+        id: q.id,
+        text: q.quote_text,
+        pageNumber: q.page_number ?? undefined,
+        bookId: q.book_id || '',
+        bookTitle: q.book_title,
+        bookAuthor: q.book_author || 'Unknown Author',
+        bookCover: q.book_cover || undefined,
+        createdAt: q.created_at,
+        isFavorite: q.is_favorite,
+        theme: q.theme as SavedQuote['theme'],
+      })) || [];
 
-  const handleAddQuote = () => {
+    setQuotes(mappedQuotes);
+  };
+
+  loadQuotes();
+}, []);
+
+
+  const handleAddQuote = async () => {
     if (!newQuote.trim() || !selectedBookId) {
       toast.error('Please enter a quote and select a book');
       return;
@@ -105,22 +139,102 @@ export const QuoteCollection = ({ books }: QuoteCollectionProps) => {
       theme: selectedTheme,
     };
 
-    setQuotes(prev => [quote, ...prev]);
+    if (!userId) {
+      toast.error('Please sign in first');
+      return;
+    }
+    
+    const { data, error } = await supabase
+      .from('quotes')
+      .insert({
+        user_id: userId,
+        book_id: book.id,
+        book_title: book.title,
+        book_author: book.authors?.[0] || 'Unknown Author',
+        book_cover: book.imageLinks?.thumbnail,
+        quote_text: newQuote.trim(),
+        page_number: pageNumber ? parseInt(pageNumber) : null,
+        is_favorite: false,
+        theme: selectedTheme,
+      })
+      .select()
+      .single();
+
+      console.log('QUOTE INSERT DATA', data);
+      console.log('QUOTE INSERT ERROR', error);
+      
+    
+    if (error) {
+      console.error(error);
+      toast.error('Failed to save quote');
+      return;
+    }
+    
+    const savedQuote: SavedQuote = {
+      id: data.id,
+      text: data.quote_text,
+      pageNumber: data.page_number ?? undefined,
+      bookId: data.book_id || '',
+      bookTitle: data.book_title,
+      bookAuthor: data.book_author || 'Unknown Author',
+      bookCover: data.book_cover || undefined,
+      createdAt: data.created_at,
+      isFavorite: data.is_favorite,
+      theme: data.theme as SavedQuote['theme'],
+    };
+    
+    setQuotes(prev => [savedQuote, ...prev]);
+    
     setNewQuote('');
     setPageNumber('');
     setSelectedBookId('');
     setIsAddingQuote(false);
+    
     toast.success('Quote saved! ✨');
   };
 
-  const toggleFavorite = (id: string) => {
+  const toggleFavorite = async (id: string) => {
+    const quote = quotes.find(q => q.id === id);
+  
+    if (!quote) return;
+  
+    const newValue = !quote.isFavorite;
+  
+    const { error } = await supabase
+      .from('quotes')
+      .update({
+        is_favorite: newValue,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id);
+  
+    if (error) {
+      toast.error('Failed to update favorite');
+      return;
+    }
+  
     setQuotes(prev =>
-      prev.map(q => (q.id === id ? { ...q, isFavorite: !q.isFavorite } : q))
+      prev.map(q =>
+        q.id === id
+          ? { ...q, isFavorite: newValue }
+          : q
+      )
     );
   };
 
-  const deleteQuote = (id: string) => {
+  const deleteQuote = async (id: string) => {
+    const { error } = await supabase
+      .from('quotes')
+      .delete()
+      .eq('id', id);
+  
+    if (error) {
+      toast.error('Failed to delete quote');
+      return;
+    }
+  
     setQuotes(prev => prev.filter(q => q.id !== id));
+  
     toast.success('Quote deleted');
   };
 
