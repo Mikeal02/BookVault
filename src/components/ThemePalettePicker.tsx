@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Palette, Check } from 'lucide-react';
-import { useThemePalette, themes } from '@/hooks/useThemePalette';
+import { useThemePalette } from '@/hooks/useThemePalette';
+import {themes} from '@/themes/themeConfig';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 
