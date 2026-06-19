@@ -43,7 +43,7 @@ const GoodreadsImport = lazy(() => import('@/components/GoodreadsImport').then(m
 const LiveReadingTimer = lazy(() => import('@/components/LiveReadingTimer').then(m => ({ default: m.LiveReadingTimer })));
 const AIReadingCoach = lazy(() => import('@/components/AIReadingCoach').then(m => ({ default: m.AIReadingCoach })));
 const LiteraryDNA = lazy(() => import('@/components/LiteraryDNA').then(m => ({ default: m.LiteraryDNA })));
-const LiteraryConstellation = lazy(() => import('@/components/LiteraryConstellation').then(m => ({ default: m.LiteraryConstellation })));
+// const LiteraryConstellation = lazy(() => import('@/components/LiteraryConstellation').then(m => ({ default: m.LiteraryConstellation })));
 const BibliothecaNexus = lazy(() => import('@/components/BibliothecaNexus').then(m => ({ default: m.BibliothecaNexus })));
 const ReadingOracle = lazy(() => import('@/components/ReadingOracle').then(m => ({ default: m.ReadingOracle })));
 
@@ -61,7 +61,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna' | 'constellation' | 'nexus' | 'oracle'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna'  | 'nexus' | 'oracle'>('dashboard');
   const [showAuthPage, setShowAuthPage] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -482,9 +482,9 @@ const Index = () => {
                 <LiteraryDNA books={bookshelf} />
               )}
 
-              {currentView === 'constellation' && (
+              {/* {currentView === 'constellation' && (
                 <LiteraryConstellation books={bookshelf} onBookSelect={handleBookSelect} />
-              )}
+              )} */}
 
               {currentView === 'nexus' && (
                 <BibliothecaNexus books={bookshelf} onBookSelect={handleBookSelect} />
