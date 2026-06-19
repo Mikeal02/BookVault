@@ -126,20 +126,21 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
         animate={{ y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
-        <div className="max-w-6xl mx-auto flex items-center justify-between frosted-panel rounded-2xl px-6 py-3 border border-border/20">
-          <div className="flex items-center gap-3">
+        <div className="max-w-6xl mx-auto flex items-center justify-between flex-wrap sm:flex-nowrap frosted-panel rounded-2xl px-4 sm:px-6 py-3 border border-border/20 gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center p-1.5 logo-glow">
               <img src="/favicon.png" alt="BookVault" className="w-full h-full object-contain" />
             </div>
             <span className="font-display font-bold text-lg gradient-text-mixed">BookVault</span>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={onGetStarted} className="text-muted-foreground hover:text-foreground">
-              Sign In
-            </Button>
-            <Button size="sm" onClick={onGetStarted} className="gradient-primary text-primary-foreground rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
-              Get Started Free
-            </Button>
+            <Button 
+  size="sm" 
+  onClick={onGetStarted} 
+  className="gradient-primary text-primary-foreground rounded-xl shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all whitespace-nowrap px-3 sm:px-4 text-xs sm:text-sm"
+>
+  Get Started Free
+</Button>
           </div>
         </div>
       </motion.nav>
@@ -344,10 +345,10 @@ export const LandingPage = ({ onGetStarted }: LandingPageProps) => {
                 Join thousands of readers who track, analyze, and elevate their reading journey with BookVault.
               </p>
               <Button
-                size="lg"
-                onClick={onGetStarted}
-                className="gradient-primary text-primary-foreground rounded-xl px-10 py-6 text-base font-semibold shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35 transition-all group"
-              >
+  size="lg"
+  onClick={onGetStarted}
+  className="gradient-primary text-primary-foreground rounded-xl px-6 sm:px-10 py-6 text-sm sm:text-base font-semibold shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35 transition-all group max-w-full whitespace-normal"
+>
                 Get Started — It's Free
                 <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
               </Button>

@@ -142,7 +142,7 @@ export function useThemePalette(): UseThemeResult {
   const [currentTheme, setCurrentTheme] = useState(() => {
     const stored = localStorage.getItem('bookapp_color_theme');
     if (stored && themes.some(t => t.id === stored)) return stored;
-    return 'slate-professional';
+    return 'cosmic-aurora';
   });
 
   const applyTheme = useCallback((themeId: string) => {
@@ -175,7 +175,7 @@ export function useThemePalette(): UseThemeResult {
 
   useEffect(() => {
     applyTheme(currentTheme);
-  }, []);
+  }, [currentTheme, applyTheme]);
 
   return { currentTheme, setTheme, themes };
 }
