@@ -46,6 +46,7 @@ const LiteraryDNA = lazy(() => import('@/components/LiteraryDNA').then(m => ({ d
 // const LiteraryConstellation = lazy(() => import('@/components/LiteraryConstellation').then(m => ({ default: m.LiteraryConstellation })));
 const BibliothecaNexus = lazy(() => import('@/components/BibliothecaNexus').then(m => ({ default: m.BibliothecaNexus })));
 const ReadingOracle = lazy(() => import('@/components/ReadingOracle').then(m => ({ default: m.ReadingOracle })));
+const GoodreadsBookPage = lazy(() => import('@/components/GoodreadsBookPage').then(m => ({ default: m.GoodreadsBookPage })));
 
 const LazyFallback = () => (
   <div className="flex items-center justify-center py-24">
@@ -61,7 +62,8 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna'  | 'nexus' | 'oracle'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna'  | 'nexus' | 'oracle' | 'bookpage'>('dashboard');
+  const [bookPageBook, setBookPageBook] = useState<Book | null>(null);
   const [showAuthPage, setShowAuthPage] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -492,6 +494,15 @@ const Index = () => {
 
               {currentView === 'oracle' && (
                 <ReadingOracle books={bookshelf} readingGoal={readingGoal} onBookSelect={handleBookSelect} />
+              )}
+
+              {currentView === 'bookpage' && (
+                <GoodreadsBookPage
+                  books={bookshelf}
+                  activeBook={bookPageBook || selectedBook}
+                  onSelectBook={(b) => setBookPageBook(b)}
+                  onOpenModal={(b) => setSelectedBook(b)}
+                />
               )}
               </Suspense>
             </motion.div>
