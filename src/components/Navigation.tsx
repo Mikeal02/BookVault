@@ -5,7 +5,7 @@ import {
   Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart,
   Music, Menu, Trophy, GitCompareArrows, FolderOpen, FileText, Share2,
   ChevronRight, X, PanelLeftClose, PanelLeft, LogOut, ScanBarcode, Gift,
-  Timer, Upload, Brain, Dna, Atom, Telescope, Network
+  Timer, Upload, Brain, Dna, Atom, Telescope, Network, BookMarked
 } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { AuditLogPanel } from './AuditLogPanel';
@@ -17,7 +17,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { emitEvent } from '@/lib/system';
 
 interface NavigationProps {
-  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna' | 'nexus' | 'oracle';
+  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna' | 'nexus' | 'oracle' | 'bookpage';
   onViewChange: (view: NavigationProps['currentView']) => void;
   bookshelfCount: number;
   onLogout?: () => void;
@@ -50,6 +50,7 @@ const navGroups: NavGroup[] = [
     label: 'Library',
     items: [
       { id: 'shelf', label: 'Bookshelf', icon: BookOpen, description: 'Your collection' },
+      { id: 'bookpage', label: 'Book Page', icon: BookMarked, description: 'Goodreads-style book view' },
       { id: 'lists', label: 'Lists', icon: FolderOpen, description: 'Reading collections' },
       { id: 'annotations', label: 'Notes', icon: FileText, description: 'Book annotations' },
       { id: 'quotes', label: 'Quotes', icon: Quote, description: 'Quote collection' },
