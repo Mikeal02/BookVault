@@ -1087,7 +1087,7 @@ export const searchBooks = async (query: string, maxResults: number = 40, filter
       filtered.sort((a, b) => (b.ratingsCount || 0) - (a.ratingsCount || 0));
     }
 
-    const result = filtered.slice(0, maxResults);
+    const result = filtered.slice(0, maxResults).map(normalizeBook);
     
     // Cache the results
     setCache(searchCache, cacheKey, result);
