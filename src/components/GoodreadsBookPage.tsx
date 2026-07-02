@@ -567,6 +567,7 @@ export const GoodreadsBookPage = ({ books, activeBook, onSelectBook, onOpenModal
         </div>
       </Section>
     </div>
+    </div>
   );
 };
 
