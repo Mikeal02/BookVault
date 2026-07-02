@@ -84,8 +84,8 @@ export const QuoteCollection = ({ books }: QuoteCollectionProps) => {
 
     setUserId(user.id);
 
-    const { data, error } = await supabase
-      .from('quotes')
+    const { data, error } = await (supabase as any)
+      .from('quotes' as any)
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
@@ -97,7 +97,7 @@ export const QuoteCollection = ({ books }: QuoteCollectionProps) => {
     }
 
     const mappedQuotes: SavedQuote[] =
-      data?.map((q) => ({
+      data?.map((q: any) => ({
         id: q.id,
         text: q.quote_text,
         pageNumber: q.page_number ?? undefined,
@@ -144,8 +144,8 @@ export const QuoteCollection = ({ books }: QuoteCollectionProps) => {
       return;
     }
     
-    const { data, error } = await supabase
-      .from('quotes')
+    const { data, error } = await (supabase as any)
+      .from('quotes' as any)
       .insert({
         user_id: userId,
         book_id: book.id,
@@ -199,8 +199,8 @@ export const QuoteCollection = ({ books }: QuoteCollectionProps) => {
   
     const newValue = !quote.isFavorite;
   
-    const { error } = await supabase
-      .from('quotes')
+    const { error } = await (supabase as any)
+      .from('quotes' as any)
       .update({
         is_favorite: newValue,
         updated_at: new Date().toISOString(),
@@ -222,8 +222,8 @@ export const QuoteCollection = ({ books }: QuoteCollectionProps) => {
   };
 
   const deleteQuote = async (id: string) => {
-    const { error } = await supabase
-      .from('quotes')
+    const { error } = await (supabase as any)
+      .from('quotes' as any)
       .delete()
       .eq('id', id);
   
