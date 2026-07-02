@@ -390,7 +390,7 @@ const transformOpenLibraryBook = (item: any): Book => {
   const series = detectSeries(item);
   const difficulty = estimateReadingDifficulty(item.number_of_pages_median, subjects);
 
-  return {
+  const base: Book = {
     id,
     title,
     authors,
