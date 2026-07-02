@@ -765,7 +765,7 @@ export const enrichBook = async (book: Book): Promise<Book> => {
     // Enrichment failed silently
   }
 
-  return { ...book, ...enrichments };
+  return normalizeBook({ ...book, ...enrichments });
 };
 
 // === Fetch Open Library work bundle: work doc, editions, ratings, bookshelves ===
