@@ -485,7 +485,7 @@ const transformGoogleBookToBook = (item: any): Book => {
 
   const difficulty = estimateReadingDifficulty(volumeInfo.pageCount, volumeInfo.categories);
 
-  return {
+  const base: Book = {
     id: item.id,
     title: volumeInfo.title || 'Unknown Title',
     subtitle: volumeInfo.subtitle,
@@ -534,6 +534,7 @@ const transformGoogleBookToBook = (item: any): Book => {
     dataSources: ['google'],
     dataConfidence: 0.7,
   };
+  return normalizeBook(base);
 };
 
 // === Search Functions ===
