@@ -70,7 +70,7 @@ export const ReadingMoodJournal = ({ books }: ReadingMoodJournalProps) => {
   useEffect(() => {
     const fetchEntries = async () => {
       const { data, error } = await supabase
-        .from('mood_entries')
+        .from('mood_entries' as any)
         .select('*')
         .order('created_at', { ascending: false });
   
@@ -134,7 +134,7 @@ export const ReadingMoodJournal = ({ books }: ReadingMoodJournalProps) => {
     console.log("INSERT PAYLOAD:", payload);
   
     const { data, error } = await supabase
-      .from('mood_entries')
+      .from('mood_entries' as any)
       .insert(payload)
       .select()
       .single();
@@ -173,7 +173,7 @@ export const ReadingMoodJournal = ({ books }: ReadingMoodJournalProps) => {
 
 const deleteEntry = async (id: string) => {
   const { error } = await supabase
-    .from('mood_entries')
+    .from('mood_entries' as any)
     .delete()
     .eq('id', id);
 
