@@ -26,10 +26,10 @@ const StarRow = ({ rating, size = 16 }: { rating: number; size?: number }) => (
       const half = !filled && rating >= i - 0.5;
       return (
         <span key={i} className="relative inline-block" style={{ width: size, height: size }}>
-          <Star className="absolute inset-0 text-amber-400/25" style={{ width: size, height: size }} />
+          <Star className="absolute inset-0" style={{ width: size, height: size, color: '#e6d9b8' }} />
           {(filled || half) && (
             <span className="absolute inset-0 overflow-hidden" style={{ width: half ? size / 2 : size }}>
-              <Star className="fill-amber-400 text-amber-400" style={{ width: size, height: size }} />
+              <Star style={{ width: size, height: size, color: '#e9a326', fill: '#e9a326' }} />
             </span>
           )}
         </span>
@@ -39,9 +39,9 @@ const StarRow = ({ rating, size = 16 }: { rating: number; size?: number }) => (
 );
 
 const Section = ({ id, title, action, children }: { id?: string; title: string; action?: React.ReactNode; children: React.ReactNode }) => (
-  <section id={id} className="border-t border-border/40 pt-6 mt-6">
+  <section id={id} className="border-t border-[#d6d0c4] pt-6 mt-8">
     <div className="flex items-baseline justify-between mb-4">
-      <h2 className="font-display text-xl sm:text-2xl font-bold tracking-tight">{title}</h2>
+      <h2 className="gr-serif text-xl sm:text-[22px] font-bold tracking-tight text-[#382110]">{title}</h2>
       {action}
     </div>
     {children}
