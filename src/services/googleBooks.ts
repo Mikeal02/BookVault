@@ -212,6 +212,172 @@ const computeRelevanceScore = (book: Book, queryTerms: string[]): number => {
 };
 
 // === Transformers ===
+// === Normalization: produces a consistent, render-safe Book shape ===
+const stripHtml = (s?: string): string | undefined => {
+  if (!s) return undefined;
+  const cleaned = s
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&[a-z]+;/gi, ' ')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+  return cleaned || undefined;
+};
+
+const cleanStr = (s?: string): string | undefined => {
+  if (typeof s !== 'string') return undefined;
+  const t = s.replace(/\s+/g, ' ').trim();
+  return t || undefined;
+};
+
+const dedupeArr = (arr?: any[], max = 20): string[] | undefined => {
+  if (!Array.isArray(arr)) return undefined;
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of arr) {
+    const v = cleanStr(String(raw ?? ''));
+    if (!v) continue;
+    const key = v.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(v);
+    if (out.length >= max) break;
+  }
+  return out.length ? out : undefined;
+};
+
+const cleanIsbn = (s?: string): string | undefined => {
+  if (!s) return undefined;
+  const t = s.replace(/[^0-9Xx]/g, '').toUpperCase();
+  return t.length === 10 || t.length === 13 ? t : undefined;
+};
+
+const normalizeLanguage = (l?: string): string | undefined => {
+  if (!l) return undefined;
+  const v = l.trim().toLowerCase();
+  if (v === 'eng') return 'en';
+  return v.length >= 2 ? v.slice(0, 5) : undefined;
+};
+
+const normalizeYear = (d?: string): string | undefined => {
+  if (!d) return undefined;
+  const m = String(d).match(/\d{4}/);
+  if (!m) return undefined;
+  const y = parseInt(m[0], 10);
+  if (y < 100 || y > new Date().getFullYear() + 2) return d.trim() || undefined;
+  return d.trim();
+};
+
+const upgradeHttps = (u?: string): string | undefined =>
+  u ? u.replace(/^http:\/\//i, 'https://') : undefined;
+
+const normalizeImageLinks = (
+  links: Book['imageLinks'] | undefined
+): Book['imageLinks'] | undefined => {
+  if (!links) return undefined;
+  const out: NonNullable<Book['imageLinks']> = {};
+  (['thumbnail', 'smallThumbnail', 'small', 'medium', 'large', 'extraLarge'] as const).forEach(k => {
+    const v = upgradeHttps(links[k]);
+    if (v) out[k] = v;
+  });
+  // Cascade fallback so consumers never get an empty gap.
+  const best = out.extraLarge || out.large || out.medium || out.small || out.thumbnail || out.smallThumbnail;
+  if (!best) return undefined;
+  if (!out.thumbnail) out.thumbnail = best;
+  if (!out.smallThumbnail) out.smallThumbnail = out.small || out.thumbnail;
+  return out;
+};
+
+const clampRating = (r?: number): number | undefined => {
+  if (typeof r !== 'number' || !isFinite(r)) return undefined;
+  return Math.round(Math.max(0, Math.min(5, r)) * 10) / 10;
+};
+
+const nonNegInt = (n?: number): number | undefined => {
+  if (typeof n !== 'number' || !isFinite(n) || n < 0) return undefined;
+  return Math.round(n);
+};
+
+/**
+ * Normalizes a raw Book (from any source) into a consistent, render-safe shape.
+ * Guarantees: trimmed strings, HTML-free prose, deduped arrays, https covers,
+ * clamped numeric ranges, canonical ISBN/language, non-null authors array.
+ */
+export const normalizeBook = (raw: Book): Book => {
+  const authors = dedupeArr(raw.authors, 12) ?? ['Unknown Author'];
+  const categories = dedupeArr(raw.categories, 8);
+  const subjects = dedupeArr(raw.subjects, 16);
+  const subjectPlaces = dedupeArr(raw.subjectPlaces, 8);
+  const subjectPeople = dedupeArr(raw.subjectPeople, 8);
+  const subjectTimes = dedupeArr(raw.subjectTimes, 8);
+  const tags = dedupeArr(raw.tags, 20);
+  const awards = dedupeArr(raw.awards, 10);
+  const authorAlternateNames = dedupeArr(raw.authorAlternateNames, 8);
+
+  const description = stripHtml(raw.description);
+  const textSnippet = stripHtml(raw.textSnippet);
+  const firstSentence = stripHtml(raw.firstSentence);
+  const authorBio = stripHtml(raw.authorBio);
+
+  const isbn10 = cleanIsbn(raw.isbn10);
+  const isbn13 = cleanIsbn(raw.isbn13);
+
+  const imageLinks = normalizeImageLinks(raw.imageLinks);
+  const sources = raw.dataSources?.length ? Array.from(new Set(raw.dataSources)) : undefined;
+
+  return {
+    ...raw,
+    title: cleanStr(raw.title) || 'Unknown Title',
+    subtitle: cleanStr(raw.subtitle),
+    authors,
+    description,
+    textSnippet,
+    firstSentence,
+    authorBio,
+    publisher: cleanStr(raw.publisher),
+    publishedDate: normalizeYear(raw.publishedDate),
+    language: normalizeLanguage(raw.language),
+    categories,
+    mainCategory: cleanStr(raw.mainCategory) || categories?.[0],
+    subjects,
+    subjectPlaces,
+    subjectPeople,
+    subjectTimes,
+    tags,
+    awards,
+    authorAlternateNames,
+    pageCount: nonNegInt(raw.pageCount),
+    printedPageCount: nonNegInt(raw.printedPageCount),
+    averageRating: clampRating(raw.averageRating),
+    ratingsCount: nonNegInt(raw.ratingsCount),
+    editionCount: nonNegInt(raw.editionCount),
+    translationCount: nonNegInt(raw.translationCount),
+    wordCountEstimate: nonNegInt(raw.wordCountEstimate),
+    isbn10,
+    isbn13,
+    imageLinks,
+    previewLink: upgradeHttps(raw.previewLink),
+    infoLink: upgradeHttps(raw.infoLink),
+    canonicalVolumeLink: upgradeHttps(raw.canonicalVolumeLink),
+    webReaderLink: upgradeHttps(raw.webReaderLink),
+    authorPhotoUrl: upgradeHttps(raw.authorPhotoUrl),
+    authorWikipediaUrl: upgradeHttps(raw.authorWikipediaUrl),
+    wikipediaUrl: upgradeHttps(raw.wikipediaUrl),
+    dataSources: sources,
+    dataConfidence: typeof raw.dataConfidence === 'number'
+      ? Math.max(0, Math.min(1, Math.round(raw.dataConfidence * 100) / 100))
+      : undefined,
+  };
+};
+
 const transformOpenLibraryBook = (item: any): Book => {
   const covers = buildCoverUrls(item);
   const authors = item.author_name || [];
@@ -255,6 +421,7 @@ const transformOpenLibraryBook = (item: any): Book => {
     dataConfidence: 0.55,
     ...series,
   };
+  return normalizeBook(base);
 };
 
 const transformGoogleBookToBook = (item: any): Book => {
