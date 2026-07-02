@@ -132,78 +132,115 @@ export const GoodreadsBookPage = ({ books, activeBook, onSelectBook, onOpenModal
   const editionYear = book.originalPublicationYear || (book.publishedDate ? new Date(book.publishedDate).getFullYear() : undefined);
 
   return (
-    <div className="max-w-[1120px] mx-auto pb-24">
-      {/* ── Book switcher (BookVault-native, since Goodreads assumes a URL per book) ── */}
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+    <div
+      className="gr-page -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-8 lg:px-10 py-8"
+      style={{
+        background: '#F4F1EA',
+        color: '#382110',
+        fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+        minHeight: '100vh',
+      }}
+    >
+      <style>{`
+        .gr-page .gr-serif { font-family: Merriweather, Georgia, "Times New Roman", serif; }
+        .gr-page a, .gr-page .gr-link { color: #00635d; }
+        .gr-page a:hover { text-decoration: underline; }
+        .gr-page .gr-btn-green { background: linear-gradient(#409D69, #2f8557); color: #fff; border: 1px solid #2b7a4f; }
+        .gr-page .gr-btn-green:hover { background: linear-gradient(#4dae78, #368e60); }
+        .gr-page .gr-btn-tan { background: linear-gradient(#F4F1EA, #E8E1D0); color: #382110; border: 1px solid #d6d0c4; }
+        .gr-page .gr-btn-tan:hover { background: linear-gradient(#EAE3D3, #DDD3BE); }
+        .gr-page .gr-genre { background: #eae4d4; color: #382110; }
+        .gr-page .gr-genre:hover { background: #ded6c0; }
+        .gr-page .gr-card { background: #fdfbf6; border: 1px solid #d6d0c4; }
+        .gr-page .gr-topbar { background: #382110; color: #F4F1EA; }
+      `}</style>
+
+      {/* Fake Goodreads-style top bar */}
+      <div className="gr-topbar -mx-4 sm:-mx-8 lg:-mx-10 px-4 sm:px-8 lg:px-10 py-2.5 mb-6 flex items-center gap-6 text-[13px]">
+        <span className="gr-serif italic text-xl font-bold" style={{ color: '#F4F1EA' }}>goodreads</span>
+        <nav className="hidden sm:flex items-center gap-5 opacity-90">
+          <button className="hover:underline">Home</button>
+          <button className="hover:underline">My Books</button>
+          <button className="hover:underline">Browse ▾</button>
+          <button className="hover:underline">Community ▾</button>
+        </nav>
+        <div className="ml-auto relative">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style={{ color: '#382110' }} />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Switch to another book from your shelf…"
-            className="w-full h-10 pl-9 pr-3 rounded-lg bg-card border border-border/50 text-sm outline-none focus:border-primary/60"
+            placeholder="Search books"
+            className="h-8 pl-8 pr-3 rounded text-xs w-56 outline-none"
+            style={{ background: '#F4F1EA', color: '#382110', border: '1px solid #221708' }}
           />
           {search && filteredBookList.length > 0 && (
-            <div className="absolute z-30 top-full mt-1 left-0 right-0 max-h-72 overflow-auto rounded-lg bg-card border border-border/60 shadow-xl">
+            <div className="absolute z-30 top-full mt-1 left-0 right-0 max-h-72 overflow-auto rounded shadow-xl"
+                 style={{ background: '#fdfbf6', border: '1px solid #d6d0c4' }}>
               {filteredBookList.map((b) => (
-                <button
-                  key={b.id}
-                  onClick={() => { onSelectBook(b); setSearch(''); }}
-                  className="w-full flex items-center gap-3 p-2 hover:bg-muted/50 text-left"
-                >
+                <button key={b.id} onClick={() => { onSelectBook(b); setSearch(''); }}
+                  className="w-full flex items-center gap-2 p-2 text-left hover:bg-[#eae4d4]" style={{ color: '#382110' }}>
                   {b.imageLinks?.thumbnail ? (
-                    <img src={b.imageLinks.thumbnail} alt="" className="w-8 h-12 object-cover rounded-sm" />
-                  ) : (
-                    <div className="w-8 h-12 rounded-sm bg-muted" />
-                  )}
+                    <img src={b.imageLinks.thumbnail} alt="" className="w-7 h-10 object-cover" />
+                  ) : <div className="w-7 h-10 bg-[#eae4d4]" />}
                   <div className="min-w-0">
-                    <div className="text-sm font-medium truncate">{b.title}</div>
-                    <div className="text-xs text-muted-foreground truncate">{b.authors?.join(', ')}</div>
+                    <div className="text-xs font-semibold truncate">{b.title}</div>
+                    <div className="text-[11px] opacity-70 truncate">{b.authors?.join(', ')}</div>
                   </div>
                 </button>
               ))}
             </div>
           )}
         </div>
-        <div className="text-xs text-muted-foreground">
-          Goodreads-style page view · {books.length} books on shelf
-        </div>
+      </div>
+
+      <div className="max-w-[1120px] mx-auto pb-24">
+      {/* breadcrumb */}
+      <div className="text-[12px] mb-4 opacity-80">
+        <span className="gr-link cursor-pointer">Home</span> › <span className="gr-link cursor-pointer">{(book.categories?.[0] || 'Fiction')}</span> › <span>{book.title}</span>
       </div>
 
       {/* ═══════════════ HERO ═══════════════ */}
-      <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-10">
         {/* Left: Cover + primary CTA */}
         <div className="flex md:block flex-col items-center gap-4">
           {book.imageLinks?.thumbnail ? (
             <img
               src={book.imageLinks.large || book.imageLinks.medium || book.imageLinks.thumbnail}
               alt={book.title}
-              className="w-[200px] md:w-full aspect-[2/3] object-cover rounded-md shadow-2xl ring-1 ring-border/40"
+              className="w-[220px] md:w-full aspect-[2/3] object-cover"
+              style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.25)', border: '1px solid #a89f8a' }}
             />
           ) : (
-            <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-[200px] md:w-full aspect-[2/3] rounded-md" />
+            <BookCoverPlaceholder title={book.title} author={book.authors?.[0]} className="w-[220px] md:w-full aspect-[2/3]" />
           )}
 
-          {/* Split "Want to Read" button — the iconic Goodreads control */}
-          <div className="w-full max-w-[220px] md:max-w-none">
-            <div className="flex rounded-md overflow-hidden shadow-lg ring-1 ring-primary/30">
+          {/* Iconic Goodreads split "Want to Read" button */}
+          <div className="w-full max-w-[240px] md:max-w-none mt-5">
+            <div className="flex overflow-hidden rounded-sm" style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.15)' }}>
               <button
                 onClick={() => { setWantStatus('want'); toast.success('Added to Want to Read'); }}
-                className="flex-1 h-11 bg-primary text-primary-foreground text-sm font-semibold hover:brightness-110 transition-all"
+                className="gr-btn-green flex-1 h-10 text-sm font-bold uppercase tracking-wide"
               >
                 {wantStatus === 'want' ? '✓ Want to Read' : wantStatus === 'reading' ? '✓ Currently Reading' : wantStatus === 'read' ? '✓ Read' : 'Want to Read'}
               </button>
-              <button className="w-10 h-11 bg-primary/90 text-primary-foreground border-l border-primary-foreground/20 flex items-center justify-center hover:bg-primary transition-colors">
+              <button className="gr-btn-green w-9 h-10 flex items-center justify-center" style={{ borderLeft: '1px solid rgba(255,255,255,0.35)' }}>
                 <ChevronDown className="w-4 h-4" />
               </button>
             </div>
-            <div className="flex items-center justify-center gap-1 mt-3">
-              <span className="text-xs text-muted-foreground mr-2">Rate this book</span>
-              {[1, 2, 3, 4, 5].map((i) => (
-                <button key={i} className="p-0.5 hover:scale-125 transition-transform">
-                  <Star className={`w-5 h-5 ${(book.personalRating || 0) >= i ? 'fill-amber-400 text-amber-400' : 'text-muted-foreground/40'}`} />
-                </button>
-              ))}
+            <div className="text-center mt-3">
+              <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#382110' }}>Rate this book</div>
+              <div className="flex items-center justify-center gap-0.5 mt-1">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <button key={i} className="p-0.5 hover:scale-110 transition-transform">
+                    <Star className="w-6 h-6" style={{ color: (book.personalRating || 0) >= i ? '#e9a326' : '#c7bfae', fill: (book.personalRating || 0) >= i ? '#e9a326' : 'transparent' }} />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="mt-4 space-y-1.5 text-[12px] text-center">
+              <button className="gr-link hover:underline block w-full">Preview</button>
+              <button className="gr-link hover:underline block w-full">Buy on Amazon</button>
+              <button className="gr-link hover:underline block w-full">Kindle $9.99</button>
             </div>
           </div>
         </div>
@@ -211,49 +248,48 @@ export const GoodreadsBookPage = ({ books, activeBook, onSelectBook, onOpenModal
         {/* Right: Metadata block */}
         <div className="min-w-0">
           {book.seriesName && (
-            <p className="text-sm text-primary/80 hover:text-primary cursor-pointer mb-1">
+            <p className="text-sm gr-link hover:underline cursor-pointer mb-1">
               {book.seriesName}{book.seriesPosition ? ` #${book.seriesPosition}` : ''}
             </p>
           )}
-          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-[1.1] tracking-tight mb-2">
+          <h1 className="gr-serif text-[34px] sm:text-[42px] md:text-[46px] font-normal leading-[1.1] mb-2" style={{ color: '#382110' }}>
             {book.title}
           </h1>
-          {book.subtitle && <p className="text-lg text-muted-foreground mb-3 leading-snug">{book.subtitle}</p>}
+          {book.subtitle && <p className="gr-serif text-xl italic mb-3 leading-snug opacity-80">{book.subtitle}</p>}
 
           <div className="flex items-center gap-2 flex-wrap mb-4">
-            <span className="text-sm text-muted-foreground">by</span>
             {(book.authors || ['Unknown']).map((a, i) => (
-              <span key={a} className="text-base font-semibold text-primary underline decoration-primary/30 underline-offset-2 cursor-pointer hover:decoration-primary">
+              <span key={a} className="text-[17px] gr-link underline decoration-1 underline-offset-4 cursor-pointer">
                 {a}{i < (book.authors?.length || 1) - 1 ? ',' : ''}
               </span>
             ))}
+            <span className="text-[13px] px-1.5 py-0.5 rounded" style={{ background: '#eae4d4', color: '#382110', border: '1px solid #d6d0c4' }}>Goodreads Author</span>
           </div>
 
           {/* Rating summary row */}
-          <div className="flex items-center gap-3 mb-6 pb-6 border-b border-border/40">
-            <span className="text-3xl font-bold numeral">{avg.toFixed(2)}</span>
-            <div className="flex flex-col">
-              <StarRow rating={avg} size={16} />
-              <div className="text-xs text-muted-foreground mt-0.5">
-                <a href="#reviews" className="underline hover:text-foreground">{ratingsCount.toLocaleString()} ratings</a>
-                {' · '}
-                <a href="#reviews" className="underline hover:text-foreground">{reviewsCount.toLocaleString()} reviews</a>
-              </div>
-            </div>
+          <div className="flex items-center gap-3 mb-5 pb-5" style={{ borderBottom: '1px solid #d6d0c4' }}>
+            <StarRow rating={avg} size={18} />
+            <span className="gr-serif text-[22px] font-bold" style={{ color: '#382110' }}>{avg.toFixed(2)}</span>
+            <span className="text-[13px] opacity-80">
+              <a href="#reviews" className="gr-link hover:underline">{ratingsCount.toLocaleString()} ratings</a>
+              {' · '}
+              <a href="#reviews" className="gr-link hover:underline">{reviewsCount.toLocaleString()} reviews</a>
+            </span>
           </div>
 
           {/* Description */}
           {book.description && (
-            <div className="mb-6">
+            <div className="mb-6 gr-serif">
               <div
-                className={`text-[15px] leading-relaxed text-foreground/90 whitespace-pre-line ${
+                className={`text-[16px] leading-[1.55] whitespace-pre-line ${
                   descExpanded ? '' : 'line-clamp-6'
                 }`}
+                style={{ color: '#382110' }}
                 dangerouslySetInnerHTML={{ __html: book.description }}
               />
               <button
                 onClick={() => setDescExpanded((v) => !v)}
-                className="mt-2 text-sm font-semibold text-primary hover:underline flex items-center gap-1"
+                className="mt-2 text-sm font-bold gr-link hover:underline flex items-center gap-1"
               >
                 {descExpanded ? 'Show less' : 'Show more'}
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${descExpanded ? 'rotate-180' : ''}`} />
@@ -265,41 +301,39 @@ export const GoodreadsBookPage = ({ books, activeBook, onSelectBook, onOpenModal
           {genres.length > 0 && (
             <div className="mb-6">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs uppercase tracking-wider font-bold text-muted-foreground mr-1">Genres</span>
+                <span className="text-[13px] font-bold mr-1" style={{ color: '#382110' }}>Genres</span>
                 {genres.map((g) => (
-                  <button key={g} className="px-2.5 py-1 rounded-full bg-muted/60 hover:bg-muted text-[13px] text-foreground/80 transition-colors">
+                  <button key={g} className="gr-genre px-2.5 py-0.5 rounded-full text-[13px] transition-colors">
                     {g}
                   </button>
                 ))}
-                <button className="text-[13px] text-muted-foreground hover:text-foreground">...more</button>
+                <button className="text-[13px] gr-link hover:underline">...more</button>
               </div>
             </div>
           )}
 
           {/* Edition metadata */}
-          <div className="text-sm text-muted-foreground space-y-0.5 mb-6">
-            <p>
-              <span className="text-foreground/90">{book.printType === 'MAGAZINE' ? 'Magazine' : book.physicalFormat || (book.isEbook ? 'ebook' : 'Hardcover')}</span>
+          <div className="text-[14px] space-y-0.5 mb-6" style={{ color: '#382110' }}>
+            <p className="font-bold">
+              {book.printType === 'MAGAZINE' ? 'Magazine' : book.physicalFormat || (book.isEbook ? 'ebook' : 'Hardcover')}
               {book.pageCount ? `, ${book.pageCount} pages` : ''}
             </p>
-            <p>
-              Published <span className="text-foreground/90">{book.publishedDate || 'Unknown'}</span>
-              {book.publisher ? ` by ${book.publisher}` : ''}
+            <p className="opacity-80">
+              Published {book.publishedDate || 'Unknown'}{book.publisher ? ` by ${book.publisher}` : ''}
             </p>
             {editionYear && (
-              <p>
-                First published <span className="text-foreground/90">{editionYear}</span>
-              </p>
+              <p className="opacity-80">First published {editionYear}</p>
             )}
+            <button className="gr-link hover:underline text-[13px] mt-1">Book details & editions →</button>
           </div>
 
           {/* Secondary action bar */}
-          <div className="flex items-center gap-1 text-sm text-muted-foreground border-t border-border/40 pt-4">
-            <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded hover:bg-muted/60"><Heart className="w-4 h-4" /> Like</button>
-            <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded hover:bg-muted/60"><Share2 className="w-4 h-4" /> Share</button>
-            <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded hover:bg-muted/60"><Bookmark className="w-4 h-4" /> Save</button>
+          <div className="flex items-center gap-1 text-[13px] pt-4" style={{ borderTop: '1px solid #d6d0c4', color: '#382110' }}>
+            <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded hover:bg-[#eae4d4]"><Heart className="w-4 h-4" /> Like</button>
+            <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded hover:bg-[#eae4d4]"><Share2 className="w-4 h-4" /> Share</button>
+            <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded hover:bg-[#eae4d4]"><Bookmark className="w-4 h-4" /> Save</button>
             {onOpenModal && (
-              <button onClick={() => onOpenModal(book)} className="ml-auto text-primary hover:underline font-medium">
+              <button onClick={() => onOpenModal(book)} className="ml-auto gr-link hover:underline font-semibold">
                 Open editor →
               </button>
             )}
