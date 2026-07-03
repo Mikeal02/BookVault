@@ -39,12 +39,12 @@ const setCache = <T>(cache: Map<string, CacheEntry<T>>, key: string, data: T, ma
 
 // === Retry with exponential backoff ===
 let googleBooksCooldownUntil = 0;
-const fetchWithRetry = async (url: string, maxRetries = 2): Promise<Response> => {
+const fetchWithRetry = async (url: string, maxRetries = 2, timeoutMs = 20000): Promise<Response> => {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeout);
       if (response.ok) return response;
@@ -61,7 +61,7 @@ const fetchWithRetry = async (url: string, maxRetries = 2): Promise<Response> =>
       lastError = err;
       if (err?.status === 429) break; // stop retrying on rate limits
       if (attempt < maxRetries) {
-        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 500));
+        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 400));
       }
     }
   }
@@ -546,26 +546,31 @@ const transformGoogleBookToBook = (item: any): Book => {
 
 // === Search Functions ===
 const searchOpenLibrary = async (query: string, limit: number = 100): Promise<Book[]> => {
-  try {
-    const params = new URLSearchParams({
-      q: query,
-      limit: Math.min(limit, 100).toString(),
-      fields: 'key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count,ratings_average,isbn,subtitle,edition_count,has_fulltext,subject_place,person,subject_people',
-    });
+  const cappedLimit = Math.min(limit, 100).toString();
+  // Primary: rich metadata; Fallback: minimal fields so slow OL still responds in time.
+  const richFields = 'key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count,ratings_average,isbn,subtitle,edition_count,has_fulltext,subject_place,person,subject_people';
+  const leanFields = 'key,title,author_name,first_publish_year,cover_i,edition_key,isbn,language,subject,ratings_average,ratings_count';
 
-    const response = await fetchWithRetry(`${OPEN_LIBRARY_SEARCH_URL}?${params}`);
-    if (!response.ok) throw new Error('Open Library request failed');
+  const attempts: { fields: string; timeout: number; retries: number }[] = [
+    { fields: richFields, timeout: 15000, retries: 1 },
+    { fields: leanFields, timeout: 20000, retries: 2 },
+  ];
 
-    const data = await response.json();
-    if (!data.docs || !Array.isArray(data.docs)) return [];
-
-    return data.docs
-      .filter((item: any) => item.title && item.author_name?.length)
-      .map(transformOpenLibraryBook);
-  } catch (error) {
-    console.error('Open Library search failed:', error);
-    return [];
+  for (const attempt of attempts) {
+    try {
+      const params = new URLSearchParams({ q: query, limit: cappedLimit, fields: attempt.fields });
+      const response = await fetchWithRetry(`${OPEN_LIBRARY_SEARCH_URL}?${params}`, attempt.retries, attempt.timeout);
+      if (!response.ok) throw new Error('Open Library request failed');
+      const data = await response.json();
+      if (!data.docs || !Array.isArray(data.docs)) return [];
+      return data.docs
+        .filter((item: any) => item.title && item.author_name?.length)
+        .map(transformOpenLibraryBook);
+    } catch (error) {
+      console.warn('[search] Open Library attempt failed, trying fallback', error);
+    }
   }
+  return [];
 };
 
 const searchGoogleBooks = async (query: string, limit: number = 40): Promise<Book[]> => {
