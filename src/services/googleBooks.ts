@@ -39,12 +39,12 @@ const setCache = <T>(cache: Map<string, CacheEntry<T>>, key: string, data: T, ma
 
 // === Retry with exponential backoff ===
 let googleBooksCooldownUntil = 0;
-const fetchWithRetry = async (url: string, maxRetries = 2): Promise<Response> => {
+const fetchWithRetry = async (url: string, maxRetries = 2, timeoutMs = 20000): Promise<Response> => {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeout);
       if (response.ok) return response;
@@ -61,7 +61,7 @@ const fetchWithRetry = async (url: string, maxRetries = 2): Promise<Response> =>
       lastError = err;
       if (err?.status === 429) break; // stop retrying on rate limits
       if (attempt < maxRetries) {
-        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 500));
+        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 400));
       }
     }
   }
