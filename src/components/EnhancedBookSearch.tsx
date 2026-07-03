@@ -48,6 +48,7 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
   const [currentPage, setCurrentPage] = useState(1);
   const [booksPerPage] = useState(12);
   const [displayedPopularSearches, setDisplayedPopularSearches] = useState<string[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
 
   // Filters
   const [sortBy, setSortBy] = useState<SearchFilters['sortBy']>('relevance');
@@ -85,9 +86,11 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
       const results = await searchBooks(searchQuery, 40, filters);
       setBooks(results);
       setCurrentPage(1);
+      setHasSearched(true);
     } catch (err: any) {
       setError(err.message || 'Failed to search books. Please try again.');
       setBooks([]);
+      setHasSearched(true);
     } finally {
       setLoading(false);
     }
@@ -721,7 +724,7 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
       )}
 
       {/* ─── Empty State ─── */}
-      {query && !loading && books.length === 0 && !error && (
+      {hasSearched && query && !loading && books.length === 0 && !error && (
         <div className="text-center py-16 px-6">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-muted/50 flex items-center justify-center">
             <BookOpen className="w-8 h-8 text-muted-foreground/40" />
