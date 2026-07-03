@@ -38,6 +38,7 @@ const setCache = <T>(cache: Map<string, CacheEntry<T>>, key: string, data: T, ma
 };
 
 // === Retry with exponential backoff ===
+let googleBooksCooldownUntil = 0;
 const fetchWithRetry = async (url: string, maxRetries = 2): Promise<Response> => {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -47,12 +48,18 @@ const fetchWithRetry = async (url: string, maxRetries = 2): Promise<Response> =>
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeout);
       if (response.ok) return response;
-      if (response.status === 429) throw new Error('429 Rate limit exceeded');
+      // 429 = rate-limited: don't waste time retrying, surface immediately
+      if (response.status === 429) {
+        const err: any = new Error('429 Rate limit exceeded');
+        err.status = 429;
+        throw err;
+      }
       if (response.status >= 500) throw new Error(`${response.status} Server error`);
       if (response.status >= 400 && response.status < 500) return response;
       lastError = new Error(`HTTP ${response.status}`);
     } catch (err: any) {
       lastError = err;
+      if (err?.status === 429) break; // stop retrying on rate limits
       if (attempt < maxRetries) {
         await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 500));
       }
@@ -562,6 +569,8 @@ const searchOpenLibrary = async (query: string, limit: number = 100): Promise<Bo
 };
 
 const searchGoogleBooks = async (query: string, limit: number = 40): Promise<Book[]> => {
+  // Skip Google Books entirely while in a rate-limit cooldown
+  if (googleBooksCooldownUntil > Date.now()) return [];
   try {
     const response = await fetchWithRetry(
       `${GOOGLE_BOOKS_API_URL}?q=${encodeURIComponent(query)}&maxResults=${Math.min(limit, 40)}&orderBy=relevance&printType=books`
@@ -570,7 +579,12 @@ const searchGoogleBooks = async (query: string, limit: number = 40): Promise<Boo
     const data = await response.json();
     if (!data.items) return [];
     return data.items.map(transformGoogleBookToBook);
-  } catch {
+  } catch (err: any) {
+    if (err?.status === 429 || /429/.test(err?.message || '')) {
+      // Back off Google Books for 5 minutes; OpenLibrary results will still be returned
+      googleBooksCooldownUntil = Date.now() + 5 * 60 * 1000;
+      console.warn('[search] Google Books rate-limited; using Open Library only for 5 min');
+    }
     return [];
   }
 };
