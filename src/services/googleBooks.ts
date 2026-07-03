@@ -38,6 +38,7 @@ const setCache = <T>(cache: Map<string, CacheEntry<T>>, key: string, data: T, ma
 };
 
 // === Retry with exponential backoff ===
+let googleBooksCooldownUntil = 0;
 const fetchWithRetry = async (url: string, maxRetries = 2): Promise<Response> => {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
