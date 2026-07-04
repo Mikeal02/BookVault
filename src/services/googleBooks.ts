@@ -1,4 +1,5 @@
 import { Book } from '@/types/book';
+import { supabase } from '@/integrations/supabase/client';
 
 // === API Endpoints ===
 const OPEN_LIBRARY_SEARCH_URL = 'https://openlibrary.org/search.json';
@@ -594,6 +595,32 @@ const searchGoogleBooks = async (query: string, limit: number = 40): Promise<Boo
   }
 };
 
+const searchBooksViaBackend = async (query: string, maxResults: number): Promise<Book[] | null> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('book-search', {
+      body: { query, maxResults },
+    });
+
+    if (error) {
+      console.warn('[search] Backend book search unavailable; falling back to browser providers', error);
+      return null;
+    }
+
+    if (data?.googleNeedsApiKey) {
+      console.warn('[search] Google Books needs a private API key; Open Library backend results are being used');
+    }
+
+    if (Array.isArray(data?.errors) && data.errors.length > 0) {
+      console.warn('[search] Book provider warnings', data.errors);
+    }
+
+    return Array.isArray(data?.books) ? data.books.map(normalizeBook) : [];
+  } catch (error) {
+    console.warn('[search] Backend book search failed; falling back to browser providers', error);
+    return null;
+  }
+};
+
 // === Fetch single book by ID (for enrichment) ===
 export const fetchBookById = async (bookId: string): Promise<Book | null> => {
   try {
@@ -995,29 +1022,40 @@ export const searchBooks = async (query: string, maxResults: number = 40, filter
     let olQuery = searchQuery;
     let gbQuery = searchQuery;
     
-    if (filters?.category && filters.category !== 'all') {
-      const subjectMap: Record<string, string> = {
+    const subjectMap: Record<string, string> = {
         'fiction': 'fiction', 'non-fiction': 'nonfiction', 'science': 'science',
         'history': 'history', 'biography': 'biography', 'technology': 'technology computers',
         'self-help': 'self-help', 'mystery': 'mystery thriller', 'romance': 'romance',
         'fantasy': 'fantasy',
-      };
+    };
+
+    if (filters?.category && filters.category !== 'all') {
       const subject = subjectMap[filters.category] || filters.category;
       olQuery = `${searchQuery} subject:${subject}`;
       gbQuery = `${searchQuery}+subject:${subject}`;
     }
 
-    // Fire both APIs in parallel with graceful degradation
-    const [openLibResults, googleResults] = await Promise.allSettled([
-      searchOpenLibrary(olQuery, Math.min(maxResults * 2, 100)),
-      searchGoogleBooks(gbQuery, 40),
-    ]);
+    const backendQuery = filters?.category && filters.category !== 'all'
+      ? `${searchQuery} ${subjectMap[filters.category] || filters.category}`
+      : searchQuery;
+    const backendBooks = await searchBooksViaBackend(backendQuery, Math.min(maxResults * 2, 100));
 
-    const olBooks = openLibResults.status === 'fulfilled' ? openLibResults.value : [];
-    const gbBooks = googleResults.status === 'fulfilled' ? googleResults.value : [];
+    let all: Book[];
+    if (backendBooks) {
+      all = backendBooks;
+    } else {
+      // Browser fallback only if the backend proxy is unavailable.
+      const [openLibResults, googleResults] = await Promise.allSettled([
+        searchOpenLibrary(olQuery, Math.min(maxResults * 2, 100)),
+        searchGoogleBooks(gbQuery, 40),
+      ]);
 
-    // Merge with Google first for richer metadata
-    const all = [...gbBooks, ...olBooks];
+      const olBooks = openLibResults.status === 'fulfilled' ? openLibResults.value : [];
+      const gbBooks = googleResults.status === 'fulfilled' ? googleResults.value : [];
+
+      // Merge with Google first for richer metadata
+      all = [...gbBooks, ...olBooks];
+    }
 
     // Deduplicate by normalized title+author, merging enhanced fields
     const seen = new Map<string, Book>();
