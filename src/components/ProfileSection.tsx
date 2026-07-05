@@ -56,7 +56,7 @@ export const ProfileSection = ({ books, currentUser, userEmail, userId }: Profil
       if (data) {
         const loadedProfile = {
           username: data.username || currentUser,
-          email: data.email || userEmail || '',
+          email: userEmail || '',
           favorite_genres: data.favorite_genres || [],
           reading_goal: data.reading_goal || 24,
           preferred_reading_time: data.preferred_reading_time || 'evening',

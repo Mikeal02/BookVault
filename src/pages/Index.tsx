@@ -175,7 +175,7 @@ const Index = () => {
         .maybeSingle();
 
       if (profile) {
-        setCurrentUser(profile.username || profile.email || 'Reader');
+        setCurrentUser(profile.username || authUser.email?.split('@')[0] || 'Reader');
         setReadingGoal(profile.reading_goal || 12);
         
         if (!profile.favorite_genres && profile.reading_goal === null) {
