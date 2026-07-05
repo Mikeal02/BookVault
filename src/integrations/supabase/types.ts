@@ -98,7 +98,6 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
-          email: string | null
           favorite_genres: string[] | null
           id: string
           preferred_reading_time: string | null
@@ -109,7 +108,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          email?: string | null
           favorite_genres?: string[] | null
           id?: string
           preferred_reading_time?: string | null
@@ -120,7 +118,6 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          email?: string | null
           favorite_genres?: string[] | null
           id?: string
           preferred_reading_time?: string | null
