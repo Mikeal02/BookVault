@@ -1,6 +1,6 @@
 
-import { useState, useEffect, useMemo } from 'react';
-import { Search, Clock, TrendingUp, X, SortAsc, Sparkles, Star, Sliders, BookOpen, ArrowRight,
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Search, Clock, TrendingUp, X, SortAsc, Sparkles, Star, Sliders, BookOpen, ArrowRight, Command, CornerDownLeft, Trash2,
   Tablet, BookMarked, Languages, Users, Calendar, Layers, Globe2, BarChart3, FileText, Gauge } from 'lucide-react';
 import { searchBooks, SearchFilters } from '@/services/googleBooks';
 import { Book } from '@/types/book';
