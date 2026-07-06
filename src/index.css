@@ -69,14 +69,16 @@
   }
 
   .dark {
-    /* Dark — Noir & Gold Editorial: pure ink black + warm antique gold */
-    --background: 0 0% 5%;
+    /* Dark — Pitch Black surfaces (all neutral containers = #000).
+       Theme palette colors (primary/secondary/accent/success/warning/destructive)
+       stay untouched so themed containers keep their color. */
+    --background: 0 0% 0%;
     --foreground: 38 22% 92%;
 
-    --card: 0 0% 7%;
+    --card: 0 0% 0%;
     --card-foreground: 38 22% 92%;
 
-    --popover: 0 0% 8%;
+    --popover: 0 0% 0%;
     --popover-foreground: 38 22% 92%;
 
     /* Primary: warm antique gold — the single editorial accent */
@@ -87,7 +89,7 @@
     --secondary: 42 70% 76%;
     --secondary-foreground: 0 0% 6%;
 
-    --muted: 0 0% 11%;
+    --muted: 0 0% 5%;
     --muted-foreground: 38 10% 64%;
 
     --accent: 42 42% 48%;
@@ -96,17 +98,17 @@
     --destructive: 358 55% 54%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 14%;
-    --input: 0 0% 12%;
+    --border: 0 0% 12%;
+    --input: 0 0% 6%;
     --ring: 42 55% 60%;
 
-    --sidebar-background: 0 0% 4%;
+    --sidebar-background: 0 0% 0%;
     --sidebar-foreground: 38 20% 88%;
     --sidebar-primary: 42 55% 60%;
     --sidebar-primary-foreground: 0 0% 6%;
-    --sidebar-accent: 0 0% 9%;
+    --sidebar-accent: 0 0% 5%;
     --sidebar-accent-foreground: 38 20% 90%;
-    --sidebar-border: 0 0% 12%;
+    --sidebar-border: 0 0% 10%;
     --sidebar-ring: 42 55% 60%;
 
     --highlight: 42 70% 62%;
@@ -119,11 +121,11 @@
     --gradient-primary: linear-gradient(135deg, hsl(42 55% 60%) 0%, hsl(38 50% 44%) 100%);
     --gradient-secondary: linear-gradient(135deg, hsl(42 70% 76%) 0%, hsl(42 55% 60%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(0 0% 8%) 0%, hsl(42 55% 60%) 100%);
-    --gradient-background: linear-gradient(160deg, hsl(0 0% 5%) 0%, hsl(0 0% 7%) 100%);
+    --gradient-background: linear-gradient(160deg, hsl(0 0% 0%) 0%, hsl(0 0% 0%) 100%);
 
-    --shadow-card: 0 1px 2px rgba(0,0,0,0.5), 0 2px 10px rgba(0,0,0,0.35);
-    --shadow-card-hover: 0 10px 32px rgba(0,0,0,0.6), 0 0 0 1px hsl(42 55% 60% / 0.18);
-    --shadow-glow: 0 0 0 1px hsl(42 55% 60% / 0.18);
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.6), 0 2px 10px rgba(0,0,0,0.5);
+    --shadow-card-hover: 0 10px 32px rgba(0,0,0,0.7), 0 0 0 1px hsl(0 0% 100% / 0.06);
+    --shadow-glow: none;
   }
 }
 
@@ -1707,4 +1709,50 @@
   width: 24px;
   height: 1px;
   background: hsl(var(--primary));
+}
+
+/* ==========================================================================
+   GLOBAL — Kill all glow across the entire project.
+   Neutral surface containers use the (already pitch-black in dark mode)
+   --card / --background / --popover / --muted tokens, so no per-component
+   overrides are needed there. Theme-palette-colored containers (primary,
+   secondary, accent, success, warning, destructive backgrounds) are left
+   untouched by design.
+   ========================================================================== */
+
+/* No colored ring/halo "glow" utilities anywhere */
+.hover-glow:hover,
+.hover-glow-coral:hover,
+.inner-glow-sapphire,
+.inner-glow-rose,
+.glow-ring-pulse,
+.animate-glow-pulse,
+.animate-glow-coral,
+.logo-glow,
+.dark .logo-glow {
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* Text glows off */
+.glow-text,
+.dark .glow-text,
+.hero-glow,
+.dark .hero-glow {
+  text-shadow: none !important;
+}
+
+/* Aurora ambient blobs are a glow effect — disable everywhere */
+.aurora-container,
+.aurora-blob-1,
+.aurora-blob-2,
+.aurora-blob-3 {
+  display: none !important;
+}
+
+/* Dark mode: strip any residual primary/secondary halo from card hovers */
+.dark .glass-card:hover,
+.dark .hover-lift:hover {
+  box-shadow: 0 10px 32px rgba(0,0,0,0.7) !important;
+  border-color: hsl(var(--border)) !important;
 }
