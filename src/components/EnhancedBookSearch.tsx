@@ -1,6 +1,6 @@
 
-import { useState, useEffect, useMemo } from 'react';
-import { Search, Clock, TrendingUp, X, SortAsc, Sparkles, Star, Sliders, BookOpen, ArrowRight,
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { Search, Clock, TrendingUp, X, SortAsc, Sparkles, Star, Sliders, BookOpen, ArrowRight, CornerDownLeft, Trash2,
   Tablet, BookMarked, Languages, Users, Calendar, Layers, Globe2, BarChart3, FileText, Gauge } from 'lucide-react';
 import { searchBooks, SearchFilters } from '@/services/googleBooks';
 import { Book } from '@/types/book';
@@ -50,6 +50,10 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
   const [displayedPopularSearches, setDisplayedPopularSearches] = useState<string[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // Elite UX: keyboard nav + focus shortcut
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [activeSuggestion, setActiveSuggestion] = useState<number>(-1);
+
   // Filters
   const [sortBy, setSortBy] = useState<SearchFilters['sortBy']>('relevance');
   const [category, setCategory] = useState<SearchFilters['category']>('all');
@@ -63,6 +67,46 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
     if (saved) setRecentSearches(JSON.parse(saved));
     setDisplayedPopularSearches(getRotatedPopularSearches());
   }, []);
+
+  // Global "/" shortcut to focus search — ignored while typing in inputs
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      e.preventDefault();
+      inputRef.current?.focus();
+      setShowSuggestions(true);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const clearAllRecent = () => {
+    setRecentSearches([]);
+    localStorage.removeItem('bookapp_recent_searches');
+  };
+
+  // Combined suggestion list for keyboard navigation (recents first, then trending)
+  const suggestionList = useMemo(
+    () => [...recentSearches, ...displayedPopularSearches],
+    [recentSearches, displayedPopularSearches]
+  );
+
+  // Highlight matching substring inside a suggestion label
+  const highlight = (text: string) => {
+    const q = query.trim();
+    if (!q) return text;
+    const idx = text.toLowerCase().indexOf(q.toLowerCase());
+    if (idx === -1) return text;
+    return (
+      <>
+        {text.slice(0, idx)}
+        <span className="text-primary font-semibold">{text.slice(idx, idx + q.length)}</span>
+        {text.slice(idx + q.length)}
+      </>
+    );
+  };
 
   const saveRecentSearch = (searchQuery: string) => {
     const updated = [searchQuery, ...recentSearches.filter(s => s !== searchQuery)].slice(0, 6);
@@ -207,9 +251,13 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
   return (
     <div className="space-y-6">
       {/* ─── Search Hero ─── */}
-      <div className="glass-card rounded-2xl p-6 sm:p-10 relative overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-56 h-56 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="glass-card rounded-2xl p-6 sm:p-10 relative">
+        {/* Decorative background layer — clipped to the card, but the card
+            itself does NOT clip so the suggestions dropdown can overflow. */}
+        <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none z-0">
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 w-56 h-56 bg-secondary/5 rounded-full blur-3xl" />
+        </div>
 
         <div className="relative z-10 text-center mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
@@ -230,19 +278,53 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <input
+                ref={inputRef}
                 type="text"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => { setQuery(e.target.value); setActiveSuggestion(-1); }}
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setShowSuggestions(true);
+                    setActiveSuggestion(i => Math.min(i + 1, suggestionList.length - 1));
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setActiveSuggestion(i => Math.max(i - 1, -1));
+                  } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const pick = activeSuggestion >= 0 ? suggestionList[activeSuggestion] : query;
+                    if (pick?.trim()) { setQuery(pick); handleSearch(pick); }
+                  } else if (e.key === 'Escape') {
+                    setShowSuggestions(false);
+                    setActiveSuggestion(-1);
+                    inputRef.current?.blur();
+                  }
+                }}
                 placeholder="Search by title, author, or ISBN..."
-                className="w-full pl-11 pr-10 py-3.5 bg-muted/30 border border-border/80 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200 text-foreground placeholder-muted-foreground text-sm shadow-sm focus:shadow-md"
+                className="w-full pl-11 pr-20 py-3.5 bg-muted/30 border border-border/80 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200 text-foreground placeholder-muted-foreground text-sm shadow-sm focus:shadow-md"
+                aria-label="Search books"
+                aria-autocomplete="list"
+                aria-expanded={showSuggestions}
+                aria-activedescendant={activeSuggestion >= 0 ? `search-sugg-${activeSuggestion}` : undefined}
               />
-              {query && (
-                <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1">
+              {query ? (
+                <button
+                  onClick={() => { setQuery(''); inputRef.current?.focus(); }}
+                  aria-label="Clear query"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                >
                   <X className="w-4 h-4" />
                 </button>
+              ) : (
+                <kbd
+                  aria-hidden="true"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center justify-center h-6 min-w-[24px] px-1.5 rounded-md border border-border/70 bg-muted/40 text-[10px] font-mono font-semibold text-muted-foreground pointer-events-none"
+                  title="Press / to search"
+                >
+                  /
+                </kbd>
               )}
             </div>
             <Button
@@ -269,22 +351,39 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
-                className="absolute top-full left-0 right-0 mt-2 glass-card rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto border border-border"
+                className="absolute top-full left-0 right-0 mt-2 glass-card rounded-xl shadow-2xl z-50 max-h-[26rem] overflow-y-auto border border-border"
+                role="listbox"
               >
                 {recentSearches.length > 0 && (
                   <div className="p-4 border-b border-border">
-                    <div className="flex items-center mb-2.5">
-                      <Clock className="w-3.5 h-3.5 text-muted-foreground mr-2" />
-                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Recent</span>
+                    <div className="flex items-center justify-between mb-2.5">
+                      <div className="flex items-center">
+                        <Clock className="w-3.5 h-3.5 text-muted-foreground mr-2" />
+                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Recent</span>
+                      </div>
+                      <button
+                        onClick={clearAllRecent}
+                        className="text-[10px] text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1 uppercase tracking-wider"
+                        aria-label="Clear all recent searches"
+                      >
+                        <Trash2 className="w-3 h-3" /> Clear all
+                      </button>
                     </div>
                     <div className="space-y-0.5">
                       {recentSearches.map((search, index) => (
-                        <div key={index} className="flex items-center justify-between group">
+                        <div
+                          key={index}
+                          id={`search-sugg-${index}`}
+                          role="option"
+                          aria-selected={activeSuggestion === index}
+                          className={`flex items-center justify-between group rounded-lg transition-colors ${activeSuggestion === index ? 'bg-primary/10' : ''}`}
+                        >
                           <button
+                            onMouseEnter={() => setActiveSuggestion(index)}
                             onClick={() => { setQuery(search); handleSearch(search); }}
                             className="flex-1 text-left text-sm text-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-muted/50"
                           >
-                            {search}
+                            {highlight(search)}
                           </button>
                           <button onClick={() => clearRecentSearch(search)} className="opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive transition-all">
                             <X className="w-3 h-3" />
@@ -308,13 +407,28 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
                     {displayedPopularSearches.map((search, index) => (
                       <button
                         key={index}
+                        id={`search-sugg-${recentSearches.length + index}`}
+                        role="option"
+                        aria-selected={activeSuggestion === recentSearches.length + index}
+                        onMouseEnter={() => setActiveSuggestion(recentSearches.length + index)}
                         onClick={() => { setQuery(search); handleSearch(search); }}
-                        className="text-left text-sm text-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-muted/50 truncate"
+                        className={`text-left text-sm text-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-muted/50 truncate ${activeSuggestion === recentSearches.length + index ? 'bg-primary/10 text-primary' : ''}`}
                       >
-                        {search}
+                        {highlight(search)}
                       </button>
                     ))}
                   </div>
+                </div>
+                {/* Footer hint bar */}
+                <div className="px-4 py-2 border-t border-border/60 bg-muted/20 flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-1"><kbd className="px-1 py-px rounded border border-border/70 bg-background/60 font-mono">↑</kbd><kbd className="px-1 py-px rounded border border-border/70 bg-background/60 font-mono">↓</kbd> navigate</span>
+                    <span className="flex items-center gap-1"><kbd className="px-1 py-px rounded border border-border/70 bg-background/60 font-mono inline-flex items-center"><CornerDownLeft className="w-2.5 h-2.5" /></kbd> select</span>
+                    <span className="hidden sm:flex items-center gap-1"><kbd className="px-1 py-px rounded border border-border/70 bg-background/60 font-mono">esc</kbd> close</span>
+                  </span>
+                  {recentSearches.length + displayedPopularSearches.length > 0 && (
+                    <span className="tabular-nums">{recentSearches.length + displayedPopularSearches.length} suggestions</span>
+                  )}
                 </div>
               </motion.div>
             )}
