@@ -50,6 +50,10 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
   const [displayedPopularSearches, setDisplayedPopularSearches] = useState<string[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // Elite UX: keyboard nav + focus shortcut
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [activeSuggestion, setActiveSuggestion] = useState<number>(-1);
+
   // Filters
   const [sortBy, setSortBy] = useState<SearchFilters['sortBy']>('relevance');
   const [category, setCategory] = useState<SearchFilters['category']>('all');
@@ -63,6 +67,46 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
     if (saved) setRecentSearches(JSON.parse(saved));
     setDisplayedPopularSearches(getRotatedPopularSearches());
   }, []);
+
+  // Global "/" shortcut to focus search — ignored while typing in inputs
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as HTMLElement | null;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      e.preventDefault();
+      inputRef.current?.focus();
+      setShowSuggestions(true);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const clearAllRecent = () => {
+    setRecentSearches([]);
+    localStorage.removeItem('bookapp_recent_searches');
+  };
+
+  // Combined suggestion list for keyboard navigation (recents first, then trending)
+  const suggestionList = useMemo(
+    () => [...recentSearches, ...displayedPopularSearches],
+    [recentSearches, displayedPopularSearches]
+  );
+
+  // Highlight matching substring inside a suggestion label
+  const highlight = (text: string) => {
+    const q = query.trim();
+    if (!q) return text;
+    const idx = text.toLowerCase().indexOf(q.toLowerCase());
+    if (idx === -1) return text;
+    return (
+      <>
+        {text.slice(0, idx)}
+        <span className="text-primary font-semibold">{text.slice(idx, idx + q.length)}</span>
+        {text.slice(idx + q.length)}
+      </>
+    );
+  };
 
   const saveRecentSearch = (searchQuery: string) => {
     const updated = [searchQuery, ...recentSearches.filter(s => s !== searchQuery)].slice(0, 6);
