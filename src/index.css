@@ -1710,3 +1710,49 @@
   height: 1px;
   background: hsl(var(--primary));
 }
+
+/* ==========================================================================
+   GLOBAL — Kill all glow across the entire project.
+   Neutral surface containers use the (already pitch-black in dark mode)
+   --card / --background / --popover / --muted tokens, so no per-component
+   overrides are needed there. Theme-palette-colored containers (primary,
+   secondary, accent, success, warning, destructive backgrounds) are left
+   untouched by design.
+   ========================================================================== */
+
+/* No colored ring/halo "glow" utilities anywhere */
+.hover-glow:hover,
+.hover-glow-coral:hover,
+.inner-glow-sapphire,
+.inner-glow-rose,
+.glow-ring-pulse,
+.animate-glow-pulse,
+.animate-glow-coral,
+.logo-glow,
+.dark .logo-glow {
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+/* Text glows off */
+.glow-text,
+.dark .glow-text,
+.hero-glow,
+.dark .hero-glow {
+  text-shadow: none !important;
+}
+
+/* Aurora ambient blobs are a glow effect — disable everywhere */
+.aurora-container,
+.aurora-blob-1,
+.aurora-blob-2,
+.aurora-blob-3 {
+  display: none !important;
+}
+
+/* Dark mode: strip any residual primary/secondary halo from card hovers */
+.dark .glass-card:hover,
+.dark .hover-lift:hover {
+  box-shadow: 0 10px 32px rgba(0,0,0,0.7) !important;
+  border-color: hsl(var(--border)) !important;
+}
