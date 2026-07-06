@@ -351,22 +351,39 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.15 }}
-                className="absolute top-full left-0 right-0 mt-2 glass-card rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto border border-border"
+                className="absolute top-full left-0 right-0 mt-2 glass-card rounded-xl shadow-2xl z-50 max-h-[26rem] overflow-y-auto border border-border"
+                role="listbox"
               >
                 {recentSearches.length > 0 && (
                   <div className="p-4 border-b border-border">
-                    <div className="flex items-center mb-2.5">
-                      <Clock className="w-3.5 h-3.5 text-muted-foreground mr-2" />
-                      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Recent</span>
+                    <div className="flex items-center justify-between mb-2.5">
+                      <div className="flex items-center">
+                        <Clock className="w-3.5 h-3.5 text-muted-foreground mr-2" />
+                        <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">Recent</span>
+                      </div>
+                      <button
+                        onClick={clearAllRecent}
+                        className="text-[10px] text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1 uppercase tracking-wider"
+                        aria-label="Clear all recent searches"
+                      >
+                        <Trash2 className="w-3 h-3" /> Clear all
+                      </button>
                     </div>
                     <div className="space-y-0.5">
                       {recentSearches.map((search, index) => (
-                        <div key={index} className="flex items-center justify-between group">
+                        <div
+                          key={index}
+                          id={`search-sugg-${index}`}
+                          role="option"
+                          aria-selected={activeSuggestion === index}
+                          className={`flex items-center justify-between group rounded-lg transition-colors ${activeSuggestion === index ? 'bg-primary/10' : ''}`}
+                        >
                           <button
+                            onMouseEnter={() => setActiveSuggestion(index)}
                             onClick={() => { setQuery(search); handleSearch(search); }}
                             className="flex-1 text-left text-sm text-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-muted/50"
                           >
-                            {search}
+                            {highlight(search)}
                           </button>
                           <button onClick={() => clearRecentSearch(search)} className="opacity-0 group-hover:opacity-100 p-1.5 text-muted-foreground hover:text-destructive transition-all">
                             <X className="w-3 h-3" />
@@ -390,13 +407,28 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
                     {displayedPopularSearches.map((search, index) => (
                       <button
                         key={index}
+                        id={`search-sugg-${recentSearches.length + index}`}
+                        role="option"
+                        aria-selected={activeSuggestion === recentSearches.length + index}
+                        onMouseEnter={() => setActiveSuggestion(recentSearches.length + index)}
                         onClick={() => { setQuery(search); handleSearch(search); }}
-                        className="text-left text-sm text-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-muted/50 truncate"
+                        className={`text-left text-sm text-foreground hover:text-primary transition-colors p-2 rounded-lg hover:bg-muted/50 truncate ${activeSuggestion === recentSearches.length + index ? 'bg-primary/10 text-primary' : ''}`}
                       >
-                        {search}
+                        {highlight(search)}
                       </button>
                     ))}
                   </div>
+                </div>
+                {/* Footer hint bar */}
+                <div className="px-4 py-2 border-t border-border/60 bg-muted/20 flex items-center justify-between text-[10px] text-muted-foreground">
+                  <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-1"><kbd className="px-1 py-px rounded border border-border/70 bg-background/60 font-mono">↑</kbd><kbd className="px-1 py-px rounded border border-border/70 bg-background/60 font-mono">↓</kbd> navigate</span>
+                    <span className="flex items-center gap-1"><kbd className="px-1 py-px rounded border border-border/70 bg-background/60 font-mono inline-flex items-center"><CornerDownLeft className="w-2.5 h-2.5" /></kbd> select</span>
+                    <span className="hidden sm:flex items-center gap-1"><kbd className="px-1 py-px rounded border border-border/70 bg-background/60 font-mono">esc</kbd> close</span>
+                  </span>
+                  {recentSearches.length + displayedPopularSearches.length > 0 && (
+                    <span className="tabular-nums">{recentSearches.length + displayedPopularSearches.length} suggestions</span>
+                  )}
                 </div>
               </motion.div>
             )}
