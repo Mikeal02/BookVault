@@ -251,9 +251,13 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
   return (
     <div className="space-y-6">
       {/* ─── Search Hero ─── */}
-      <div className="glass-card rounded-2xl p-6 sm:p-10 relative overflow-hidden">
-        <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-56 h-56 bg-secondary/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="glass-card rounded-2xl p-6 sm:p-10 relative">
+        {/* Decorative background layer — clipped to the card, but the card
+            itself does NOT clip so the suggestions dropdown can overflow. */}
+        <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none z-0">
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute -bottom-20 -left-20 w-56 h-56 bg-secondary/5 rounded-full blur-3xl" />
+        </div>
 
         <div className="relative z-10 text-center mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium mb-4">
@@ -274,19 +278,53 @@ export const EnhancedBookSearch = ({ onBookSelect, onAddToBookshelf, isInBookshe
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <input
+                ref={inputRef}
                 type="text"
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => { setQuery(e.target.value); setActiveSuggestion(-1); }}
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                onKeyDown={(e) => {
+                  if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    setShowSuggestions(true);
+                    setActiveSuggestion(i => Math.min(i + 1, suggestionList.length - 1));
+                  } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    setActiveSuggestion(i => Math.max(i - 1, -1));
+                  } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const pick = activeSuggestion >= 0 ? suggestionList[activeSuggestion] : query;
+                    if (pick?.trim()) { setQuery(pick); handleSearch(pick); }
+                  } else if (e.key === 'Escape') {
+                    setShowSuggestions(false);
+                    setActiveSuggestion(-1);
+                    inputRef.current?.blur();
+                  }
+                }}
                 placeholder="Search by title, author, or ISBN..."
-                className="w-full pl-11 pr-10 py-3.5 bg-muted/30 border border-border/80 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200 text-foreground placeholder-muted-foreground text-sm shadow-sm focus:shadow-md"
+                className="w-full pl-11 pr-20 py-3.5 bg-muted/30 border border-border/80 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200 text-foreground placeholder-muted-foreground text-sm shadow-sm focus:shadow-md"
+                aria-label="Search books"
+                aria-autocomplete="list"
+                aria-expanded={showSuggestions}
+                aria-activedescendant={activeSuggestion >= 0 ? `search-sugg-${activeSuggestion}` : undefined}
               />
-              {query && (
-                <button onClick={() => setQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1">
+              {query ? (
+                <button
+                  onClick={() => { setQuery(''); inputRef.current?.focus(); }}
+                  aria-label="Clear query"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                >
                   <X className="w-4 h-4" />
                 </button>
+              ) : (
+                <kbd
+                  aria-hidden="true"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex items-center justify-center h-6 min-w-[24px] px-1.5 rounded-md border border-border/70 bg-muted/40 text-[10px] font-mono font-semibold text-muted-foreground pointer-events-none"
+                  title="Press / to search"
+                >
+                  /
+                </kbd>
               )}
             </div>
             <Button
