@@ -1,8 +1,33 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+/** Verify the caller's Supabase JWT so the shared Google Books quota can't be drained anonymously. */
+const requireUser = async (req: Request) => {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  const client = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
+  const { data, error } = await client.auth.getClaims(authHeader.slice(7));
+  const sub = (data?.claims as Record<string, unknown> | undefined)?.sub;
+  if (error || typeof sub !== "string" || !sub) return null;
+  return data!.claims;
+};
+
+/** Naive in-memory per-user rate limit (per edge instance): 30 searches / minute. */
+const RATE_WINDOW_MS = 60_000;
+const RATE_MAX = 30;
+const hits = new Map<string, number[]>();
+const rateLimited = (key: string) => {
+  const now = Date.now();
+  const recent = (hits.get(key) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
+  recent.push(now);
+  hits.set(key, recent);
+  if (hits.size > 5000) hits.clear();
+  return recent.length > RATE_MAX;
 };
 
 const OPEN_LIBRARY_SEARCH_URL = "https://openlibrary.org/search.json";
@@ -381,9 +406,15 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
   if (req.method !== "POST") return json({ books: [], error: "Method not allowed" }, 405);
 
+  const claims = await requireUser(req);
+  if (!claims) return json({ books: [], error: "Unauthorized" }, 401);
+  if (rateLimited(String((claims as Record<string, unknown>).sub))) {
+    return json({ books: [], error: "Too many searches. Please slow down." }, 429);
+  }
+
   try {
     const { query, maxResults = 40 } = await req.json().catch(() => ({}));
-    const searchQuery = cleanStr(query);
+    const searchQuery = cleanStr(query)?.slice(0, 256);
     if (!searchQuery) return json({ books: [], sources: [], errors: [] });
 
     const [openLibrary, google] = await Promise.allSettled([

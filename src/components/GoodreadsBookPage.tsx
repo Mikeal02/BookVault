@@ -8,6 +8,7 @@ import { Book } from '@/types/book';
 import { Button } from '@/components/ui/button';
 import { BookCoverPlaceholder } from './BookCoverPlaceholder';
 import { toast } from 'sonner';
+import { sanitizeHtml } from '@/lib/system';
 
 interface Props {
   books: Book[];
@@ -285,7 +286,7 @@ export const GoodreadsBookPage = ({ books, activeBook, onSelectBook, onOpenModal
                   descExpanded ? '' : 'line-clamp-6'
                 }`}
                 style={{ color: '#382110' }}
-                dangerouslySetInnerHTML={{ __html: book.description }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(book.description) }}
               />
               <button
                 onClick={() => setDescExpanded((v) => !v)}

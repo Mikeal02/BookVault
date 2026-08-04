@@ -3,6 +3,7 @@ import { GraduationCap, Download, X, Loader2, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Book } from '@/types/book';
 import { toast } from 'sonner';
+import { sanitizeHtml } from '@/lib/system';
 
 interface CitationExportProps {
   books: Book[];
@@ -199,8 +200,9 @@ export const CitationExport = ({ books, onClose }: CitationExportProps) => {
                   {eligibleBooks.slice(0, 5).map(book => (
                     <p key={book.id} className="text-xs text-foreground/80 leading-relaxed font-mono"
                        dangerouslySetInnerHTML={{
-                         __html: generateCitation(book, style)
-                           .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                         __html: sanitizeHtml(
+                           generateCitation(book, style).replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                         )
                        }}
                     />
                   ))}

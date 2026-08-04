@@ -305,12 +305,13 @@ export const EliteAnalytics = ({ books, currentUser, readingGoal = 12 }: EliteAn
         slopePages: forecast?.slope ? Math.round(forecast.slope * 10) / 10 : 0,
       };
       const URL_FN = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-book-chat`;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) throw new Error('You must be signed in to use AI insights');
       const resp = await fetch(URL_FN, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
         body: JSON.stringify({
           messages: [{ role: 'user', content: `Analyze these reading metrics and produce a concise narrative insight (300 words max) in markdown with sections ## Snapshot, ## Strengths, ## Watch-outs, ## Next Move. Metrics: ${JSON.stringify(ctx)}` }],
-          systemPrompt: 'You are an elite reading analytics coach. Be specific, concrete, and motivating. Use markdown.',
           mode: 'analyze',
         }),
       });

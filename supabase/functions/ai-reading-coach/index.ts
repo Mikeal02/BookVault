@@ -1,15 +1,35 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const requireUser = async (req: Request) => {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) return null;
+  const client = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
+  const { data, error } = await client.auth.getClaims(authHeader.slice(7));
+  const sub = (data?.claims as Record<string, unknown> | undefined)?.sub;
+  if (error || typeof sub !== "string" || !sub) return null;
+  return data!.claims;
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  if (!(await requireUser(req))) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
-    const { books, readingSessions } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const books = Array.isArray(body?.books) ? body.books.slice(0, 500) : [];
+    const readingSessions = Array.isArray(body?.readingSessions) ? body.readingSessions.slice(0, 200) : [];
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     if (!GEMINI_API_KEY) {
     throw new Error('GEMINI_API_KEY is not configured');
