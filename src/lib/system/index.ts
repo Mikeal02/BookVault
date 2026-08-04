@@ -5,4 +5,5 @@ export type { AppEventMap } from './eventBus';
 export { measure, reportWebVitals } from './perf';
 export { queryClient, installQueryPersistence } from './queryClient';
 export { getFlags, isFlagEnabled, setFlag } from './featureFlags';
+export { sanitizeHtml } from './sanitize';
 export type { FeatureFlags } from './featureFlags';

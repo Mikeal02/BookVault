@@ -4,6 +4,7 @@ import { Sparkles, Brain, Link2, CalendarCheck, X, Loader2, BookOpen, Copy, Chec
 import { Button } from '@/components/ui/button';
 import { Book } from '@/types/book';
 import { toast } from 'sonner';
+import { sanitizeHtml } from '@/lib/system';
 
 interface AIBookInsightsProps {
   book: Book;
@@ -229,7 +230,7 @@ export const AIBookInsights = ({ book, userBooks, onClose }: AIBookInsightsProps
               className="ai-response prose prose-sm max-w-none"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              dangerouslySetInnerHTML={{ __html: formatMarkdown(content) }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(formatMarkdown(content)) }}
             />
           )}
 
