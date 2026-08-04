@@ -35,26 +35,67 @@ function maskUrl(url: string): string {
   }
 }
 
+/** Verify caller JWT and require the 'admin' role. Returns the caller's user id. */
+async function requireAdmin(req: Request): Promise<{ userId: string } | null> {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) return null;
+  const anonClient = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_ANON_KEY')!,
+  );
+  const { data, error } = await anonClient.auth.getClaims(authHeader.slice(7));
+  const sub = (data?.claims as Record<string, unknown> | undefined)?.sub;
+  if (error || typeof sub !== 'string' || !sub) return null;
+
+  const admin = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  );
+  const { data: hasRole, error: roleError } = await admin.rpc('has_role', {
+    _user_id: sub,
+    _role: 'admin',
+  });
+  if (roleError || hasRole !== true) return null;
+  return { userId: sub };
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ success: false, error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  // Auth + authorization: only signed-in admins may run sync, and they may only
+  // ever sync THEIR OWN rows — the user id comes from the verified JWT, never the body.
+  const caller = await requireAdmin(req);
+  if (!caller) {
+    return new Response(JSON.stringify({ success: false, error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   let externalDb: any = null;
 
   try {
-    const body = await req.json();
-    const { action, direction, userId } = body;
-    
-    console.log('Request received:', { action, direction, userId: userId ? 'present' : 'missing' });
+    const body = await req.json().catch(() => ({}));
+    const action = typeof body?.action === 'string' ? body.action : undefined;
+    const rawDirection = body?.direction;
+    const direction = ['export', 'import', 'both'].includes(rawDirection) ? rawDirection : undefined;
+    const userId = caller.userId;
+
+    console.log('Sync request received:', { action, direction });
 
     // Get and validate external DB URL
     const externalDbUrl = Deno.env.get('EXTERNAL_DB_URL');
-    
-    console.log('EXTERNAL_DB_URL present:', !!externalDbUrl);
-    console.log('EXTERNAL_DB_URL length:', externalDbUrl?.length || 0);
-    
+
     if (!externalDbUrl) {
       console.error('EXTERNAL_DB_URL is not configured in secrets');
       return new Response(JSON.stringify({
@@ -69,7 +110,7 @@ serve(async (req) => {
 
     // Validate URL format
     if (!isValidPostgresUrl(externalDbUrl)) {
-      console.error('Invalid PostgreSQL URL format. URL starts with:', externalDbUrl.substring(0, 15));
+      console.error('Invalid PostgreSQL URL format in EXTERNAL_DB_URL secret');
       return new Response(JSON.stringify({
         success: false,
         connected: false,
@@ -80,7 +121,7 @@ serve(async (req) => {
       });
     }
 
-    console.log('Connecting to external DB:', maskUrl(externalDbUrl));
+    console.log('Connecting to external DB host:', (() => { try { return new URL(externalDbUrl).host; } catch { return '[invalid]'; } })());
 
     // Handle connection test
     if (action === 'test') {
@@ -105,18 +146,18 @@ serve(async (req) => {
         console.error('Connection test failed:', errorMessage);
         return new Response(JSON.stringify({
           connected: false,
-          error: `Connection failed: ${errorMessage}`,
+          error: 'Connection failed. Check the configured external database URL.',
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
     }
     
-    // Validate userId for sync operations
-    if (!userId) {
+    // Validate direction for sync operations
+    if (!direction) {
       return new Response(JSON.stringify({
         success: false,
-        error: 'User ID is required for sync operations',
+        error: 'A valid sync direction (export, import, both) is required',
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
