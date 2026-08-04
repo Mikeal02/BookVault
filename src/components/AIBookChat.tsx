@@ -299,31 +299,6 @@ export const AIBookChat = ({ books, onClose }: AIBookChatProps) => {
     }));
   };
 
-  const getModePrompt = () => {
-    const booksContext = JSON.stringify(getBooksContext(), null, 2);
-    
-    const formattingInstructions = `
-Format your responses using markdown:
-- Use **bold** for important terms and book titles
-- Use bullet points for lists
-- Use headers (## or ###) for sections
-- Use > for quotes
-- Use ==text== to highlight key insights
-- Keep responses well-structured and scannable
-`;
-
-    switch (mode) {
-      case 'summary':
-        return `You are a helpful book assistant. Based on the user's library, provide concise summaries and insights about their books. ${formattingInstructions} Library: ${booksContext}`;
-      case 'recommend':
-        return `You are a book recommendation expert. Based on the user's reading history and preferences, suggest new books they might enjoy. Be specific and explain why each recommendation fits. ${formattingInstructions} Library: ${booksContext}`;
-      case 'analyze':
-        return `You are a reading analyst. Analyze the user's notes and thoughts about their books to provide insights about their reading patterns, themes they enjoy, and how their reading journey has evolved. ${formattingInstructions} Library: ${booksContext}`;
-      default:
-        return `You are a friendly book companion. Help users discuss their books, answer questions about literature, and provide insights. Be conversational and helpful. ${formattingInstructions} User's library: ${booksContext}`;
-    }
-  };
-
   const sendMessage = async (messageText?: string) => {
     const text = messageText || input.trim();
     if (!text || isLoading) return;
@@ -359,7 +334,8 @@ Format your responses using markdown:
         },
         body: JSON.stringify({
           messages: allMessages,
-          mode
+          mode,
+          library: getBooksContext(),
         }),
       });
 
