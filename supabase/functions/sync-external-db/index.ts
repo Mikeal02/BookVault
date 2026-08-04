@@ -479,7 +479,7 @@ serve(async (req) => {
     
     return new Response(JSON.stringify({
       success: false,
-      error: errorMessage,
+      error: 'Sync failed. See function logs for details.',
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
