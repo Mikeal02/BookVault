@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { isbnVariants, normalizeIsbn } from "../_shared/isbn.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -352,8 +353,8 @@ const searchGoogleBooks = async (query: string, limit: number): Promise<{ books:
   return { books: items.map(transformGoogleBook) };
 };
 
-/** Dedicated ISBN lookup: Open Library supports an `isbn` query param, Google uses the `isbn:` operator. */
-const lookupByIsbn = async (isbn: string): Promise<{ books: Book[]; errors: string[]; sources: string[] }> => {
+/** Dedicated ISBN lookup for one exact ISBN spelling. */
+const lookupOneIsbn = async (isbn: string): Promise<{ books: Book[]; errors: string[]; sources: string[] }> => {
   const fields = "key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count,ratings_average,isbn,subtitle,edition_count,has_fulltext,subject_place,person,subject_people";
   const [google, openLibrary] = await Promise.allSettled([
     searchGoogleBooks(`isbn:${isbn}`, 5),
@@ -386,6 +387,27 @@ const lookupByIsbn = async (isbn: string): Promise<{ books: Book[]; errors: stri
   }
 
   return { books: mergeAndSort(books, "", 3), errors, sources };
+};
+
+/**
+ * Open Library / Google index editions under either ISBN width, so try the ISBN-10 and
+ * ISBN-13 spellings of the same book until one returns results.
+ */
+const lookupByIsbn = async (isbn: string): Promise<{ books: Book[]; errors: string[]; sources: string[] }> => {
+  const variants = isbnVariants(isbn);
+  const errors: string[] = [];
+  const sources = new Set<string>();
+
+  for (const variant of variants) {
+    const result = await lookupOneIsbn(variant);
+    result.errors.forEach((e) => errors.push(e));
+    result.sources.forEach((s) => sources.add(s));
+    if (result.books.length) {
+      return { books: result.books, errors, sources: [...sources] };
+    }
+  }
+
+  return { books: [], errors, sources: [...sources] };
 };
 
 const relevanceScore = (book: Book, terms: string[]) => {
@@ -451,9 +473,9 @@ serve(async (req) => {
   try {
     const { query, maxResults = 40, isbn } = await req.json().catch(() => ({}));
 
-    const cleanedIsbn = typeof isbn === "string" ? isbn.replace(/[^0-9Xx]/g, "").toUpperCase() : "";
-    if (cleanedIsbn) {
-      if (cleanedIsbn.length !== 10 && cleanedIsbn.length !== 13) {
+    if (typeof isbn === "string" && isbn.trim()) {
+      const cleanedIsbn = normalizeIsbn(isbn);
+      if (!cleanedIsbn) {
         return json({ books: [], sources: [], errors: ["Invalid ISBN"] }, 400);
       }
       const result = await lookupByIsbn(cleanedIsbn);
