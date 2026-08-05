@@ -352,6 +352,42 @@ const searchGoogleBooks = async (query: string, limit: number): Promise<{ books:
   return { books: items.map(transformGoogleBook) };
 };
 
+/** Dedicated ISBN lookup: Open Library supports an `isbn` query param, Google uses the `isbn:` operator. */
+const lookupByIsbn = async (isbn: string): Promise<{ books: Book[]; errors: string[]; sources: string[] }> => {
+  const fields = "key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count,ratings_average,isbn,subtitle,edition_count,has_fulltext,subject_place,person,subject_people";
+  const [google, openLibrary] = await Promise.allSettled([
+    searchGoogleBooks(`isbn:${isbn}`, 5),
+    fetchJson(`${OPEN_LIBRARY_SEARCH_URL}?${new URLSearchParams({ isbn, limit: "3", fields })}`, 16000),
+  ]);
+
+  const errors: string[] = [];
+  const sources: string[] = [];
+  let books: Book[] = [];
+
+  if (google.status === "fulfilled") {
+    if (google.value.error) errors.push(google.value.error);
+    if (google.value.books.length) {
+      books = [...books, ...google.value.books];
+      sources.push("google");
+    }
+  } else {
+    errors.push("Google Books request failed");
+  }
+
+  if (openLibrary.status === "fulfilled" && openLibrary.value.ok) {
+    const docs = Array.isArray(openLibrary.value.body?.docs) ? openLibrary.value.body.docs : [];
+    const olBooks = docs.filter((item: any) => item.title).map(transformOpenLibraryBook);
+    if (olBooks.length) {
+      books = [...books, ...olBooks];
+      sources.push("openlibrary");
+    }
+  } else {
+    errors.push("Open Library request failed");
+  }
+
+  return { books: mergeAndSort(books, "", 3), errors, sources };
+};
+
 const relevanceScore = (book: Book, terms: string[]) => {
   const title = book.title.toLowerCase();
   const author = (book.authors?.[0] || "").toLowerCase();
@@ -413,7 +449,17 @@ serve(async (req) => {
   }
 
   try {
-    const { query, maxResults = 40 } = await req.json().catch(() => ({}));
+    const { query, maxResults = 40, isbn } = await req.json().catch(() => ({}));
+
+    const cleanedIsbn = typeof isbn === "string" ? isbn.replace(/[^0-9Xx]/g, "").toUpperCase() : "";
+    if (cleanedIsbn) {
+      if (cleanedIsbn.length !== 10 && cleanedIsbn.length !== 13) {
+        return json({ books: [], sources: [], errors: ["Invalid ISBN"] }, 400);
+      }
+      const result = await lookupByIsbn(cleanedIsbn);
+      return json({ books: result.books, sources: result.sources, errors: result.errors });
+    }
+
     const searchQuery = cleanStr(query)?.slice(0, 256);
     if (!searchQuery) return json({ books: [], sources: [], errors: [] });
 
