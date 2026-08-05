@@ -951,6 +951,24 @@ const fetchWorkBundle = async (
 
 // === Fetch book by ISBN (for barcode scanning / direct lookup) ===
 export const fetchBookByISBN = async (isbn: string): Promise<Book | null> => {
+  const cleaned = isbn.replace(/[^0-9Xx]/g, '').toUpperCase();
+
+  // 1) Backend proxy first: avoids browser CORS failures and shared-quota 429s.
+  try {
+    const { data, error } = await supabase.functions.invoke('book-search', {
+      body: { isbn: cleaned },
+    });
+    if (!error && Array.isArray(data?.books) && data.books.length > 0) {
+      return normalizeBook(data.books[0]);
+    }
+    if (error) {
+      console.warn('[isbn] Backend ISBN lookup unavailable; falling back to browser providers', error);
+    }
+  } catch (err) {
+    console.warn('[isbn] Backend ISBN lookup failed; falling back to browser providers', err);
+  }
+
+  // 2) Browser fallback.
   const results = await Promise.allSettled([
     fetchWithRetry(`${OPEN_LIBRARY_SEARCH_URL}?isbn=${isbn}&limit=1&fields=key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count,ratings_average,isbn,subtitle,edition_count,has_fulltext`),
     fetchWithRetry(`${GOOGLE_BOOKS_API_URL}?q=isbn:${isbn}&maxResults=1`),
