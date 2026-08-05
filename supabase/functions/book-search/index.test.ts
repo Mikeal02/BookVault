@@ -17,7 +17,7 @@ const canRunLive = Boolean(TEST_USER_EMAIL && TEST_USER_PASSWORD);
 const ATOMIC_HABITS = {
   isbn13: "9780735211292",
   isbn13Dashed: "978-0-7352-1129-2",
-  isbn13Spaced": "978 0 7352 1129 2",
+  isbn13Spaced: "978 0 7352 1129 2",
   isbn10: "0735211299",
   isbn10Dashed: "0-7352-1129-9",
 };
