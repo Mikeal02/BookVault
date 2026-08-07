@@ -1756,3 +1756,11 @@
   box-shadow: 0 10px 32px rgba(0,0,0,0.7) !important;
   border-color: hsl(var(--border)) !important;
 }
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
