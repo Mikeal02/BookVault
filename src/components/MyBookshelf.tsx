@@ -557,46 +557,99 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
             <span className="serial-numeral text-[10px]">§</span>
             <span className="eyebrow text-[10px]">Search · Sort · Survey</span>
           </div>
-          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40 smcp hidden sm:inline">
-            {filteredBooks.length} / {vaultBooks.length}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/40 smcp hidden sm:inline">
+              {filteredBooks.length} / {vaultBooks.length}
+            </span>
+            {activeFilterCount > 0 && (
+              <button
+                onClick={() => { setSearchQuery(''); reset(); }}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md border border-border/60 text-[10px] uppercase tracking-[0.16em] smcp text-muted-foreground hover:text-primary hover:border-primary/40 transition-all"
+                title="Reset search, sort and filters"
+              >
+                <RotateCcw className="w-3 h-3" /> Reset
+              </button>
+            )}
+          </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
           {/* Search */}
-          <div className="relative flex-1">
+          <div className="relative flex-1 min-w-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
             <input
               type="text"
-              placeholder="Search by title, author, or tag…"
+              placeholder="Search title, author, tag, category…"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
+              aria-label="Search your bookshelf"
               className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-muted/50 border border-border/60 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-muted-foreground/50 hover:text-foreground transition-colors"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
-          {/* Sort */}
-          <div className="relative">
-            <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50 pointer-events-none" />
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value as any)}
-              className="pl-8 pr-8 py-2.5 rounded-xl bg-muted/50 border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer"
+          {/* Sort + direction */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 sm:flex-none">
+              <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground/50 pointer-events-none" />
+              <select
+                value={sortBy}
+                onChange={e => update('sortBy', e.target.value as typeof sortBy)}
+                aria-label="Sort books by"
+                className="w-full sm:w-auto pl-8 pr-8 py-2.5 rounded-xl bg-muted/50 border border-border/60 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 appearance-none cursor-pointer"
+              >
+                <option value="title">Title</option>
+                <option value="author">Author</option>
+                <option value="rating">Rating</option>
+                <option value="dateAdded">Date added</option>
+                <option value="dateFinished">Date finished</option>
+                <option value="progress">Progress</option>
+                <option value="pages">Page count</option>
+              </select>
+            </div>
+            <button
+              onClick={() => update('sortDir', sortDir === 'asc' ? 'desc' : 'asc')}
+              title={sortDir === 'asc' ? 'Ascending — click for descending' : 'Descending — click for ascending'}
+              aria-label="Toggle sort direction"
+              className="p-2.5 rounded-xl bg-muted/50 border border-border/60 text-muted-foreground hover:text-primary hover:border-primary/40 transition-all shrink-0"
             >
-              <option value="title">Title A–Z</option>
-              <option value="author">Author</option>
-              <option value="rating">Rating</option>
-              <option value="dateAdded">Date Added</option>
-            </select>
+              {sortDir === 'asc' ? <ArrowUpNarrowWide className="w-4 h-4" /> : <ArrowDownWideNarrow className="w-4 h-4" />}
+            </button>
+            <button
+              onClick={() => update('showAdvanced', !showAdvanced)}
+              aria-expanded={showAdvanced}
+              className={`relative p-2.5 rounded-xl border transition-all shrink-0 ${
+                showAdvanced || minRating > 0 || activeTags.length > 0
+                  ? 'border-primary/40 bg-primary/10 text-primary'
+                  : 'border-border/60 bg-muted/50 text-muted-foreground hover:text-foreground'
+              }`}
+              title="Advanced filters"
+            >
+              <Filter className="w-4 h-4" />
+              {(minRating > 0 || activeTags.length > 0) && (
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center">
+                  {minRating > 0 ? activeTags.length + 1 : activeTags.length}
+                </span>
+              )}
+            </button>
           </div>
 
           {/* View mode toggle */}
-          <div className="flex items-center gap-0.5 p-1 bg-muted/50 border border-border/60 rounded-xl">
+          <div className="flex items-center gap-0.5 p-1 bg-muted/50 border border-border/60 rounded-xl overflow-x-auto no-scrollbar">
             {viewModes.map(({ mode, icon: Icon, label }) => (
               <button
                 key={mode}
                 onClick={() => setViewMode(mode)}
                 title={label}
-                className={`relative p-2 rounded-lg transition-all duration-200 ${
+                aria-label={`${label} view`}
+                className={`relative p-2 rounded-lg transition-all duration-200 shrink-0 ${
                   viewMode === mode
                     ? 'text-primary'
                     : 'text-muted-foreground/50 hover:text-foreground'
@@ -616,11 +669,11 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
         </div>
 
         {/* Status filter pills */}
-        <div className="flex items-center gap-2 mt-3 flex-wrap">
+        <div className="flex items-center gap-1.5 sm:gap-2 mt-3 flex-wrap">
           {(['all', 'reading', 'finished', 'not-read'] as const).map(status => (
             <button
               key={status}
-              onClick={() => setFilterStatus(status)}
+              onClick={() => update('filterStatus', status)}
               className={`relative px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-200 ${
                 filterStatus === status
                   ? 'text-primary'
@@ -644,6 +697,69 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
             </button>
           ))}
         </div>
+
+        {/* Advanced filters — rating floor + tags */}
+        <AnimatePresence initial={false}>
+          {showAdvanced && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="mt-3 pt-3 border-t border-border/50 space-y-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="eyebrow text-[10px] text-muted-foreground/50 smcp inline-flex items-center gap-1">
+                    <Star className="w-3 h-3" /> Minimum rating
+                  </span>
+                  <div className="flex items-center gap-1">
+                    {[0, 1, 2, 3, 4, 5].map(r => (
+                      <button
+                        key={r}
+                        onClick={() => update('minRating', r)}
+                        className={`px-2 py-1 rounded-lg text-[11px] font-semibold border transition-all ${
+                          minRating === r
+                            ? 'border-primary/40 bg-primary/10 text-primary'
+                            : 'border-border/60 text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        {r === 0 ? 'Any' : `${r}★+`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {availableTags.length > 0 && (
+                  <div className="flex items-start gap-2 flex-wrap">
+                    <span className="eyebrow text-[10px] text-muted-foreground/50 smcp inline-flex items-center gap-1 mt-1.5">
+                      <Tag className="w-3 h-3" /> Tags
+                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap flex-1">
+                      {availableTags.map(([tag, count]) => {
+                        const on = activeTags.includes(tag);
+                        return (
+                          <button
+                            key={tag}
+                            onClick={() => toggleTag(tag)}
+                            aria-pressed={on}
+                            className={`px-2.5 py-1 rounded-full text-[11px] border transition-all ${
+                              on
+                                ? 'border-primary/40 bg-primary/10 text-primary'
+                                : 'border-border/60 text-muted-foreground hover:text-foreground hover:border-border'
+                            }`}
+                          >
+                            {tag} <span className="opacity-50">{count}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
 
       {/* Results count */}
