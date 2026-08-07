@@ -60,14 +60,24 @@ Deno.test("isbnVariants always yields both widths for a lookup", () => {
   assertEquals(isbnVariants("nope"), []);
 });
 
+let cachedToken: string | null = null;
+
+/**
+ * Signs in the dedicated test user. autoRefreshToken/persistSession are disabled so the
+ * client never starts a background timer (Deno's test runner reports those as leaks).
+ */
 const signIn = async () => {
-  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  if (cachedToken) return cachedToken;
+  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
+  });
   const { data, error } = await client.auth.signInWithPassword({
     email: TEST_USER_EMAIL!,
     password: TEST_USER_PASSWORD!,
   });
   if (error || !data.session) throw new Error(`Test sign-in failed: ${error?.message}`);
-  return data.session.access_token;
+  cachedToken = data.session.access_token;
+  return cachedToken;
 };
 
 const lookup = async (token: string, isbn: string) => {
