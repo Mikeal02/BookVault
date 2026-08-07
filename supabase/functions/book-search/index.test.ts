@@ -1,16 +1,25 @@
+// Local runs read the project .env; CI supplies the same names as real env vars.
 import "https://deno.land/std@0.224.0/dotenv/load.ts";
 import { assert, assertEquals } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isbn10To13, isbn13To10, isbnVariants, normalizeIsbn } from "../_shared/isbn.ts";
 
-const SUPABASE_URL = Deno.env.get("VITE_SUPABASE_URL")!;
-const SUPABASE_ANON_KEY = Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY")!;
+const SUPABASE_URL = Deno.env.get("VITE_SUPABASE_URL") ?? Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_ANON_KEY =
+  Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY") ?? Deno.env.get("SUPABASE_ANON_KEY")!;
 const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/book-search`;
 
-// Live provider calls need an authenticated caller. Set TEST_USER_EMAIL / TEST_USER_PASSWORD
-// in .env to run the end-to-end lookups; the pure normalization tests always run.
+// Live provider calls need an authenticated caller: a dedicated, confirmed test user.
+// TEST_USER_EMAIL / TEST_USER_PASSWORD are stored as project/CI secrets. In CI they are
+// required, so a missing credential fails the run instead of silently skipping.
 const TEST_USER_EMAIL = Deno.env.get("TEST_USER_EMAIL");
 const TEST_USER_PASSWORD = Deno.env.get("TEST_USER_PASSWORD");
+const IS_CI = Deno.env.get("CI") === "true";
+if (IS_CI && !(TEST_USER_EMAIL && TEST_USER_PASSWORD)) {
+  throw new Error(
+    "TEST_USER_EMAIL / TEST_USER_PASSWORD must be configured in CI to run the live ISBN tests.",
+  );
+}
 const canRunLive = Boolean(TEST_USER_EMAIL && TEST_USER_PASSWORD);
 
 /** The same physical book expressed in every format a scanner or a human might produce. */
@@ -51,14 +60,24 @@ Deno.test("isbnVariants always yields both widths for a lookup", () => {
   assertEquals(isbnVariants("nope"), []);
 });
 
+let cachedToken: string | null = null;
+
+/**
+ * Signs in the dedicated test user. autoRefreshToken/persistSession are disabled so the
+ * client never starts a background timer (Deno's test runner reports those as leaks).
+ */
 const signIn = async () => {
-  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  if (cachedToken) return cachedToken;
+  const client = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
+  });
   const { data, error } = await client.auth.signInWithPassword({
     email: TEST_USER_EMAIL!,
     password: TEST_USER_PASSWORD!,
   });
   if (error || !data.session) throw new Error(`Test sign-in failed: ${error?.message}`);
-  return data.session.access_token;
+  cachedToken = data.session.access_token;
+  return cachedToken;
 };
 
 const lookup = async (token: string, isbn: string) => {

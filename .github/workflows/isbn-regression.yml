@@ -1,0 +1,25 @@
+name: ISBN regression tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  isbn-tests:
+    runs-on: ubuntu-latest
+    env:
+      # Public project values (safe to expose) — mirror the app's .env names.
+      VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      # Dedicated end-to-end test account (confirmed, no data of its own).
+      TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+      TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Run edge function ISBN tests (incl. live end-to-end)
+        run: deno test --allow-net --allow-env --allow-read supabase/functions/book-search/index.test.ts
