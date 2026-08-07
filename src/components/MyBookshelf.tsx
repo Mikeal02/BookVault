@@ -1,6 +1,6 @@
 
 import { useState, useMemo } from 'react';
-import { Search, BookOpen, FileText, Bot, LayoutGrid, List, LayoutList, Layers, Calendar, Image, SlidersHorizontal, GraduationCap, Star, BookMarked, CheckCircle2, Clock, X } from 'lucide-react';
+import { Search, BookOpen, FileText, Bot, LayoutGrid, List, LayoutList, Layers, Calendar, Image, SlidersHorizontal, GraduationCap, Star, BookMarked, CheckCircle2, Clock, X, ArrowUpNarrowWide, ArrowDownWideNarrow, Filter, RotateCcw, Tag } from 'lucide-react';
 import { Book } from '@/types/book';
 import { BookCard } from './BookCard';
 import { BookManagementModal } from './BookManagementModal';
@@ -12,6 +12,7 @@ import { EmptyState } from './EmptyState';
 import { VaultSwitcher } from './VaultSwitcher';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { useShelfPreferences } from '@/hooks/useShelfPreferences';
 import { Vault } from '@/hooks/useVaults';
 
 interface MyBookshelfProps {
