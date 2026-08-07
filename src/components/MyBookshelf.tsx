@@ -361,12 +361,13 @@ const CompactView = ({ books, onSelect }: { books: Book[]; onSelect: (b: Book) =
 
 export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpdateBook, onManageBook, vaults, activeVaultId, onVaultSelect, onVaultCreate, onVaultUpdate, onVaultDelete, onAssignBookToVault, periodFilter, onClearPeriodFilter }: MyBookshelfProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<'title' | 'author' | 'rating' | 'dateAdded'>('title');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'not-read' | 'reading' | 'finished'>('all');
+  const { prefs, update, toggleTag, reset } = useShelfPreferences();
+  const { sortBy, sortDir, filterStatus, minRating, activeTags, showAdvanced } = prefs;
   const [showExport, setShowExport] = useState(false);
   const [showAIChat, setShowAIChat] = useState(false);
   const [showCitations, setShowCitations] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const viewMode = prefs.viewMode as ViewMode;
+  const setViewMode = (mode: ViewMode) => update('viewMode', mode);
   const { ref: headerRef, isVisible: headerVisible } = useScrollReveal({ threshold: 0.05 });
 
   // Filter by vault first
@@ -392,23 +393,54 @@ export const MyBookshelf = ({ books, onBookSelect, onRemoveFromBookshelf, onUpda
       })
     : vaultBooks;
 
-  const filteredBooks = periodBooks
-    .filter(book => {
-      const matchesSearch = book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        book.authors.some(author => author.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        book.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+  // Every tag present in the current vault, for the tag filter row
+  const availableTags = useMemo(() => {
+    const counts = new Map<string, number>();
+    periodBooks.forEach(b => (b.tags || []).forEach(t => {
+      const tag = t.trim();
+      if (tag) counts.set(tag, (counts.get(tag) || 0) + 1);
+    }));
+    return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+  }, [periodBooks]);
+
+  const filteredBooks = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    const terms = q ? q.split(/\s+/) : [];
+    const dir = sortDir === 'asc' ? 1 : -1;
+
+    const matched = periodBooks.filter(book => {
+      const haystack = [
+        book.title,
+        ...(book.authors || []),
+        ...(book.tags || []),
+        ...(book.categories || []),
+        book.publisher || '',
+      ].join(' ').toLowerCase();
+      const matchesSearch = terms.every(t => haystack.includes(t));
       const matchesStatus = filterStatus === 'all' || book.readingStatus === filterStatus;
-      return matchesSearch && matchesStatus;
-    })
-    .sort((a, b) => {
+      const matchesRating = minRating === 0 || (book.personalRating || 0) >= minRating;
+      const matchesTags = activeTags.length === 0 || activeTags.every(t => (book.tags || []).includes(t));
+      return matchesSearch && matchesStatus && matchesRating && matchesTags;
+    });
+
+    const time = (v?: string) => (v ? new Date(v).getTime() || 0 : 0);
+
+    return matched.sort((a, b) => {
       switch (sortBy) {
-        case 'title': return a.title.localeCompare(b.title);
-        case 'author': return (a.authors[0] || '').localeCompare(b.authors[0] || '');
-        case 'rating': return (b.personalRating || 0) - (a.personalRating || 0);
-        case 'dateAdded': return new Date(b.dateAdded || 0).getTime() - new Date(a.dateAdded || 0).getTime();
+        case 'title': return a.title.localeCompare(b.title) * dir;
+        case 'author': return (a.authors?.[0] || '').localeCompare(b.authors?.[0] || '') * dir;
+        case 'rating': return ((a.personalRating || 0) - (b.personalRating || 0)) * dir;
+        case 'dateAdded': return (time(a.dateAdded) - time(b.dateAdded)) * dir;
+        case 'dateFinished': return (time(a.dateFinished) - time(b.dateFinished)) * dir;
+        case 'progress': return ((a.readingProgress || 0) - (b.readingProgress || 0)) * dir;
+        case 'pages': return ((a.pageCount || 0) - (b.pageCount || 0)) * dir;
         default: return 0;
       }
     });
+  }, [periodBooks, searchQuery, filterStatus, minRating, activeTags, sortBy, sortDir]);
+
+  const activeFilterCount =
+    (searchQuery.trim() ? 1 : 0) + (filterStatus !== 'all' ? 1 : 0) + (minRating > 0 ? 1 : 0) + activeTags.length;
 
   if (books.length === 0) {
     return (
