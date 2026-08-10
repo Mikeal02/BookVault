@@ -1,47 +1,35 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { withGuard } from "../_shared/guard.ts";
+import { corsHeaders } from "../_shared/http.ts";
+import * as v from "../_shared/validate.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
-};
+const BodySchema = v.object({
+  mode: v.withDefault(v.literalUnion('synthesize', 'cluster', 'flashcards', 'essay'), 'synthesize'),
+  bookContext: v.optional(v.text(200)),
+  annotations: v.array(
+    v.object({
+      content: v.text(600),
+      annotation_type: v.withDefault(v.text(40), 'note'),
+      book_title: v.optional(v.text(200)),
+      chapter: v.optional(v.text(80)),
+      page_number: v.optional(v.number({ min: 0, max: 100_000, int: true })),
+    }),
+    { max: 80, min: 1 },
+  ),
+});
 
-const requireUser = async (req: Request) => {
-  const authHeader = req.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const client = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!);
-  const { data, error } = await client.auth.getClaims(authHeader.slice(7));
-  const sub = (data?.claims as Record<string, unknown> | undefined)?.sub;
-  if (error || typeof sub !== 'string' || !sub) return null;
-  return data!.claims;
-};
-
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  if (!(await requireUser(req))) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
+serve(withGuard(
+  {
+    fn: 'ai-annotation-synthesis',
+    schema: BodySchema,
+    maxBodyBytes: 512 * 1024,
+    rate: { name: 'ai-annotation-synthesis', max: 15, windowMs: 60_000, maxConcurrent: 2 },
+    cost: (body) => 1 + Math.floor(body.annotations.length / 20),
+  },
+  async ({ body, log }) => {
+  const { annotations, mode, bookContext } = body;
 
   try {
-    const { annotations, mode = 'synthesize', bookContext } = await req.json().catch(() => ({}));
-
-    if (!Array.isArray(annotations) || annotations.length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'No annotations provided' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
     if (!GEMINI_API_KEY) {
@@ -50,7 +38,7 @@ serve(async (req) => {
 
     const compact = annotations
       .slice(0, 80)
-      .map((a: any, i: number) => {
+      .map((a, i: number) => {
         const meta = [
           a.book_title,
           a.chapter ? `Ch ${a.chapter}` : null,
@@ -91,14 +79,6 @@ serve(async (req) => {
         `You are an essayist. Weave the annotations into a cohesive 350-500 word reflective essay using citations [#n]. Use markdown.`;
 
       userPrompt = `Write an essay drawing from:\n\n${compact}`;
-    } else {
-      return new Response(
-        JSON.stringify({ error: 'Unknown mode' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
     }
 
     const prompt = `
@@ -137,11 +117,7 @@ ${userPrompt}
     if (!response.ok) {
       const errorText = await response.text();
 
-      console.error(
-        'Gemini API error:',
-        response.status,
-        errorText
-      );
+      log.error('upstream AI error', { status: response.status, detail: errorText });
 
       if (response.status === 429) {
         return new Response(
@@ -180,15 +156,10 @@ ${userPrompt}
       }
     );
   } catch (error) {
-    console.error('annotation synthesis error:', error);
+    log.error('annotation synthesis failure', { detail: error instanceof Error ? error.message : String(error) });
 
     return new Response(
-      JSON.stringify({
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Unknown error',
-      }),
+      JSON.stringify({ error: 'Synthesis failed. Please try again.', code: 'internal_error' }),
       {
         status: 500,
         headers: {
@@ -198,4 +169,4 @@ ${userPrompt}
       }
     );
   }
-});
+}));
