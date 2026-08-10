@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { withGuard } from "../_shared/guard.ts";
 import { corsHeaders } from "../_shared/http.ts";
+import { aiErrorBody, generateAiText } from "../_shared/ai.ts";
 import * as v from "../_shared/validate.ts";
 
 const BodySchema = v.object({
@@ -20,10 +21,6 @@ serve(withGuard(
   const readingSessions = body.readingSessions as any[];
 
   try {
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    if (!GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY is not configured');
-}
 
     // Build reading profile summary
     const totalBooks = books?.length || 0;
@@ -73,60 +70,9 @@ Keep the total response concise (under 400 words). Be specific, not generic.`;
 
 Please give me my personalized reading coach insights.`;
 
-   const prompt = `
-System Instructions:
-${systemPrompt}
+    const generatedText = await generateAiText({ system: systemPrompt, prompt: userPrompt, log });
 
-User Request:
-${userPrompt}
-`;
-
-const response = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [
-            {
-              text: prompt,
-            },
-          ],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 4096,
-      },
-    }),
-  }
-);
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      
-      const t = await response.text();
-      log.error("upstream AI error", { status: response.status, detail: t });
-      return new Response(JSON.stringify({ error: "AI service error" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const data = await response.json();
-
-const generatedText =
-  data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-  "No response generated";
-
-return new Response(
+    return new Response(
   JSON.stringify({
     response: generatedText,
   }),
@@ -138,11 +84,11 @@ return new Response(
     },
   }
 );
-
   } catch (e) {
     log.error("reading-coach failure", { detail: e instanceof Error ? e.message : String(e) });
-    return new Response(JSON.stringify({ error: "Coaching analysis failed. Please try again.", code: "internal_error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    const mapped = aiErrorBody(e);
+    return new Response(JSON.stringify(mapped.body), {
+      status: mapped.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 }));
