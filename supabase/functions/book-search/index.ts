@@ -1,35 +1,15 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { isbnVariants, normalizeIsbn } from "../_shared/isbn.ts";
+import { withGuard } from "../_shared/guard.ts";
+import { corsHeaders } from "../_shared/http.ts";
+import * as v from "../_shared/validate.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
-
-/** Verify the caller's Supabase JWT so the shared Google Books quota can't be drained anonymously. */
-const requireUser = async (req: Request) => {
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return null;
-  const client = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
-  const { data, error } = await client.auth.getClaims(authHeader.slice(7));
-  const sub = (data?.claims as Record<string, unknown> | undefined)?.sub;
-  if (error || typeof sub !== "string" || !sub) return null;
-  return data!.claims;
-};
-
-/** Naive in-memory per-user rate limit (per edge instance): 30 searches / minute. */
-const RATE_WINDOW_MS = 60_000;
-const RATE_MAX = 30;
-const hits = new Map<string, number[]>();
-const rateLimited = (key: string) => {
-  const now = Date.now();
-  const recent = (hits.get(key) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
-  recent.push(now);
-  hits.set(key, recent);
-  if (hits.size > 5000) hits.clear();
-  return recent.length > RATE_MAX;
-};
+/** Either a free-text query or a single ISBN lookup; both are strictly bounded. */
+const BodySchema = v.object({
+  query: v.optional(v.string({ max: 256 })),
+  isbn: v.optional(v.string({ max: 32 })),
+  maxResults: v.withDefault(v.number({ min: 1, max: 40, int: true }), 40),
+});
 
 const OPEN_LIBRARY_SEARCH_URL = "https://openlibrary.org/search.json";
 const GOOGLE_BOOKS_API_URL = "https://www.googleapis.com/books/v1/volumes";
@@ -460,19 +440,18 @@ const mergeAndSort = (books: Book[], query: string, maxResults: number) => {
     .map(normalizeBook);
 };
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  if (req.method !== "POST") return json({ books: [], error: "Method not allowed" }, 405);
-
-  const claims = await requireUser(req);
-  if (!claims) return json({ books: [], error: "Unauthorized" }, 401);
-  if (rateLimited(String((claims as Record<string, unknown>).sub))) {
-    return json({ books: [], error: "Too many searches. Please slow down." }, 429);
-  }
+serve(withGuard(
+  {
+    fn: "book-search",
+    schema: BodySchema,
+    maxBodyBytes: 16 * 1024,
+    // Protects the shared upstream book-API quota from a single account.
+    rate: { name: "book-search", max: 30, windowMs: 60_000, maxConcurrent: 4 },
+  },
+  async ({ body, log }) => {
+  const { query, maxResults, isbn } = body;
 
   try {
-    const { query, maxResults = 40, isbn } = await req.json().catch(() => ({}));
-
     if (typeof isbn === "string" && isbn.trim()) {
       const cleanedIsbn = normalizeIsbn(isbn);
       if (!cleanedIsbn) {
@@ -506,7 +485,7 @@ serve(async (req) => {
       googleNeedsApiKey: Boolean(googleValue.needsApiKey),
     });
   } catch (error) {
-    console.error("book-search error", error);
+    log.error("book-search failure", { detail: error instanceof Error ? error.message : String(error) });
     return json({
       books: [],
       sources: [],
@@ -514,4 +493,4 @@ serve(async (req) => {
       fallback: true,
     });
   }
-});
+}));

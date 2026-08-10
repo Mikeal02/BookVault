@@ -1,39 +1,26 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { withGuard } from "../_shared/guard.ts";
+import { corsHeaders } from "../_shared/http.ts";
+import { aiErrorBody, generateAiText } from "../_shared/ai.ts";
+import * as v from "../_shared/validate.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+const BodySchema = v.object({
+  books: v.withDefault(v.array(v.record(60), { max: 500 }), []),
+  readingSessions: v.withDefault(v.array(v.record(30), { max: 200 }), []),
+});
 
-const requireUser = async (req: Request) => {
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) return null;
-  const client = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!);
-  const { data, error } = await client.auth.getClaims(authHeader.slice(7));
-  const sub = (data?.claims as Record<string, unknown> | undefined)?.sub;
-  if (error || typeof sub !== "string" || !sub) return null;
-  return data!.claims;
-};
-
-serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-
-  if (!(await requireUser(req))) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
+serve(withGuard(
+  {
+    fn: 'ai-reading-coach',
+    schema: BodySchema,
+    maxBodyBytes: 1024 * 1024,
+    rate: { name: 'ai-reading-coach', max: 12, windowMs: 60_000, maxConcurrent: 2 },
+  },
+  async ({ body, log }) => {
+  const books = body.books as any[];
+  const readingSessions = body.readingSessions as any[];
 
   try {
-    const body = await req.json().catch(() => ({}));
-    const books = Array.isArray(body?.books) ? body.books.slice(0, 500) : [];
-    const readingSessions = Array.isArray(body?.readingSessions) ? body.readingSessions.slice(0, 200) : [];
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-    if (!GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY is not configured');
-}
 
     // Build reading profile summary
     const totalBooks = books?.length || 0;
@@ -83,60 +70,9 @@ Keep the total response concise (under 400 words). Be specific, not generic.`;
 
 Please give me my personalized reading coach insights.`;
 
-   const prompt = `
-System Instructions:
-${systemPrompt}
+    const generatedText = await generateAiText({ system: systemPrompt, prompt: userPrompt, log });
 
-User Request:
-${userPrompt}
-`;
-
-const response = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-  {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [
-            {
-              text: prompt,
-            },
-          ],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 4096,
-      },
-    }),
-  }
-);
-
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limited. Please try again in a moment." }), {
-          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      
-      const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
-      return new Response(JSON.stringify({ error: "AI service error" }), {
-        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const data = await response.json();
-
-const generatedText =
-  data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-  "No response generated";
-
-return new Response(
+    return new Response(
   JSON.stringify({
     response: generatedText,
   }),
@@ -148,11 +84,11 @@ return new Response(
     },
   }
 );
-
   } catch (e) {
-    console.error("reading-coach error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    log.error("reading-coach failure", { detail: e instanceof Error ? e.message : String(e) });
+    const mapped = aiErrorBody(e);
+    return new Response(JSON.stringify(mapped.body), {
+      status: mapped.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+}));
