@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { withGuard } from "../_shared/guard.ts";
 import { corsHeaders } from "../_shared/http.ts";
+import { aiErrorBody, generateAiText } from "../_shared/ai.ts";
 import * as v from "../_shared/validate.ts";
 
 /** Server-owned system prompts — never accept prompt text from the client. */
