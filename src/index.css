@@ -1764,3 +1764,192 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* ==========================================================================
+   ELITE UI v5 — Production-grade design system layer
+   Adds: elevation/motion/spacing tokens, accessible focus system, refined
+   surfaces, premium component states. Honours the project constraints:
+   NO glow anywhere, pitch-black neutral containers in dark mode, theme
+   palette colors untouched.
+   ========================================================================== */
+
+:root {
+  /* Elevation — soft, neutral, physically plausible */
+  --elev-1: 0 1px 2px hsl(0 0% 0% / 0.05);
+  --elev-2: 0 1px 2px hsl(0 0% 0% / 0.04), 0 2px 6px -2px hsl(0 0% 0% / 0.08);
+  --elev-3: 0 2px 4px hsl(0 0% 0% / 0.04), 0 8px 20px -8px hsl(0 0% 0% / 0.12);
+  --elev-4: 0 4px 8px hsl(0 0% 0% / 0.05), 0 20px 44px -16px hsl(0 0% 0% / 0.18);
+
+  /* Hairlines & surfaces */
+  --hairline: hsl(var(--border));
+  --surface-1: hsl(var(--card));
+  --surface-2: hsl(var(--muted));
+
+  /* Motion — one curve, three durations */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+
+  /* Focus system */
+  --focus-ring: hsl(var(--ring));
+  --focus-ring-offset: hsl(var(--background));
+}
+
+.dark {
+  --elev-1: 0 1px 0 hsl(0 0% 100% / 0.03) inset;
+  --elev-2: 0 1px 0 hsl(0 0% 100% / 0.03) inset, 0 2px 8px -4px hsl(0 0% 0% / 0.8);
+  --elev-3: 0 1px 0 hsl(0 0% 100% / 0.04) inset, 0 12px 28px -14px hsl(0 0% 0% / 0.9);
+  --elev-4: 0 1px 0 hsl(0 0% 100% / 0.05) inset, 0 26px 60px -24px hsl(0 0% 0% / 0.95);
+}
+
+/* --- Typography rhythm ---------------------------------------------------- */
+h1 { line-height: 1.06; }
+h2 { line-height: 1.14; }
+h3, h4 { line-height: 1.24; }
+p, li { text-wrap: pretty; }
+h1, h2, h3, h4, h5, h6 { text-wrap: balance; }
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* --- Accessibility: single, unmistakable focus ring ----------------------- */
+:where(a, button, [role="button"], [role="tab"], [role="menuitem"], input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: calc(var(--radius) - 2px);
+}
+:where(a, button, input, select, textarea):focus:not(:focus-visible) { outline: none; }
+
+/* Skip-link helper */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 100;
+}
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  padding: 0.5rem 0.875rem;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+
+::selection {
+  background: hsl(var(--primary) / 0.22);
+  color: hsl(var(--foreground));
+}
+
+/* --- Refined scrollbars --------------------------------------------------- */
+* { scrollbar-width: thin; scrollbar-color: hsl(var(--foreground) / 0.18) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--foreground) / 0.16);
+  border: 3px solid transparent;
+  background-clip: content-box;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--foreground) / 0.28); background-clip: content-box; }
+
+/* --- Surfaces ------------------------------------------------------------- */
+.surface {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: var(--elev-2);
+}
+.surface-raised { box-shadow: var(--elev-3); }
+.surface-inset {
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+.interactive {
+  transition: background-color var(--dur-base) var(--ease-standard),
+              border-color var(--dur-base) var(--ease-standard),
+              box-shadow var(--dur-base) var(--ease-standard),
+              transform var(--dur-base) var(--ease-out-expo);
+}
+.interactive:hover { border-color: hsl(var(--primary) / 0.32); box-shadow: var(--elev-3); }
+.interactive:active { transform: translateY(0.5px); }
+
+/* Frosted chrome for sticky headers / toolbars (no glow, just blur + hairline) */
+.chrome-frosted {
+  background: hsl(var(--background) / 0.72);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid hsl(var(--border));
+}
+@supports not (backdrop-filter: blur(2px)) {
+  .chrome-frosted { background: hsl(var(--background)); }
+}
+
+/* --- Data presentation --------------------------------------------------- */
+.data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; }
+.data-table th {
+  text-align: left;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  padding: 0.625rem 0.875rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+.data-table td {
+  padding: 0.75rem 0.875rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.6);
+  font-size: 13.5px;
+}
+.data-table tbody tr { transition: background-color var(--dur-fast) linear; }
+.data-table tbody tr:hover { background: hsl(var(--foreground) / 0.035); }
+.data-table tbody tr:last-child td { border-bottom: none; }
+
+.stat-tile {
+  position: relative;
+  padding: 1rem 1.125rem;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: var(--elev-1);
+}
+.stat-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+.stat-value { font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+
+/* --- Loading states ------------------------------------------------------ */
+.skeleton-line {
+  position: relative;
+  overflow: hidden;
+  background: hsl(var(--muted));
+  border-radius: calc(var(--radius) - 2px);
+}
+.skeleton-line::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.06), transparent);
+  animation: shimmer 1.6s infinite;
+}
+
+/* --- Mobile ergonomics --------------------------------------------------- */
+@media (max-width: 640px) {
+  .tap-target { min-height: 44px; min-width: 44px; }
+}
+
+/* --- Respect reduced motion ---------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
