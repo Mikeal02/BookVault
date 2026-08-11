@@ -100,15 +100,16 @@ const UserAvatar = ({ name, email, size = 'md', onClick }: { name?: string; emai
   const initials = getInitials(name, email);
   const hue = getAvatarHue(name || email || 'user');
   const sizeClass = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-9 h-9 text-sm';
+  const Comp = onClick ? 'button' : 'span';
   return (
-    <button
-      onClick={onClick}
-      className={`${sizeClass} rounded-xl font-bold flex items-center justify-center flex-shrink-0 transition-all duration-200 hover:scale-105 hover:shadow-md ring-2 ring-primary/20`}
+    <Comp
+      {...(onClick ? { onClick, type: 'button' as const, 'aria-label': `Open profile for ${name || email || 'user'}` } : { 'aria-hidden': true })}
+      className={`${sizeClass} rounded-xl font-bold flex items-center justify-center flex-shrink-0 transition-transform duration-200 hover:scale-[1.04] ring-1 ring-border`}
       style={{ background: `linear-gradient(135deg, hsl(${hue} 65% 55%), hsl(${(hue + 40) % 360} 60% 50%))`, color: 'white' }}
       title={name || email || 'Profile'}
     >
       {initials}
-    </button>
+    </Comp>
   );
 };
 
