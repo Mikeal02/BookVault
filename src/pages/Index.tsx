@@ -511,7 +511,7 @@ const Index = () => {
           </AnimatePresence>
           </ErrorBoundary>
         </div>
-      </div>
+      </main>
 
       {/* Modals */}
       {selectedBook && (
