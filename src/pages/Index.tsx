@@ -317,7 +317,8 @@ const Index = () => {
   const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 240;
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-dvh bg-background relative overflow-hidden">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <div className="absolute inset-0 gradient-mesh pointer-events-none" />
       <div className="blob-1 -top-60 -right-60 opacity-25" />
       <div className="blob-2 -bottom-60 -left-60 opacity-15" />
@@ -334,11 +335,12 @@ const Index = () => {
       />
 
       {/* Main content area — offset by sidebar width */}
-      <div
+      <main
+        id="main-content"
         className="relative z-10 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
         style={{ marginLeft: sidebarWidth }}
       >
-        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-[1400px] mx-auto">
+        <div className="px-4 sm:px-6 lg:px-10 py-5 sm:py-8 max-w-[1400px] mx-auto">
           {/* Page header is handled by each section component */}
 
           {/* Main Content with page transitions */}
