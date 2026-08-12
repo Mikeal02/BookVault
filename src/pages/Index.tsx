@@ -340,7 +340,7 @@ const Index = () => {
         className="relative z-10 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
         style={{ marginLeft: sidebarWidth }}
       >
-        <div className="px-4 sm:px-6 lg:px-10 py-5 sm:py-8 max-w-[1400px] mx-auto">
+        <div className="page-shell py-5 sm:py-8">
           {/* Page header is handled by each section component */}
 
           {/* Main Content with page transitions */}
