@@ -2106,3 +2106,170 @@ h1, h2, h3, h4, h5, h6 { text-wrap: balance; }
   letter-spacing: -0.035em;
   line-height: 1;
 }
+
+/* ==========================================================================
+   ELITE UI v7 — Typographic scale, density & interaction finish
+   Presentational only. No glow; dark neutrals stay pitch black.
+   ========================================================================== */
+
+:root {
+  /* Fluid type scale (Apple/Linear-like tight display, comfortable body) */
+  --fs-display: clamp(1.875rem, 1.2rem + 2.2vw, 3rem);
+  --fs-title: clamp(1.375rem, 1.05rem + 1.1vw, 1.875rem);
+  --fs-heading: clamp(1.075rem, 0.95rem + 0.45vw, 1.25rem);
+  --fs-body: 0.9375rem;
+  --fs-small: 0.8125rem;
+  --fs-micro: 0.6875rem;
+
+  /* Density tokens */
+  --row-h: 2.75rem;
+  --control-h: 2.25rem;
+  --gutter: 0.75rem;
+}
+@media (min-width: 1280px) { :root { --row-h: 3rem; } }
+
+/* Type utilities ---------------------------------------------------------- */
+.t-display {
+  font-family: var(--font-display, inherit);
+  font-size: var(--fs-display);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.t-title {
+  font-family: var(--font-display, inherit);
+  font-size: var(--fs-title);
+  line-height: 1.12;
+  letter-spacing: -0.022em;
+  text-wrap: balance;
+}
+.t-heading { font-size: var(--fs-heading); line-height: 1.25; letter-spacing: -0.015em; font-weight: 600; }
+.t-body { font-size: var(--fs-body); line-height: 1.6; }
+.t-small { font-size: var(--fs-small); line-height: 1.5; color: hsl(var(--muted-foreground)); }
+.t-micro {
+  font-size: var(--fs-micro);
+  line-height: 1.4;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground) / 0.75);
+}
+.t-prose { max-width: 68ch; font-size: var(--fs-body); line-height: 1.68; text-wrap: pretty; }
+.t-num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+/* Surfaces --------------------------------------------------------------- */
+.surface {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+.surface-quiet { background: hsl(var(--muted) / 0.4); border: 1px solid hsl(var(--border) / 0.6); border-radius: var(--radius); }
+.surface-raised { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: var(--radius); box-shadow: var(--elev-2); }
+.surface-inset { box-shadow: inset 0 1px 0 hsl(var(--foreground) / 0.04); }
+
+/* Interactive surface: subtle lift, no glow */
+.interactive {
+  transition: transform var(--dur-base) var(--ease-out-expo),
+              box-shadow var(--dur-base) var(--ease-standard),
+              border-color var(--dur-fast) var(--ease-standard),
+              background-color var(--dur-fast) var(--ease-standard);
+  will-change: transform;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .interactive:hover { transform: translateY(-2px); box-shadow: var(--elev-3); border-color: hsl(var(--border)); }
+}
+.interactive:active { transform: translateY(0); box-shadow: var(--elev-1); }
+
+/* Rows / list density ---------------------------------------------------- */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--gutter);
+  min-height: var(--row-h);
+  padding-inline: 0.75rem;
+  border-radius: calc(var(--radius) - 2px);
+  transition: background-color var(--dur-fast) var(--ease-standard);
+}
+.row:hover { background: hsl(var(--muted) / 0.5); }
+.row-list > * + * { border-top: 1px solid hsl(var(--border) / 0.6); }
+
+/* Toolbar that sticks under a header without visual noise */
+.toolbar-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-block: 0.625rem;
+  background: hsl(var(--background) / 0.82);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border-bottom: 1px solid hsl(var(--border) / 0.7);
+}
+
+/* Focus finish ----------------------------------------------------------- */
+.focus-frame:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(var(--background)), 0 0 0 4px hsl(var(--ring) / 0.55);
+  border-radius: calc(var(--radius) - 2px);
+}
+:where(a, button):focus-visible { outline-offset: 2px; }
+
+/* Underline that animates from the caret side */
+.link-underline {
+  position: relative;
+  text-decoration: none;
+}
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -2px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.5;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-base) var(--ease-out-expo), opacity var(--dur-fast) var(--ease-standard);
+}
+.link-underline:hover::after, .link-underline:focus-visible::after { transform: scaleX(1); opacity: 0.85; }
+
+/* Data viz + progress bars ---------------------------------------------- */
+.bar-track { height: 0.375rem; border-radius: 999px; background: hsl(var(--muted)); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; background: hsl(var(--primary)); transition: width 600ms var(--ease-out-expo); }
+
+/* Stat block with hairline separators, ledger-like */
+.ledger { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 768px) { .ledger { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.ledger > * { padding: 0.875rem 1rem; border-top: 1px solid hsl(var(--border) / 0.6); border-left: 1px solid hsl(var(--border) / 0.6); }
+.ledger > *:nth-child(-n+2) { border-top: none; }
+.ledger > *:nth-child(2n+1) { border-left: none; }
+@media (min-width: 768px) {
+  .ledger > *:nth-child(-n+4) { border-top: none; }
+  .ledger > *:nth-child(2n+1) { border-left: 1px solid hsl(var(--border) / 0.6); }
+  .ledger > *:nth-child(4n+1) { border-left: none; }
+}
+
+/* Loading shimmer (opacity-based, no colored glow) */
+.shimmer { position: relative; overflow: hidden; background: hsl(var(--muted) / 0.6); }
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, hsl(var(--foreground) / 0.06), transparent);
+  animation: shimmer-sweep 1.6s var(--ease-standard) infinite;
+}
+@keyframes shimmer-sweep { to { transform: translateX(100%); } }
+
+/* Truncation + overflow safety for dense layouts */
+.min-0 { min-width: 0; }
+.ellipsis { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Safe-area padding for mobile bottom bars */
+.pb-safe { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer::after { animation: none; }
+  .interactive, .bar-fill, .link-underline::after { transition-duration: 1ms; }
+}
