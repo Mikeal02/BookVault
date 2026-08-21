@@ -1,38 +1,39 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { withGuard } from "../_shared/guard.ts";
+import { corsHeaders } from "../_shared/http.ts";
+import { aiErrorBody, generateAiText } from "../_shared/ai.ts";
+import * as v from "../_shared/validate.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
-};
+const BodySchema = v.object({
+  mode: v.withDefault(v.literalUnion('synthesize', 'cluster', 'flashcards', 'essay'), 'synthesize'),
+  bookContext: v.optional(v.text(200)),
+  annotations: v.array(
+    v.object({
+      content: v.text(600),
+      annotation_type: v.withDefault(v.text(40), 'note'),
+      book_title: v.optional(v.text(200)),
+      chapter: v.optional(v.text(80)),
+      page_number: v.optional(v.number({ min: 0, max: 100_000, int: true })),
+    }),
+    { max: 80, min: 1 },
+  ),
+});
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
+serve(withGuard(
+  {
+    fn: 'ai-annotation-synthesis',
+    schema: BodySchema,
+    maxBodyBytes: 512 * 1024,
+    rate: { name: 'ai-annotation-synthesis', max: 15, windowMs: 60_000, maxConcurrent: 2 },
+    cost: (body) => 1 + Math.floor(body.annotations.length / 20),
+  },
+  async ({ body, log }) => {
+  const { annotations, mode, bookContext } = body;
 
   try {
-    const { annotations, mode = 'synthesize', bookContext } = await req.json();
-
-    if (!Array.isArray(annotations) || annotations.length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'No annotations provided' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-
-    if (!GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY is not configured');
-    }
-
     const compact = annotations
       .slice(0, 80)
-      .map((a: any, i: number) => {
+      .map((a, i: number) => {
         const meta = [
           a.book_title,
           a.chapter ? `Ch ${a.chapter}` : null,
@@ -73,81 +74,9 @@ serve(async (req) => {
         `You are an essayist. Weave the annotations into a cohesive 350-500 word reflective essay using citations [#n]. Use markdown.`;
 
       userPrompt = `Write an essay drawing from:\n\n${compact}`;
-    } else {
-      return new Response(
-        JSON.stringify({ error: 'Unknown mode' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
     }
 
-    const prompt = `
-System Instructions:
-${systemPrompt}
-
-User Request:
-${userPrompt}
-`;
-
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 4096,
-          },
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-
-      console.error(
-        'Gemini API error:',
-        response.status,
-        errorText
-      );
-
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({
-            error: 'Rate limit exceeded. Please try again shortly.',
-          }),
-          {
-            status: 429,
-            headers: {
-              ...corsHeaders,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-      }
-
-      throw new Error(`Gemini API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    const result =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-      'No response generated';
+    const result = await generateAiText({ system: systemPrompt, prompt: userPrompt, log });
 
     return new Response(
       JSON.stringify({
@@ -162,17 +91,13 @@ ${userPrompt}
       }
     );
   } catch (error) {
-    console.error('annotation synthesis error:', error);
+    log.error('annotation synthesis failure', { detail: error instanceof Error ? error.message : String(error) });
 
+    const mapped = aiErrorBody(error);
     return new Response(
-      JSON.stringify({
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Unknown error',
-      }),
+      JSON.stringify(mapped.body),
       {
-        status: 500,
+        status: mapped.status,
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json',
@@ -180,4 +105,4 @@ ${userPrompt}
       }
     );
   }
-});
+}));

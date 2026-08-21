@@ -5,7 +5,7 @@ import {
   Search, BookOpen, BarChart3, Sparkles, Home, User, Quote, Heart,
   Music, Menu, Trophy, GitCompareArrows, FolderOpen, FileText, Share2,
   ChevronRight, X, PanelLeftClose, PanelLeft, LogOut, ScanBarcode, Gift,
-  Timer, Upload, Brain, Dna, Atom, Telescope, Network
+  Timer, Upload, Brain, Dna, Atom, Telescope, Network, BookMarked
 } from 'lucide-react';
 import { DatabaseSyncButton } from './DatabaseSyncButton';
 import { AuditLogPanel } from './AuditLogPanel';
@@ -17,7 +17,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { emitEvent } from '@/lib/system';
 
 interface NavigationProps {
-  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna' | 'nexus' | 'oracle';
+  currentView: 'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna' | 'nexus' | 'oracle' | 'bookpage';
   onViewChange: (view: NavigationProps['currentView']) => void;
   bookshelfCount: number;
   onLogout?: () => void;
@@ -50,6 +50,7 @@ const navGroups: NavGroup[] = [
     label: 'Library',
     items: [
       { id: 'shelf', label: 'Bookshelf', icon: BookOpen, description: 'Your collection' },
+      { id: 'bookpage', label: 'Book Page', icon: BookMarked, description: 'Goodreads-style book view' },
       { id: 'lists', label: 'Lists', icon: FolderOpen, description: 'Reading collections' },
       { id: 'annotations', label: 'Notes', icon: FileText, description: 'Book annotations' },
       { id: 'quotes', label: 'Quotes', icon: Quote, description: 'Quote collection' },
@@ -99,15 +100,16 @@ const UserAvatar = ({ name, email, size = 'md', onClick }: { name?: string; emai
   const initials = getInitials(name, email);
   const hue = getAvatarHue(name || email || 'user');
   const sizeClass = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-9 h-9 text-sm';
+  const Comp = onClick ? 'button' : 'span';
   return (
-    <button
-      onClick={onClick}
-      className={`${sizeClass} rounded-xl font-bold flex items-center justify-center flex-shrink-0 transition-all duration-200 hover:scale-105 hover:shadow-md ring-2 ring-primary/20`}
+    <Comp
+      {...(onClick ? { onClick, type: 'button' as const, 'aria-label': `Open profile for ${name || email || 'user'}` } : { 'aria-hidden': true })}
+      className={`${sizeClass} rounded-xl font-bold flex items-center justify-center flex-shrink-0 transition-transform duration-200 hover:scale-[1.04] ring-1 ring-border`}
       style={{ background: `linear-gradient(135deg, hsl(${hue} 65% 55%), hsl(${(hue + 40) % 360} 60% 50%))`, color: 'white' }}
       title={name || email || 'Profile'}
     >
       {initials}
-    </button>
+    </Comp>
   );
 };
 

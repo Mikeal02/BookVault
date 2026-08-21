@@ -98,7 +98,6 @@ export type Database = {
       profiles: {
         Row: {
           created_at: string | null
-          email: string | null
           favorite_genres: string[] | null
           id: string
           preferred_reading_time: string | null
@@ -109,7 +108,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          email?: string | null
           favorite_genres?: string[] | null
           id?: string
           preferred_reading_time?: string | null
@@ -120,7 +118,6 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          email?: string | null
           favorite_genres?: string[] | null
           id?: string
           preferred_reading_time?: string | null
@@ -238,52 +235,6 @@ export type Database = {
         }
         Relationships: []
       }
-      quotes: {
-        Row: {
-          id: string
-          user_id: string
-          book_id: string | null
-          book_title: string
-          book_author: string | null
-          book_cover: string | null
-          quote_text: string
-          page_number: number | null
-          is_favorite: boolean
-          theme: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          book_id?: string | null
-          book_title: string
-          book_author?: string | null
-          book_cover?: string | null
-          quote_text: string
-          page_number?: number | null
-          is_favorite?: boolean
-          theme?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          book_id?: string | null
-          book_title?: string
-          book_author?: string | null
-          book_cover?: string | null
-          quote_text?: string
-          page_number?: number | null
-          is_favorite?: boolean
-          theme?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-
       user_books: {
         Row: {
           authors: string[] | null
@@ -391,49 +342,6 @@ export type Database = {
           },
         ]
       }
-      mood_entries: {
-        Row: {
-          id: string;
-          user_id: string;
-          book_id: string;
-          book_title: string;
-          book_cover: string | null;
-          mood: string;
-          mood_emoji: string;
-          intensity: number;
-          notes: string | null;
-          chapter: string | null;
-          created_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          book_id: string;
-          book_title: string;
-          book_cover?: string | null;
-          mood: string;
-          mood_emoji: string;
-          intensity: number;
-          notes?: string | null;
-          chapter?: string | null;
-          created_at?: string;
-        };
-        Update: {
-          id?: string;
-          user_id?: string;
-          book_id?: string;
-          book_title?: string;
-          book_cover?: string | null;
-          mood?: string;
-          mood_emoji?: string;
-          intensity?: number;
-          notes?: string | null;
-          chapter?: string | null;
-          created_at?: string;
-        };
-        Relationships: [];
-      };
-      
       user_roles: {
         Row: {
           created_at: string | null

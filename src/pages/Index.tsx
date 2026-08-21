@@ -46,6 +46,7 @@ const LiteraryDNA = lazy(() => import('@/components/LiteraryDNA').then(m => ({ d
 // const LiteraryConstellation = lazy(() => import('@/components/LiteraryConstellation').then(m => ({ default: m.LiteraryConstellation })));
 const BibliothecaNexus = lazy(() => import('@/components/BibliothecaNexus').then(m => ({ default: m.BibliothecaNexus })));
 const ReadingOracle = lazy(() => import('@/components/ReadingOracle').then(m => ({ default: m.ReadingOracle })));
+const GoodreadsBookPage = lazy(() => import('@/components/GoodreadsBookPage').then(m => ({ default: m.GoodreadsBookPage })));
 
 const LazyFallback = () => (
   <div className="flex items-center justify-center py-24">
@@ -61,7 +62,8 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [currentUser, setCurrentUser] = useState<string>('');
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna'  | 'nexus' | 'oracle'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'search' | 'shelf' | 'stats' | 'recommendations' | 'profile' | 'quotes' | 'mood' | 'atmosphere' | 'challenges' | 'comparison' | 'lists' | 'annotations' | 'sharing' | 'scanner' | 'wrapped' | 'import' | 'timer' | 'coach' | 'dna'  | 'nexus' | 'oracle' | 'bookpage'>('dashboard');
+  const [bookPageBook, setBookPageBook] = useState<Book | null>(null);
   const [showAuthPage, setShowAuthPage] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
@@ -173,7 +175,7 @@ const Index = () => {
         .maybeSingle();
 
       if (profile) {
-        setCurrentUser(profile.username || profile.email || 'Reader');
+        setCurrentUser(profile.username || authUser.email?.split('@')[0] || 'Reader');
         setReadingGoal(profile.reading_goal || 12);
         
         if (!profile.favorite_genres && profile.reading_goal === null) {
@@ -315,7 +317,8 @@ const Index = () => {
   const sidebarWidth = isMobile ? 0 : sidebarCollapsed ? 64 : 240;
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <div className="min-h-dvh bg-background relative overflow-hidden">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <div className="absolute inset-0 gradient-mesh pointer-events-none" />
       <div className="blob-1 -top-60 -right-60 opacity-25" />
       <div className="blob-2 -bottom-60 -left-60 opacity-15" />
@@ -332,11 +335,12 @@ const Index = () => {
       />
 
       {/* Main content area — offset by sidebar width */}
-      <div
+      <main
+        id="main-content"
         className="relative z-10 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
         style={{ marginLeft: sidebarWidth }}
       >
-        <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 max-w-[1400px] mx-auto">
+        <div className="page-shell py-5 sm:py-8">
           {/* Page header is handled by each section component */}
 
           {/* Main Content with page transitions */}
@@ -493,12 +497,21 @@ const Index = () => {
               {currentView === 'oracle' && (
                 <ReadingOracle books={bookshelf} readingGoal={readingGoal} onBookSelect={handleBookSelect} />
               )}
+
+              {currentView === 'bookpage' && (
+                <GoodreadsBookPage
+                  books={bookshelf}
+                  activeBook={bookPageBook || selectedBook}
+                  onSelectBook={(b) => setBookPageBook(b)}
+                  onOpenModal={(b) => setSelectedBook(b)}
+                />
+              )}
               </Suspense>
             </motion.div>
           </AnimatePresence>
           </ErrorBoundary>
         </div>
-      </div>
+      </main>
 
       {/* Modals */}
       {selectedBook && (

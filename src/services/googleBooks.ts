@@ -1,4 +1,5 @@
 import { Book } from '@/types/book';
+import { supabase } from '@/integrations/supabase/client';
 
 // === API Endpoints ===
 const OPEN_LIBRARY_SEARCH_URL = 'https://openlibrary.org/search.json';
@@ -38,23 +39,30 @@ const setCache = <T>(cache: Map<string, CacheEntry<T>>, key: string, data: T, ma
 };
 
 // === Retry with exponential backoff ===
-const fetchWithRetry = async (url: string, maxRetries = 2): Promise<Response> => {
+let googleBooksCooldownUntil = 0;
+const fetchWithRetry = async (url: string, maxRetries = 2, timeoutMs = 20000): Promise<Response> => {
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 8000);
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
       const response = await fetch(url, { signal: controller.signal });
       clearTimeout(timeout);
       if (response.ok) return response;
-      if (response.status === 429) throw new Error('429 Rate limit exceeded');
+      // 429 = rate-limited: don't waste time retrying, surface immediately
+      if (response.status === 429) {
+        const err: any = new Error('429 Rate limit exceeded');
+        err.status = 429;
+        throw err;
+      }
       if (response.status >= 500) throw new Error(`${response.status} Server error`);
       if (response.status >= 400 && response.status < 500) return response;
       lastError = new Error(`HTTP ${response.status}`);
     } catch (err: any) {
       lastError = err;
+      if (err?.status === 429) break; // stop retrying on rate limits
       if (attempt < maxRetries) {
-        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 500));
+        await new Promise(r => setTimeout(r, Math.pow(2, attempt) * 400));
       }
     }
   }
@@ -212,6 +220,172 @@ const computeRelevanceScore = (book: Book, queryTerms: string[]): number => {
 };
 
 // === Transformers ===
+// === Normalization: produces a consistent, render-safe Book shape ===
+const stripHtml = (s?: string): string | undefined => {
+  if (!s) return undefined;
+  const cleaned = s
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&[a-z]+;/gi, ' ')
+    .replace(/[ \t]+/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+  return cleaned || undefined;
+};
+
+const cleanStr = (s?: string): string | undefined => {
+  if (typeof s !== 'string') return undefined;
+  const t = s.replace(/\s+/g, ' ').trim();
+  return t || undefined;
+};
+
+const dedupeArr = (arr?: any[], max = 20): string[] | undefined => {
+  if (!Array.isArray(arr)) return undefined;
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of arr) {
+    const v = cleanStr(String(raw ?? ''));
+    if (!v) continue;
+    const key = v.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(v);
+    if (out.length >= max) break;
+  }
+  return out.length ? out : undefined;
+};
+
+const cleanIsbn = (s?: string): string | undefined => {
+  if (!s) return undefined;
+  const t = s.replace(/[^0-9Xx]/g, '').toUpperCase();
+  return t.length === 10 || t.length === 13 ? t : undefined;
+};
+
+const normalizeLanguage = (l?: string): string | undefined => {
+  if (!l) return undefined;
+  const v = l.trim().toLowerCase();
+  if (v === 'eng') return 'en';
+  return v.length >= 2 ? v.slice(0, 5) : undefined;
+};
+
+const normalizeYear = (d?: string): string | undefined => {
+  if (!d) return undefined;
+  const m = String(d).match(/\d{4}/);
+  if (!m) return undefined;
+  const y = parseInt(m[0], 10);
+  if (y < 100 || y > new Date().getFullYear() + 2) return d.trim() || undefined;
+  return d.trim();
+};
+
+const upgradeHttps = (u?: string): string | undefined =>
+  u ? u.replace(/^http:\/\//i, 'https://') : undefined;
+
+const normalizeImageLinks = (
+  links: Book['imageLinks'] | undefined
+): Book['imageLinks'] | undefined => {
+  if (!links) return undefined;
+  const out: NonNullable<Book['imageLinks']> = {};
+  (['thumbnail', 'smallThumbnail', 'small', 'medium', 'large', 'extraLarge'] as const).forEach(k => {
+    const v = upgradeHttps(links[k]);
+    if (v) out[k] = v;
+  });
+  // Cascade fallback so consumers never get an empty gap.
+  const best = out.extraLarge || out.large || out.medium || out.small || out.thumbnail || out.smallThumbnail;
+  if (!best) return undefined;
+  if (!out.thumbnail) out.thumbnail = best;
+  if (!out.smallThumbnail) out.smallThumbnail = out.small || out.thumbnail;
+  return out;
+};
+
+const clampRating = (r?: number): number | undefined => {
+  if (typeof r !== 'number' || !isFinite(r)) return undefined;
+  return Math.round(Math.max(0, Math.min(5, r)) * 10) / 10;
+};
+
+const nonNegInt = (n?: number): number | undefined => {
+  if (typeof n !== 'number' || !isFinite(n) || n < 0) return undefined;
+  return Math.round(n);
+};
+
+/**
+ * Normalizes a raw Book (from any source) into a consistent, render-safe shape.
+ * Guarantees: trimmed strings, HTML-free prose, deduped arrays, https covers,
+ * clamped numeric ranges, canonical ISBN/language, non-null authors array.
+ */
+export const normalizeBook = (raw: Book): Book => {
+  const authors = dedupeArr(raw.authors, 12) ?? ['Unknown Author'];
+  const categories = dedupeArr(raw.categories, 8);
+  const subjects = dedupeArr(raw.subjects, 16);
+  const subjectPlaces = dedupeArr(raw.subjectPlaces, 8);
+  const subjectPeople = dedupeArr(raw.subjectPeople, 8);
+  const subjectTimes = dedupeArr(raw.subjectTimes, 8);
+  const tags = dedupeArr(raw.tags, 20);
+  const awards = dedupeArr(raw.awards, 10);
+  const authorAlternateNames = dedupeArr(raw.authorAlternateNames, 8);
+
+  const description = stripHtml(raw.description);
+  const textSnippet = stripHtml(raw.textSnippet);
+  const firstSentence = stripHtml(raw.firstSentence);
+  const authorBio = stripHtml(raw.authorBio);
+
+  const isbn10 = cleanIsbn(raw.isbn10);
+  const isbn13 = cleanIsbn(raw.isbn13);
+
+  const imageLinks = normalizeImageLinks(raw.imageLinks);
+  const sources = raw.dataSources?.length ? Array.from(new Set(raw.dataSources)) : undefined;
+
+  return {
+    ...raw,
+    title: cleanStr(raw.title) || 'Unknown Title',
+    subtitle: cleanStr(raw.subtitle),
+    authors,
+    description,
+    textSnippet,
+    firstSentence,
+    authorBio,
+    publisher: cleanStr(raw.publisher),
+    publishedDate: normalizeYear(raw.publishedDate),
+    language: normalizeLanguage(raw.language),
+    categories,
+    mainCategory: cleanStr(raw.mainCategory) || categories?.[0],
+    subjects,
+    subjectPlaces,
+    subjectPeople,
+    subjectTimes,
+    tags,
+    awards,
+    authorAlternateNames,
+    pageCount: nonNegInt(raw.pageCount),
+    printedPageCount: nonNegInt(raw.printedPageCount),
+    averageRating: clampRating(raw.averageRating),
+    ratingsCount: nonNegInt(raw.ratingsCount),
+    editionCount: nonNegInt(raw.editionCount),
+    translationCount: nonNegInt(raw.translationCount),
+    wordCountEstimate: nonNegInt(raw.wordCountEstimate),
+    isbn10,
+    isbn13,
+    imageLinks,
+    previewLink: upgradeHttps(raw.previewLink),
+    infoLink: upgradeHttps(raw.infoLink),
+    canonicalVolumeLink: upgradeHttps(raw.canonicalVolumeLink),
+    webReaderLink: upgradeHttps(raw.webReaderLink),
+    authorPhotoUrl: upgradeHttps(raw.authorPhotoUrl),
+    authorWikipediaUrl: upgradeHttps(raw.authorWikipediaUrl),
+    wikipediaUrl: upgradeHttps(raw.wikipediaUrl),
+    dataSources: sources,
+    dataConfidence: typeof raw.dataConfidence === 'number'
+      ? Math.max(0, Math.min(1, Math.round(raw.dataConfidence * 100) / 100))
+      : undefined,
+  };
+};
+
 const transformOpenLibraryBook = (item: any): Book => {
   const covers = buildCoverUrls(item);
   const authors = item.author_name || [];
@@ -224,7 +398,7 @@ const transformOpenLibraryBook = (item: any): Book => {
   const series = detectSeries(item);
   const difficulty = estimateReadingDifficulty(item.number_of_pages_median, subjects);
 
-  return {
+  const base: Book = {
     id,
     title,
     authors,
@@ -255,6 +429,7 @@ const transformOpenLibraryBook = (item: any): Book => {
     dataConfidence: 0.55,
     ...series,
   };
+  return normalizeBook(base);
 };
 
 const transformGoogleBookToBook = (item: any): Book => {
@@ -318,7 +493,7 @@ const transformGoogleBookToBook = (item: any): Book => {
 
   const difficulty = estimateReadingDifficulty(volumeInfo.pageCount, volumeInfo.categories);
 
-  return {
+  const base: Book = {
     id: item.id,
     title: volumeInfo.title || 'Unknown Title',
     subtitle: volumeInfo.subtitle,
@@ -367,33 +542,41 @@ const transformGoogleBookToBook = (item: any): Book => {
     dataSources: ['google'],
     dataConfidence: 0.7,
   };
+  return normalizeBook(base);
 };
 
 // === Search Functions ===
 const searchOpenLibrary = async (query: string, limit: number = 100): Promise<Book[]> => {
-  try {
-    const params = new URLSearchParams({
-      q: query,
-      limit: Math.min(limit, 100).toString(),
-      fields: 'key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count,ratings_average,isbn,subtitle,edition_count,has_fulltext,subject_place,person,subject_people',
-    });
+  const cappedLimit = Math.min(limit, 100).toString();
+  // Primary: rich metadata; Fallback: minimal fields so slow OL still responds in time.
+  const richFields = 'key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count,ratings_average,isbn,subtitle,edition_count,has_fulltext,subject_place,person,subject_people';
+  const leanFields = 'key,title,author_name,first_publish_year,cover_i,edition_key,isbn,language,subject,ratings_average,ratings_count';
 
-    const response = await fetchWithRetry(`${OPEN_LIBRARY_SEARCH_URL}?${params}`);
-    if (!response.ok) throw new Error('Open Library request failed');
+  const attempts: { fields: string; timeout: number; retries: number }[] = [
+    { fields: richFields, timeout: 15000, retries: 1 },
+    { fields: leanFields, timeout: 20000, retries: 2 },
+  ];
 
-    const data = await response.json();
-    if (!data.docs || !Array.isArray(data.docs)) return [];
-
-    return data.docs
-      .filter((item: any) => item.title && item.author_name?.length)
-      .map(transformOpenLibraryBook);
-  } catch (error) {
-    console.error('Open Library search failed:', error);
-    return [];
+  for (const attempt of attempts) {
+    try {
+      const params = new URLSearchParams({ q: query, limit: cappedLimit, fields: attempt.fields });
+      const response = await fetchWithRetry(`${OPEN_LIBRARY_SEARCH_URL}?${params}`, attempt.retries, attempt.timeout);
+      if (!response.ok) throw new Error('Open Library request failed');
+      const data = await response.json();
+      if (!data.docs || !Array.isArray(data.docs)) return [];
+      return data.docs
+        .filter((item: any) => item.title && item.author_name?.length)
+        .map(transformOpenLibraryBook);
+    } catch (error) {
+      console.warn('[search] Open Library attempt failed, trying fallback', error);
+    }
   }
+  return [];
 };
 
 const searchGoogleBooks = async (query: string, limit: number = 40): Promise<Book[]> => {
+  // Skip Google Books entirely while in a rate-limit cooldown
+  if (googleBooksCooldownUntil > Date.now()) return [];
   try {
     const response = await fetchWithRetry(
       `${GOOGLE_BOOKS_API_URL}?q=${encodeURIComponent(query)}&maxResults=${Math.min(limit, 40)}&orderBy=relevance&printType=books`
@@ -402,8 +585,39 @@ const searchGoogleBooks = async (query: string, limit: number = 40): Promise<Boo
     const data = await response.json();
     if (!data.items) return [];
     return data.items.map(transformGoogleBookToBook);
-  } catch {
+  } catch (err: any) {
+    if (err?.status === 429 || /429/.test(err?.message || '')) {
+      // Back off Google Books for 5 minutes; OpenLibrary results will still be returned
+      googleBooksCooldownUntil = Date.now() + 5 * 60 * 1000;
+      console.warn('[search] Google Books rate-limited; using Open Library only for 5 min');
+    }
     return [];
+  }
+};
+
+const searchBooksViaBackend = async (query: string, maxResults: number): Promise<Book[] | null> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('book-search', {
+      body: { query, maxResults },
+    });
+
+    if (error) {
+      console.warn('[search] Backend book search unavailable; falling back to browser providers', error);
+      return null;
+    }
+
+    if (data?.googleNeedsApiKey) {
+      console.warn('[search] Google Books needs a private API key; Open Library backend results are being used');
+    }
+
+    if (Array.isArray(data?.errors) && data.errors.length > 0) {
+      console.warn('[search] Book provider warnings', data.errors);
+    }
+
+    return Array.isArray(data?.books) ? data.books.map(normalizeBook) : [];
+  } catch (error) {
+    console.warn('[search] Backend book search failed; falling back to browser providers', error);
+    return null;
   }
 };
 
@@ -597,7 +811,7 @@ export const enrichBook = async (book: Book): Promise<Book> => {
     // Enrichment failed silently
   }
 
-  return { ...book, ...enrichments };
+  return normalizeBook({ ...book, ...enrichments });
 };
 
 // === Fetch Open Library work bundle: work doc, editions, ratings, bookshelves ===
@@ -737,6 +951,24 @@ const fetchWorkBundle = async (
 
 // === Fetch book by ISBN (for barcode scanning / direct lookup) ===
 export const fetchBookByISBN = async (isbn: string): Promise<Book | null> => {
+  const cleaned = isbn.replace(/[^0-9Xx]/g, '').toUpperCase();
+
+  // 1) Backend proxy first: avoids browser CORS failures and shared-quota 429s.
+  try {
+    const { data, error } = await supabase.functions.invoke('book-search', {
+      body: { isbn: cleaned },
+    });
+    if (!error && Array.isArray(data?.books) && data.books.length > 0) {
+      return normalizeBook(data.books[0]);
+    }
+    if (error) {
+      console.warn('[isbn] Backend ISBN lookup unavailable; falling back to browser providers', error);
+    }
+  } catch (err) {
+    console.warn('[isbn] Backend ISBN lookup failed; falling back to browser providers', err);
+  }
+
+  // 2) Browser fallback.
   const results = await Promise.allSettled([
     fetchWithRetry(`${OPEN_LIBRARY_SEARCH_URL}?isbn=${isbn}&limit=1&fields=key,title,author_name,first_publish_year,cover_i,edition_key,publisher,number_of_pages_median,subject,language,first_sentence,ratings_count,ratings_average,isbn,subtitle,edition_count,has_fulltext`),
     fetchWithRetry(`${GOOGLE_BOOKS_API_URL}?q=isbn:${isbn}&maxResults=1`),
@@ -808,29 +1040,40 @@ export const searchBooks = async (query: string, maxResults: number = 40, filter
     let olQuery = searchQuery;
     let gbQuery = searchQuery;
     
-    if (filters?.category && filters.category !== 'all') {
-      const subjectMap: Record<string, string> = {
+    const subjectMap: Record<string, string> = {
         'fiction': 'fiction', 'non-fiction': 'nonfiction', 'science': 'science',
         'history': 'history', 'biography': 'biography', 'technology': 'technology computers',
         'self-help': 'self-help', 'mystery': 'mystery thriller', 'romance': 'romance',
         'fantasy': 'fantasy',
-      };
+    };
+
+    if (filters?.category && filters.category !== 'all') {
       const subject = subjectMap[filters.category] || filters.category;
       olQuery = `${searchQuery} subject:${subject}`;
       gbQuery = `${searchQuery}+subject:${subject}`;
     }
 
-    // Fire both APIs in parallel with graceful degradation
-    const [openLibResults, googleResults] = await Promise.allSettled([
-      searchOpenLibrary(olQuery, Math.min(maxResults * 2, 100)),
-      searchGoogleBooks(gbQuery, 40),
-    ]);
+    const backendQuery = filters?.category && filters.category !== 'all'
+      ? `${searchQuery} ${subjectMap[filters.category] || filters.category}`
+      : searchQuery;
+    const backendBooks = await searchBooksViaBackend(backendQuery, Math.min(maxResults * 2, 100));
 
-    const olBooks = openLibResults.status === 'fulfilled' ? openLibResults.value : [];
-    const gbBooks = googleResults.status === 'fulfilled' ? googleResults.value : [];
+    let all: Book[];
+    if (backendBooks) {
+      all = backendBooks;
+    } else {
+      // Browser fallback only if the backend proxy is unavailable.
+      const [openLibResults, googleResults] = await Promise.allSettled([
+        searchOpenLibrary(olQuery, Math.min(maxResults * 2, 100)),
+        searchGoogleBooks(gbQuery, 40),
+      ]);
 
-    // Merge with Google first for richer metadata
-    const all = [...gbBooks, ...olBooks];
+      const olBooks = openLibResults.status === 'fulfilled' ? openLibResults.value : [];
+      const gbBooks = googleResults.status === 'fulfilled' ? googleResults.value : [];
+
+      // Merge with Google first for richer metadata
+      all = [...gbBooks, ...olBooks];
+    }
 
     // Deduplicate by normalized title+author, merging enhanced fields
     const seen = new Map<string, Book>();
@@ -919,7 +1162,7 @@ export const searchBooks = async (query: string, maxResults: number = 40, filter
       filtered.sort((a, b) => (b.ratingsCount || 0) - (a.ratingsCount || 0));
     }
 
-    const result = filtered.slice(0, maxResults);
+    const result = filtered.slice(0, maxResults).map(normalizeBook);
     
     // Cache the results
     setCache(searchCache, cacheKey, result);

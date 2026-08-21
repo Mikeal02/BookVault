@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Book } from '@/types/book';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { sanitizeHtml } from '@/lib/system';
 
 interface AIReadingCoachProps {
   books: Book[];
@@ -184,7 +185,7 @@ export const AIReadingCoach = ({ books, userId }: AIReadingCoachProps) => {
           <div className="h-[2px] bg-gradient-to-r from-primary via-secondary to-primary" />
           <div ref={contentRef} className="p-5 sm:p-6 max-h-[60vh] overflow-y-auto ai-response">
             {insights ? (
-              <div dangerouslySetInnerHTML={{ __html: formatMarkdown(insights) }} />
+              <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(formatMarkdown(insights)) }} />
             ) : loading ? (
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Loader2 className="w-5 h-5 animate-spin" />
