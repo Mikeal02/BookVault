@@ -13,7 +13,7 @@ export function useThemePalette(): UseThemeResult {
   const [currentTheme, setCurrentTheme] = useState(() => {
     const stored = localStorage.getItem('bookapp_color_theme');
     if (stored && themes.some(t => t.id === stored)) return stored;
-    return 'cosmic-aurora';
+    return 'goodreads-heritage';
   });
 
   const applyTheme = useCallback((themeId: string) => {

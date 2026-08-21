@@ -1,6 +1,6 @@
 
-/* Import Google Fonts — Refined Editorial */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap');
+/* Import Google Fonts — Goodreads catalog (Lato + Merriweather) */
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,300;0,400;0,700;0,900;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400;1,700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,121 +9,119 @@
 
 @layer base {
   :root {
-    /* Light — Paper & Antique Gold (Noir & Gold Editorial · light) */
-    --background: 38 24% 96%;
-    --foreground: 0 0% 8%;
+    /* Light — Goodreads catalog: cream paper, espresso chrome, Want-to-Read green */
+    --background: 40 31% 94%;
+    --foreground: 24 28% 12%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 8%;
+    --card: 40 50% 99%;
+    --card-foreground: 24 28% 12%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 8%;
+    --popover: 40 50% 99%;
+    --popover-foreground: 24 28% 12%;
 
-    /* Primary: deep antique brass — editorial & restrained */
-    --primary: 38 45% 36%;
-    --primary-foreground: 38 24% 97%;
+    /* Primary: Goodreads Want to Read green */
+    --primary: 148 42% 43%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Secondary: brighter gold leaf */
-    --secondary: 42 58% 52%;
-    --secondary-foreground: 0 0% 8%;
+    /* Secondary: Goodreads teal links */
+    --secondary: 176 100% 19%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 38 16% 92%;
-    --muted-foreground: 0 0% 36%;
+    --muted: 36 22% 90%;
+    --muted-foreground: 24 8% 42%;
 
-    --accent: 38 36% 28%;
-    --accent-foreground: 38 24% 97%;
+    --accent: 24 56% 18%;
+    --accent-foreground: 40 31% 96%;
 
     --destructive: 358 58% 44%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 38 14% 84%;
-    --input: 38 14% 90%;
-    --ring: 38 45% 36%;
+    --border: 36 18% 82%;
+    --input: 36 20% 88%;
+    --ring: 148 42% 43%;
 
-    --radius: 0.5rem;
+    --radius: 0.25rem;
 
-    --sidebar-background: 38 20% 95%;
-    --sidebar-foreground: 0 0% 12%;
-    --sidebar-primary: 38 45% 36%;
-    --sidebar-primary-foreground: 38 24% 97%;
-    --sidebar-accent: 38 16% 91%;
-    --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 38 14% 86%;
-    --sidebar-ring: 38 45% 36%;
+    --sidebar-background: 24 56% 14%;
+    --sidebar-foreground: 40 25% 92%;
+    --sidebar-primary: 148 42% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 24 40% 20%;
+    --sidebar-accent-foreground: 40 25% 94%;
+    --sidebar-border: 24 30% 22%;
+    --sidebar-ring: 148 42% 48%;
 
-    --highlight: 42 64% 48%;
-    --highlight-foreground: 0 0% 8%;
-    --success: 158 38% 32%;
+    --highlight: 48 90% 51%;
+    --highlight-foreground: 24 28% 12%;
+    --success: 148 42% 38%;
     --success-foreground: 0 0% 100%;
-    --warning: 36 72% 44%;
-    --warning-foreground: 0 0% 8%;
+    --warning: 32 90% 48%;
+    --warning-foreground: 24 28% 10%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(38 45% 36%) 0%, hsl(36 50% 28%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(42 58% 52%) 0%, hsl(38 52% 44%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(0 0% 8%) 0%, hsl(38 45% 36%) 100%);
-    --gradient-background: linear-gradient(160deg, hsl(38 24% 96%) 0%, hsl(38 18% 93%) 100%);
+    --gradient-primary: linear-gradient(180deg, hsl(148 42% 46%) 0%, hsl(148 42% 38%) 100%);
+    --gradient-secondary: linear-gradient(180deg, hsl(176 100% 22%) 0%, hsl(176 100% 16%) 100%);
+    --gradient-accent: linear-gradient(180deg, hsl(24 56% 22%) 0%, hsl(24 56% 14%) 100%);
+    --gradient-background: linear-gradient(180deg, hsl(40 31% 95%) 0%, hsl(40 28% 92%) 100%);
 
-    --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03);
-    --shadow-card-hover: 0 6px 22px rgba(0,0,0,0.07), 0 0 0 1px hsl(38 45% 36% / 0.10);
-    --shadow-glow: 0 0 0 1px hsl(38 45% 36% / 0.12);
+    --shadow-card: 0 1px 2px rgba(56, 33, 16, 0.06), 0 1px 3px rgba(56, 33, 16, 0.04);
+    --shadow-card-hover: 0 4px 16px rgba(56, 33, 16, 0.10), 0 0 0 1px hsl(148 42% 43% / 0.18);
+    --shadow-glow: 0 0 0 1px hsl(148 42% 43% / 0.16);
   }
 
   .dark {
-    /* Dark — Noir & Gold Editorial: pure ink black + warm antique gold */
-    --background: 0 0% 5%;
-    --foreground: 38 22% 92%;
+    /* Dark — espresso shelves, cream type, catalog green */
+    --background: 24 22% 8%;
+    --foreground: 40 25% 92%;
 
-    --card: 0 0% 7%;
-    --card-foreground: 38 22% 92%;
+    --card: 24 18% 11%;
+    --card-foreground: 40 25% 92%;
 
-    --popover: 0 0% 8%;
-    --popover-foreground: 38 22% 92%;
+    --popover: 24 18% 12%;
+    --popover-foreground: 40 25% 92%;
 
-    /* Primary: warm antique gold — the single editorial accent */
-    --primary: 42 55% 60%;
-    --primary-foreground: 0 0% 6%;
+    --primary: 148 40% 48%;
+    --primary-foreground: 24 28% 8%;
 
-    /* Secondary: pale gold leaf, used sparingly */
-    --secondary: 42 70% 76%;
-    --secondary-foreground: 0 0% 6%;
+    --secondary: 176 45% 42%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 11%;
-    --muted-foreground: 38 10% 64%;
+    --muted: 24 14% 14%;
+    --muted-foreground: 36 12% 62%;
 
-    --accent: 42 42% 48%;
-    --accent-foreground: 0 0% 6%;
+    --accent: 40 30% 72%;
+    --accent-foreground: 24 28% 10%;
 
     --destructive: 358 55% 54%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 14%;
-    --input: 0 0% 12%;
-    --ring: 42 55% 60%;
+    --border: 24 14% 18%;
+    --input: 24 14% 16%;
+    --ring: 148 40% 48%;
 
-    --sidebar-background: 0 0% 4%;
-    --sidebar-foreground: 38 20% 88%;
-    --sidebar-primary: 42 55% 60%;
-    --sidebar-primary-foreground: 0 0% 6%;
-    --sidebar-accent: 0 0% 9%;
-    --sidebar-accent-foreground: 38 20% 90%;
-    --sidebar-border: 0 0% 12%;
-    --sidebar-ring: 42 55% 60%;
+    --sidebar-background: 24 40% 8%;
+    --sidebar-foreground: 40 20% 90%;
+    --sidebar-primary: 148 40% 50%;
+    --sidebar-primary-foreground: 24 28% 8%;
+    --sidebar-accent: 24 28% 14%;
+    --sidebar-accent-foreground: 40 20% 92%;
+    --sidebar-border: 24 20% 16%;
+    --sidebar-ring: 148 40% 50%;
 
-    --highlight: 42 70% 62%;
-    --highlight-foreground: 0 0% 6%;
-    --success: 158 32% 48%;
+    --highlight: 48 86% 52%;
+    --highlight-foreground: 24 28% 8%;
+    --success: 148 38% 46%;
     --success-foreground: 0 0% 100%;
-    --warning: 36 72% 56%;
-    --warning-foreground: 0 0% 6%;
+    --warning: 32 86% 54%;
+    --warning-foreground: 24 28% 8%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(42 55% 60%) 0%, hsl(38 50% 44%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(42 70% 76%) 0%, hsl(42 55% 60%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(0 0% 8%) 0%, hsl(42 55% 60%) 100%);
-    --gradient-background: linear-gradient(160deg, hsl(0 0% 5%) 0%, hsl(0 0% 7%) 100%);
+    --gradient-primary: linear-gradient(180deg, hsl(148 40% 52%) 0%, hsl(148 40% 40%) 100%);
+    --gradient-secondary: linear-gradient(180deg, hsl(176 45% 46%) 0%, hsl(176 45% 34%) 100%);
+    --gradient-accent: linear-gradient(180deg, hsl(24 28% 16%) 0%, hsl(24 40% 8%) 100%);
+    --gradient-background: linear-gradient(180deg, hsl(24 22% 8%) 0%, hsl(24 18% 10%) 100%);
 
-    --shadow-card: 0 1px 2px rgba(0,0,0,0.5), 0 2px 10px rgba(0,0,0,0.35);
-    --shadow-card-hover: 0 10px 32px rgba(0,0,0,0.6), 0 0 0 1px hsl(42 55% 60% / 0.18);
-    --shadow-glow: 0 0 0 1px hsl(42 55% 60% / 0.18);
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.45), 0 2px 10px rgba(0,0,0,0.32);
+    --shadow-card-hover: 0 8px 24px rgba(0,0,0,0.5), 0 0 0 1px hsl(148 40% 48% / 0.22);
+    --shadow-glow: 0 0 0 1px hsl(148 40% 48% / 0.2);
   }
 }
 
@@ -157,14 +155,14 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.01em;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Merriweather', Georgia, serif;
     letter-spacing: -0.02em;
   }
 
@@ -173,7 +171,7 @@
   }
 
   .font-sans {
-    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 }
 
@@ -483,7 +481,7 @@
 }
 
 .dark .hover-lift:hover {
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px hsl(222 80% 62% / 0.08);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px hsl(var(--primary) / 0.18);
 }
 
 .hover-glow:hover {
@@ -747,7 +745,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, hsl(222 72% 52% / 0.08), transparent);
+  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.12), transparent);
   animation: shimmer 2s infinite;
 }
 
@@ -1303,7 +1301,7 @@
 
 /* Editorial eyebrow — small caps tracked label */
 .eyebrow {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Lato', sans-serif;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.22em;
@@ -1322,7 +1320,7 @@
 
 /* Editorial drop-cap for first paragraph */
 .dropcap::first-letter {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Merriweather', Georgia, serif;
   font-size: 3.4em;
   font-weight: 700;
   line-height: 0.85;
@@ -1375,7 +1373,7 @@
 
 /* Numeric ornament — Playfair italic large numerals */
 .numeral {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Merriweather', Georgia, serif;
   font-style: italic;
   font-weight: 500;
   font-feature-settings: 'lnum' 1, 'pnum' 1;
@@ -1487,7 +1485,7 @@
 
 /* Sharp serif heading helper */
 .h-editorial {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Merriweather', Georgia, serif;
   font-weight: 600;
   letter-spacing: -0.022em;
   line-height: 1.05;
@@ -1519,7 +1517,7 @@
 
 /* Refined serial number — for stat cards & section markers */
 .serial-numeral {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Merriweather', Georgia, serif;
   font-style: italic;
   font-weight: 500;
   font-size: 10px;
@@ -1530,7 +1528,7 @@
 
 /* Drop cap for editorial paragraphs */
 .drop-cap::first-letter {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Merriweather', Georgia, serif;
   font-weight: 700;
   font-size: 3.4em;
   line-height: 0.85;
@@ -1549,7 +1547,7 @@
   align-items: center;
   gap: 14px;
   color: hsl(var(--primary) / 0.55);
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Merriweather', Georgia, serif;
   font-style: italic;
   font-size: 14px;
   line-height: 1;
@@ -1632,7 +1630,7 @@
 
 /* Editorial number — Playfair italic for tabular stat values */
 .editorial-num {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: 'Merriweather', Georgia, serif;
   font-feature-settings: 'lnum' 1, 'tnum' 1;
   font-weight: 600;
   letter-spacing: -0.025em;

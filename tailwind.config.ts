@@ -31,9 +31,9 @@ export default {
 		},
 	extend: {
 			fontFamily: {
-				'serif': ['Playfair Display', 'Georgia', 'serif'],
-				'display': ['Playfair Display', 'Georgia', 'serif'],
-				'sans': ['DM Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+				'serif': ['Merriweather', 'Georgia', 'serif'],
+				'display': ['Merriweather', 'Georgia', 'serif'],
+				'sans': ['Lato', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
